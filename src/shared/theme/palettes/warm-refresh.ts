@@ -1,0 +1,25 @@
+import { ColorScheme } from "@/src/shared/theme/palettes/types";
+
+export const warmRefresh: ColorScheme = {
+  canvas: "#FFFBF5",
+  surface: "#FFFFFF",
+  surfaceStrong: "#FFFFFF",
+  ink: "#1C1917",
+  muted: "#78716C",
+  primary: "#D97706",
+  primarySoft: "#FEF3C7",
+  accent: "#DC2626",
+  accentSoft: "#FEE2E2",
+  info: "#2563EB",
+  infoSoft: "#DBEAFE",
+  line: "#E7E5E4",
+  onPrimary: "#FFFFFF",
+  overlayWhite: "rgba(255,255,255,0.7)",
+  primaryGlow: "rgba(217,119,6,0.1)",
+  accentGlow: "rgba(220,38,38,0.1)",
+  neutralGlow: "rgba(28,25,23,0.08)",
+  chipAgainBg: "#FEE2E2",
+  chipAgainBorder: "rgba(220,38,38,0.2)",
+  chipEasyBg: "#FEF3C7",
+  chipEasyBorder: "rgba(217,119,6,0.2)",
+};
