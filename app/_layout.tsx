@@ -5,26 +5,35 @@ import { StatusBar } from "expo-status-bar";
 
 import { AppProviders } from "@/src/app/AppProviders";
 import { AppBootstrapGate } from "@/src/app/bootstrap/AppBootstrapGate";
-import { tokens } from "@/src/shared/theme/tokens";
+import { useTheme } from "@/src/shared/theme/ThemeProvider";
+
+function RootNavigator() {
+  const { colors } = useTheme();
+  return (
+    <>
+      <StatusBar style="dark" />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: {
+            backgroundColor: colors.canvas,
+          },
+        }}
+      >
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="decks/[deckId]/edit" />
+        <Stack.Screen name="study/[deckId]" />
+        <Stack.Screen name="bundles/[bundleId]" />
+      </Stack>
+    </>
+  );
+}
 
 export default function RootLayout() {
   return (
     <AppProviders>
       <AppBootstrapGate>
-        <StatusBar style="dark" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: {
-              backgroundColor: tokens.colors.canvas,
-            },
-          }}
-        >
-          <Stack.Screen name="(tabs)" />
-          <Stack.Screen name="decks/[deckId]/edit" />
-          <Stack.Screen name="study/[deckId]" />
-          <Stack.Screen name="bundles/[bundleId]" />
-        </Stack>
+        <RootNavigator />
       </AppBootstrapGate>
     </AppProviders>
   );
