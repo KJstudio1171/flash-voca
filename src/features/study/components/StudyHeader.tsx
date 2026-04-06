@@ -1,6 +1,5 @@
 import { memo } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import Animated, { useAnimatedStyle, withTiming } from "react-native-reanimated";
 
 import { tokens } from "@/src/shared/theme/tokens";
 
@@ -21,10 +20,6 @@ function StudyHeaderComponent({
 }: StudyHeaderProps) {
   const progress = totalCards > 0 ? currentIndex / totalCards : 0;
 
-  const progressStyle = useAnimatedStyle(() => ({
-    width: withTiming(`${progress * 100}%` as unknown as number, { duration: 300 }),
-  }));
-
   return (
     <View style={styles.root}>
       <View style={styles.titleRow}>
@@ -35,7 +30,7 @@ function StudyHeaderComponent({
       </View>
 
       <View style={styles.progressTrack}>
-        <Animated.View style={[styles.progressFill, progressStyle]} />
+        <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
       </View>
 
       <View style={styles.countersRow}>
