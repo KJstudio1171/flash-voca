@@ -20,7 +20,7 @@ export default function StoreScreen() {
       title="Store"
       subtitle="공식 단어장 번들 카탈로그와 구매 권한을 분리해 두었습니다. 실제 결제 구현체는 나중에 연결하면 됩니다."
     >
-      <Panel accentColor={colors.accent}>
+      <Panel>
         <Badge tone="accent">Paid Layer</Badge>
         <Text style={[styles.heroTitle, { color: colors.ink }]}>Official bundle catalog</Text>
         <Text style={[styles.heroBody, { color: colors.muted }]}>
@@ -29,7 +29,7 @@ export default function StoreScreen() {
       </Panel>
 
       {bundles.map((bundle) => (
-        <Panel key={bundle.id} accentColor={bundle.coverColor}>
+        <Panel key={bundle.id}>
           <View style={styles.row}>
             <View style={styles.copy}>
               <Text style={[styles.bundleTitle, { color: colors.ink }]}>{bundle.title}</Text>

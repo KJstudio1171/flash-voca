@@ -29,7 +29,7 @@ export default function ProfileScreen() {
         </AppButton>
       }
     >
-      <Panel accentColor={hasSupabaseConfig ? colors.primary : colors.info}>
+      <Panel>
         <Badge tone={hasSupabaseConfig ? "primary" : "info"}>
           {hasSupabaseConfig ? "Supabase Ready" : "Local Mode"}
         </Badge>

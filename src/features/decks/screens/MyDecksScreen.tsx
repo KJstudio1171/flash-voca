@@ -34,7 +34,7 @@ export default function MyDecksScreen() {
       }
     >
       {decks.map((deck) => (
-        <Panel key={deck.id} accentColor={deck.accentColor}>
+        <Panel key={deck.id}>
           <View style={styles.row}>
             <View style={styles.copy}>
               <Text style={[styles.deckTitle, { color: colors.ink }]}>{deck.title}</Text>

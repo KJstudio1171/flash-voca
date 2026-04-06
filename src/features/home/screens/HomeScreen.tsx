@@ -25,7 +25,7 @@ export default function HomeScreen() {
       title="Home"
       subtitle="로컬 학습 상태는 SQLite에 두고, 계정/권한은 별도 경계에서 연결하는 MVP 구조입니다."
     >
-      <Panel accentColor={quickStudyDeck?.accentColor ?? colors.primary}>
+      <Panel>
         <Badge tone="primary">Today</Badge>
         <Text style={[styles.heroTitle, { color: colors.ink }]}>
           {quickStudyDeck ? quickStudyDeck.title : "첫 단어장을 만들 준비가 되어 있습니다"}

@@ -83,7 +83,7 @@ export default function StudyScreen() {
       ) : null}
 
       {studyQuery.isError ? (
-        <Panel accentColor={colors.accent}>
+        <Panel>
           <Badge tone="accent">Error</Badge>
           <Text style={[styles.body, { color: colors.muted }]}>
             {studyQuery.error instanceof Error
@@ -112,7 +112,7 @@ export default function StudyScreen() {
       ) : null}
 
       {session.lastError ? (
-        <Panel accentColor={colors.accent}>
+        <Panel>
           <Badge tone="accent">저장 오류</Badge>
           <Text style={[styles.body, { color: colors.muted }]}>{session.lastError}</Text>
         </Panel>

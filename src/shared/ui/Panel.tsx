@@ -6,10 +6,9 @@ import { tokens } from "@/src/shared/theme/tokens";
 
 type PanelProps = PropsWithChildren<{
   style?: StyleProp<ViewStyle>;
-  accentColor?: string;
 }>;
 
-export function Panel({ children, style, accentColor }: PanelProps) {
+export function Panel({ children, style }: PanelProps) {
   const { colors } = useTheme();
 
   return (
@@ -19,7 +18,6 @@ export function Panel({ children, style, accentColor }: PanelProps) {
         {
           backgroundColor: colors.surface,
           borderColor: colors.line,
-          borderLeftColor: accentColor ?? "transparent",
         },
         style,
       ]}
@@ -33,7 +31,6 @@ const styles = StyleSheet.create({
   base: {
     borderRadius: tokens.radius.l,
     borderWidth: 1,
-    borderLeftWidth: 5,
     padding: tokens.spacing.l,
     gap: tokens.spacing.s,
   },

@@ -143,7 +143,7 @@ export default function DeckEditorScreen() {
         ) : undefined
       }
     >
-      <Panel accentColor={colors.primary}>
+      <Panel>
         <Badge tone="primary">{isNewDeck ? "Draft" : "Persisted"}</Badge>
         <Text style={[styles.sectionTitle, { color: colors.ink }]}>Deck meta</Text>
         <TextField onChangeText={setTitle} placeholder="Deck title" value={title} />
@@ -200,7 +200,7 @@ export default function DeckEditorScreen() {
         ))}
       </Panel>
 
-      <Panel accentColor={colors.info}>
+      <Panel>
         <Text style={[styles.sectionTitle, { color: colors.ink }]}>Save state</Text>
         <Text style={[styles.helpText, { color: colors.muted }]}>
           저장 시 deck + deck_cards를 함께 갱신합니다. 결제/권한 테이블과는 분리되어 있어 무료 개인 학습 기능을 먼저 완성할 수 있습니다.

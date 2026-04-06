@@ -35,7 +35,7 @@ export default function BundleDetailScreen() {
       title={bundle.title}
       subtitle="번들 상세는 구매 UI와 권한 판단을 분리한 상태로 시작합니다."
     >
-      <Panel accentColor={bundle.coverColor}>
+      <Panel>
         <Badge tone={bundle.owned ? "primary" : "accent"}>
           {bundle.owned ? "Unlocked" : "Paid Bundle"}
         </Badge>
