@@ -22,4 +22,7 @@ export const natureFresh: ColorScheme = {
   chipAgainBorder: "rgba(249,115,22,0.2)",
   chipEasyBg: "#DCFCE7",
   chipEasyBorder: "rgba(22,163,74,0.2)",
+  primarySoftStrong: "#BBF7D0",
+  cardShadowFront: "#16A34A",
+  cardShadowBack: "#F97316",
 };

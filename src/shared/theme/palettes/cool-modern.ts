@@ -22,4 +22,7 @@ export const coolModern: ColorScheme = {
   chipAgainBorder: "rgba(244,63,94,0.2)",
   chipEasyBg: "#EEF2FF",
   chipEasyBorder: "rgba(99,102,241,0.2)",
+  primarySoftStrong: "#E0E7FF",
+  cardShadowFront: "#6366F1",
+  cardShadowBack: "#F43F5E",
 };
