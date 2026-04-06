@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Flash Voca",
+    "slug": "flash-voca",
+    "scheme": "flash-voca",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "plugins": [
+      [
+        "expo-router",
+        {
+          "root": "./app"
+        }
+      ],
+      "expo-font"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "android": {
+      "package": "com.kjstudio.flashvoca",
+      "adaptiveIcon": {
+        "backgroundColor": "#F7F2E8"
+      },
+      "edgeToEdgeEnabled": true
+    }
+  }
+}
