@@ -85,6 +85,11 @@ export interface UserCardState {
   updatedAt: string;
 }
 
+export interface DeckSummary extends Deck {
+  dueCount: number;
+  masteredCount: number;
+}
+
 export interface StudyCard {
   card: DeckCard;
   state: UserCardState | null;

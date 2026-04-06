@@ -1,5 +1,5 @@
 import { LOCAL_USER_ID } from "@/src/core/config/constants";
-import { LogReviewInput, StudyDeckSnapshot } from "@/src/core/domain/models";
+import { DeckSummary, LogReviewInput, StudyDeckSnapshot } from "@/src/core/domain/models";
 import { DeckRepository } from "@/src/core/repositories/contracts/DeckRepository";
 import { StudyRepository } from "@/src/core/repositories/contracts/StudyRepository";
 
@@ -8,6 +8,23 @@ export class StudySessionService {
     private readonly deckRepository: DeckRepository,
     private readonly studyRepository: StudyRepository,
   ) {}
+
+  async listDeckSummariesAsync(userId = LOCAL_USER_ID): Promise<DeckSummary[]> {
+    const decks = await this.deckRepository.listDecksAsync();
+    const summaries = await Promise.all(
+      decks.map(async (deck) => {
+        const states = await this.studyRepository.listCardStatesAsync(deck.id, userId);
+        const now = Date.now();
+        const notDueCount = states.filter(
+          (s) => s.nextReviewAt && new Date(s.nextReviewAt).getTime() > now,
+        ).length;
+        const dueCount = deck.cardCount - notDueCount;
+        const masteredCount = states.filter((s) => s.masteryLevel >= 3).length;
+        return { ...deck, dueCount, masteredCount };
+      }),
+    );
+    return summaries;
+  }
 
   async getSnapshotAsync(deckId: string, userId = LOCAL_USER_ID) {
     const [deck, states] = await Promise.all([
