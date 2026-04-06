@@ -13,12 +13,13 @@ import Animated, {
 
 import { tokens } from "@/src/shared/theme/tokens";
 
-type SwipeDirection = "left" | "right";
+type SwipeDirection = "left" | "right" | "up";
 
 type SwipeStudyCardProps = PropsWithChildren<{
   disabled?: boolean;
   leftActionLabel?: string;
   rightActionLabel?: string;
+  upActionLabel?: string;
   onSwipeComplete?: (direction: SwipeDirection) => void;
 }>;
 
@@ -30,65 +31,103 @@ export function SwipeStudyCard({
   disabled = false,
   leftActionLabel,
   rightActionLabel,
+  upActionLabel,
   onSwipeComplete,
 }: SwipeStudyCardProps) {
   const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
 
   const gesture = Gesture.Pan()
     .enabled(!disabled)
     .activeOffsetX([-12, 12])
-    .failOffsetY([-18, 18])
+    .activeOffsetY([-12, 1000])
     .onUpdate((event) => {
       translateX.value = event.translationX;
+      translateY.value = Math.min(0, event.translationY);
     })
     .onEnd(() => {
-      const shouldDismiss = Math.abs(translateX.value) > SWIPE_THRESHOLD;
+      const absX = Math.abs(translateX.value);
+      const absY = Math.abs(translateY.value);
+      const isVertical = absY > absX && translateY.value < -SWIPE_THRESHOLD;
+      const isHorizontal = absX > SWIPE_THRESHOLD;
 
-      if (!shouldDismiss) {
-        translateX.value = withSpring(0, {
-          damping: 18,
-          stiffness: 220,
-        });
+      if (!isVertical && !isHorizontal) {
+        translateX.value = withSpring(0, { damping: 18, stiffness: 220 });
+        translateY.value = withSpring(0, { damping: 18, stiffness: 220 });
         return;
       }
 
-      const direction: SwipeDirection = translateX.value > 0 ? "right" : "left";
-      const target = direction === "right" ? EXIT_DISTANCE : -EXIT_DISTANCE;
+      let direction: SwipeDirection;
+      let targetX = 0;
+      let targetY = 0;
 
-      translateX.value = withTiming(
-        target,
-        {
-          duration: 180,
-          easing: Easing.out(Easing.cubic),
-        },
-        (finished) => {
-          if (!finished) {
-            return;
-          }
+      if (isVertical) {
+        direction = "up";
+        targetY = -EXIT_DISTANCE;
+      } else {
+        direction = translateX.value > 0 ? "right" : "left";
+        targetX = direction === "right" ? EXIT_DISTANCE : -EXIT_DISTANCE;
+      }
 
-          translateX.value = 0;
+      const animateAxis = (
+        sv: { value: number },
+        target: number,
+        cb?: (finished?: boolean) => void,
+      ) => {
+        sv.value = withTiming(
+          target,
+          { duration: 180, easing: Easing.out(Easing.cubic) },
+          cb,
+        );
+      };
 
-          if (onSwipeComplete) {
-            runOnJS(onSwipeComplete)(direction);
-          }
-        },
-      );
+      animateAxis(translateX, targetX);
+      animateAxis(translateY, targetY, (finished) => {
+        if (!finished) return;
+        translateX.value = 0;
+        translateY.value = 0;
+        if (onSwipeComplete) {
+          runOnJS(onSwipeComplete)(direction);
+        }
+      });
     });
 
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: translateX.value },
-      { rotateZ: `${translateX.value / 20}deg` },
-      { scale: interpolate(Math.abs(translateX.value), [0, EXIT_DISTANCE], [1, 0.92]) },
-    ],
-    opacity: interpolate(Math.abs(translateX.value), [0, EXIT_DISTANCE], [1, 0.68]),
-  }));
+  const animatedStyle = useAnimatedStyle(() => {
+    const absX = Math.abs(translateX.value);
+    const absY = Math.abs(translateY.value);
+    const maxDisplacement = Math.max(absX, absY);
 
-  const glowStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(Math.abs(translateX.value), [0, SWIPE_THRESHOLD], [0, 1]),
-    backgroundColor:
-      translateX.value >= 0 ? "rgba(15, 118, 110, 0.1)" : "rgba(234, 88, 12, 0.1)",
-  }));
+    return {
+      transform: [
+        { translateX: translateX.value },
+        { translateY: translateY.value },
+        { rotateZ: `${translateX.value / 20}deg` },
+        { scale: interpolate(maxDisplacement, [0, EXIT_DISTANCE], [1, 0.92]) },
+      ],
+      opacity: interpolate(maxDisplacement, [0, EXIT_DISTANCE], [1, 0.68]),
+    };
+  });
+
+  const glowStyle = useAnimatedStyle(() => {
+    const absX = Math.abs(translateX.value);
+    const absY = Math.abs(translateY.value);
+    const maxDisplacement = Math.max(absX, absY);
+    const isUpward = absY > absX;
+
+    let bgColor: string;
+    if (isUpward) {
+      bgColor = "rgba(20, 51, 45, 0.08)";
+    } else if (translateX.value >= 0) {
+      bgColor = "rgba(15, 118, 110, 0.1)";
+    } else {
+      bgColor = "rgba(234, 88, 12, 0.1)";
+    }
+
+    return {
+      opacity: interpolate(maxDisplacement, [0, SWIPE_THRESHOLD], [0, 1]),
+      backgroundColor: bgColor,
+    };
+  });
 
   const leftLabelStyle = useAnimatedStyle(() => ({
     opacity: interpolate(-translateX.value, [24, SWIPE_THRESHOLD], [0, 1]),
@@ -98,6 +137,11 @@ export function SwipeStudyCard({
   const rightLabelStyle = useAnimatedStyle(() => ({
     opacity: interpolate(translateX.value, [24, SWIPE_THRESHOLD], [0, 1]),
     transform: [{ scale: interpolate(translateX.value, [24, SWIPE_THRESHOLD], [0.96, 1]) }],
+  }));
+
+  const upLabelStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(-translateY.value, [24, SWIPE_THRESHOLD], [0, 1]),
+    transform: [{ scale: interpolate(-translateY.value, [24, SWIPE_THRESHOLD], [0.96, 1]) }],
   }));
 
   return (
@@ -115,6 +159,14 @@ export function SwipeStudyCard({
             style={[styles.actionChip, styles.rightChip, rightLabelStyle]}
           >
             <Text style={[styles.actionLabel, styles.rightLabel]}>{rightActionLabel}</Text>
+          </Animated.View>
+        ) : null}
+        {upActionLabel ? (
+          <Animated.View
+            pointerEvents="none"
+            style={[styles.actionChip, styles.upChip, upLabelStyle]}
+          >
+            <Text style={[styles.actionLabel, styles.upLabel]}>{upActionLabel}</Text>
           </Animated.View>
         ) : null}
         {children}
@@ -150,6 +202,13 @@ const styles = StyleSheet.create({
     backgroundColor: tokens.colors.primarySoft,
     borderColor: "rgba(15, 118, 110, 0.2)",
   },
+  upChip: {
+    top: tokens.spacing.m,
+    left: "50%",
+    transform: [{ translateX: -24 }],
+    backgroundColor: tokens.colors.surface,
+    borderColor: tokens.colors.line,
+  },
   actionLabel: {
     fontSize: 13,
     fontWeight: "800",
@@ -161,5 +220,8 @@ const styles = StyleSheet.create({
   },
   rightLabel: {
     color: tokens.colors.primary,
+  },
+  upLabel: {
+    color: tokens.colors.ink,
   },
 });
