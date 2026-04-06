@@ -24,6 +24,7 @@ function RootNavigator() {
         <Stack.Screen name="decks/[deckId]/edit" />
         <Stack.Screen name="study/[deckId]" />
         <Stack.Screen name="bundles/[bundleId]" />
+        <Stack.Screen name="settings/index" />
       </Stack>
     </>
   );

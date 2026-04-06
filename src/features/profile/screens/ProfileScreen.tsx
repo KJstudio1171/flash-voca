@@ -1,4 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 
 import { useAppServices } from "@/src/app/AppProviders";
@@ -13,6 +14,7 @@ import { tokens } from "@/src/shared/theme/tokens";
 export default function ProfileScreen() {
   const { entitlementService } = useAppServices();
   const { colors } = useTheme();
+  const router = useRouter();
   const syncMutation = useMutation({
     mutationFn: () => entitlementService.syncAsync(),
   });
@@ -21,6 +23,11 @@ export default function ProfileScreen() {
     <Screen
       title="Profile"
       subtitle="계정, entitlement sync, 결제 복구 같은 서버 연동성은 여기서 출발하도록 분리했습니다."
+      rightSlot={
+        <AppButton onPress={() => router.push("/settings")} variant="secondary">
+          Settings
+        </AppButton>
+      }
     >
       <Panel accentColor={hasSupabaseConfig ? colors.primary : colors.info}>
         <Badge tone={hasSupabaseConfig ? "primary" : "info"}>
