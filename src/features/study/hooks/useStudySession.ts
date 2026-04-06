@@ -23,6 +23,7 @@ export function useStudySession({
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [lastError, setLastError] = useState<string | null>(null);
+  const [ratingCounts, setRatingCounts] = useState({ again: 0, good: 0, easy: 0 });
   const actionLockRef = useRef(false);
   const startedAtRef = useRef(Date.now());
 
@@ -35,6 +36,7 @@ export function useStudySession({
     setCurrentIndex(0);
     setIsTransitioning(false);
     setLastError(null);
+    setRatingCounts({ again: 0, good: 0, easy: 0 });
   }, []);
 
   useEffect(() => {
@@ -58,6 +60,13 @@ export function useStudySession({
       actionLockRef.current = true;
       setIsTransitioning(true);
       setLastError(null);
+
+      setRatingCounts((prev) => ({
+        ...prev,
+        ...(rating === 1 && { again: prev.again + 1 }),
+        ...(rating === 2 && { good: prev.good + 1 }),
+        ...(rating === 3 && { easy: prev.easy + 1 }),
+      }));
 
       recordReview({
         input: {
@@ -85,6 +94,7 @@ export function useStudySession({
     isTransitioning,
     lastError,
     rateCard,
+    ratingCounts,
     restartSession,
     totalCards: cards.length,
   };
