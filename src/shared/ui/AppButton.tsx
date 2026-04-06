@@ -1,6 +1,8 @@
 import { PropsWithChildren } from "react";
 import { Pressable, StyleSheet, Text, ViewStyle } from "react-native";
 
+import { useTheme } from "@/src/shared/theme/ThemeProvider";
+import { ColorScheme } from "@/src/shared/theme/palettes";
 import { tokens } from "@/src/shared/theme/tokens";
 
 type AppButtonProps = PropsWithChildren<{
@@ -17,6 +19,10 @@ export function AppButton({
   style,
   disabled = false,
 }: AppButtonProps) {
+  const { colors } = useTheme();
+  const variantStyles = createVariantStyles(colors);
+  const labelStyles = createLabelStyles(colors);
+
   return (
     <Pressable
       disabled={disabled}
@@ -56,29 +62,14 @@ const styles = StyleSheet.create({
   },
 });
 
-const variantStyles = StyleSheet.create({
-  primary: {
-    backgroundColor: tokens.colors.primary,
-    borderColor: tokens.colors.primary,
-  },
-  secondary: {
-    backgroundColor: tokens.colors.surfaceStrong,
-    borderColor: tokens.colors.line,
-  },
-  ghost: {
-    backgroundColor: "transparent",
-    borderColor: "transparent",
-  },
+const createVariantStyles = (colors: ColorScheme) => ({
+  primary: { backgroundColor: colors.primary, borderColor: colors.primary },
+  secondary: { backgroundColor: colors.surfaceStrong, borderColor: colors.line },
+  ghost: { backgroundColor: "transparent", borderColor: "transparent" },
 });
 
-const labelStyles = StyleSheet.create({
-  primary: {
-    color: "#FFFFFF",
-  },
-  secondary: {
-    color: tokens.colors.ink,
-  },
-  ghost: {
-    color: tokens.colors.primary,
-  },
+const createLabelStyles = (colors: ColorScheme) => ({
+  primary: { color: colors.onPrimary },
+  secondary: { color: colors.ink },
+  ghost: { color: colors.primary },
 });

@@ -1,6 +1,8 @@
 import { ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
+import { useTheme } from "@/src/shared/theme/ThemeProvider";
+import { ColorScheme } from "@/src/shared/theme/palettes";
 import { tokens } from "@/src/shared/theme/tokens";
 
 type BadgeProps = {
@@ -9,9 +11,13 @@ type BadgeProps = {
 };
 
 export function Badge({ children, tone = "primary" }: BadgeProps) {
+  const { colors } = useTheme();
+  const toneStyle = createToneStyles(colors)[tone];
+  const labelStyle = createLabelStyles(colors)[tone];
+
   return (
-    <View style={[styles.base, toneStyles[tone]]}>
-      <Text style={[styles.label, labelStyles[tone]]}>{children}</Text>
+    <View style={[styles.base, toneStyle]}>
+      <Text style={[styles.label, labelStyle]}>{children}</Text>
     </View>
   );
 }
@@ -29,26 +35,14 @@ const styles = StyleSheet.create({
   },
 });
 
-const toneStyles = StyleSheet.create({
-  primary: {
-    backgroundColor: tokens.colors.primarySoft,
-  },
-  accent: {
-    backgroundColor: tokens.colors.accentSoft,
-  },
-  info: {
-    backgroundColor: tokens.colors.infoSoft,
-  },
+const createToneStyles = (colors: ColorScheme) => ({
+  primary: { backgroundColor: colors.primarySoft },
+  accent: { backgroundColor: colors.accentSoft },
+  info: { backgroundColor: colors.infoSoft },
 });
 
-const labelStyles = StyleSheet.create({
-  primary: {
-    color: tokens.colors.primary,
-  },
-  accent: {
-    color: tokens.colors.accent,
-  },
-  info: {
-    color: tokens.colors.info,
-  },
+const createLabelStyles = (colors: ColorScheme) => ({
+  primary: { color: colors.primary },
+  accent: { color: colors.accent },
+  info: { color: colors.info },
 });
