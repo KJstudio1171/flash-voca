@@ -1,11 +1,14 @@
 import { memo, useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Dimensions, Platform, StyleSheet, Text, View } from "react-native";
 
 import { StudyCard } from "@/src/core/domain/models";
 import { AnimatedFlipCard } from "@/src/shared/animation/AnimatedFlipCard";
 import { SwipeStudyCard } from "@/src/shared/animation/SwipeStudyCard";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { tokens } from "@/src/shared/theme/tokens";
+
+const SCREEN_HEIGHT = Dimensions.get("window").height;
+const CARD_HEIGHT = Math.min(400, Math.max(240, SCREEN_HEIGHT * 0.42));
 
 type StudyFlashcardProps = {
   card: StudyCard;
@@ -23,6 +26,30 @@ function StudyFlashcardComponent({
   const masteryLabel =
     card.state == null ? "New" : `Mastery ${card.state.masteryLevel}`;
 
+  const frontShadow = Platform.select({
+    ios: {
+      shadowColor: colors.cardShadowFront,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.08,
+      shadowRadius: 16,
+    },
+    android: {
+      elevation: 4,
+    },
+  });
+
+  const backShadow = Platform.select({
+    ios: {
+      shadowColor: colors.cardShadowBack,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.08,
+      shadowRadius: 16,
+    },
+    android: {
+      elevation: 4,
+    },
+  });
+
   return (
     <View style={styles.root}>
       <SwipeStudyCard
@@ -37,7 +64,13 @@ function StudyFlashcardComponent({
       >
         <AnimatedFlipCard
           back={
-            <View style={[styles.card, styles.cardBack, { backgroundColor: colors.surface, borderColor: colors.accent }]}>
+            <View
+              style={[
+                styles.card,
+                { backgroundColor: colors.surface },
+                backShadow,
+              ]}
+            >
               <View style={styles.cardCenter}>
                 <Text style={[styles.label, { color: colors.accent }]}>MEANING</Text>
                 <Text style={[styles.meaningText, { color: colors.ink }]}>{card.card.meaning}</Text>
@@ -51,8 +84,14 @@ function StudyFlashcardComponent({
             }
           }}
         >
-          <View style={[styles.card, styles.cardFront, { backgroundColor: colors.surface, borderColor: colors.line }]}>
-            <View style={[styles.masteryBadge, { backgroundColor: colors.primarySoft }]}>
+          <View
+            style={[
+              styles.card,
+              { backgroundColor: colors.surface },
+              frontShadow,
+            ]}
+          >
+            <View style={[styles.masteryBadge, { backgroundColor: colors.primarySoftStrong }]}>
               <Text style={[styles.masteryText, { color: colors.primary }]}>{masteryLabel}</Text>
             </View>
             <View style={styles.cardCenter}>
@@ -76,17 +115,11 @@ const styles = StyleSheet.create({
     gap: tokens.spacing.xs,
   },
   card: {
-    minHeight: 240,
+    minHeight: CARD_HEIGHT,
     borderRadius: tokens.radius.l,
     padding: tokens.spacing.xl,
     justifyContent: "center",
     alignItems: "center",
-  },
-  cardFront: {
-    borderWidth: 1,
-  },
-  cardBack: {
-    borderWidth: 2,
   },
   masteryBadge: {
     position: "absolute",
@@ -97,34 +130,37 @@ const styles = StyleSheet.create({
     borderRadius: tokens.radius.pill,
   },
   masteryText: {
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: "700",
+    letterSpacing: 0.5,
   },
   cardCenter: {
     alignItems: "center",
     gap: tokens.spacing.m,
   },
   label: {
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 1.5,
+    fontSize: 10,
+    fontWeight: "600",
+    letterSpacing: 2,
     textTransform: "uppercase",
   },
   termText: {
-    fontSize: 36,
+    fontSize: 34,
     fontWeight: "800",
+    letterSpacing: -0.5,
     textAlign: "center",
   },
   meaningText: {
-    fontSize: 34,
+    fontSize: 32,
     fontWeight: "800",
+    letterSpacing: -0.3,
     textAlign: "center",
   },
   hint: {
-    fontSize: 14,
+    fontSize: 12,
   },
   swipeHint: {
     textAlign: "center",
-    fontSize: 12,
+    fontSize: 11,
   },
 });
