@@ -1,6 +1,7 @@
 import { PropsWithChildren } from "react";
 import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 
+import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { tokens } from "@/src/shared/theme/tokens";
 
 type PanelProps = PropsWithChildren<{
@@ -9,11 +10,17 @@ type PanelProps = PropsWithChildren<{
 }>;
 
 export function Panel({ children, style, accentColor }: PanelProps) {
+  const { colors } = useTheme();
+
   return (
     <View
       style={[
         styles.base,
-        accentColor ? { borderLeftColor: accentColor } : null,
+        {
+          backgroundColor: colors.surface,
+          borderColor: colors.line,
+          borderLeftColor: accentColor ?? "transparent",
+        },
         style,
       ]}
     >
@@ -25,11 +32,8 @@ export function Panel({ children, style, accentColor }: PanelProps) {
 const styles = StyleSheet.create({
   base: {
     borderRadius: tokens.radius.l,
-    backgroundColor: tokens.colors.surface,
     borderWidth: 1,
-    borderColor: tokens.colors.line,
     borderLeftWidth: 5,
-    borderLeftColor: "transparent",
     padding: tokens.spacing.l,
     gap: tokens.spacing.s,
   },

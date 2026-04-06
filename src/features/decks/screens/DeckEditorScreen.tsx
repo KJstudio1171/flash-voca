@@ -6,6 +6,7 @@ import {
   useDeckDetailQuery,
   useSaveDeckMutation,
 } from "@/src/features/decks/hooks/useDeckQueries";
+import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { AppButton } from "@/src/shared/ui/AppButton";
 import { Badge } from "@/src/shared/ui/Badge";
 import { Panel } from "@/src/shared/ui/Panel";
@@ -38,6 +39,7 @@ function createEmptyCard(): EditableCard {
 
 export default function DeckEditorScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
   const params = useLocalSearchParams<{ deckId: string | string[] }>();
   const deckId = getParamValue(params.deckId);
   const isNewDeck = deckId === "new";
@@ -141,9 +143,9 @@ export default function DeckEditorScreen() {
         ) : undefined
       }
     >
-      <Panel accentColor={tokens.colors.primary}>
+      <Panel accentColor={colors.primary}>
         <Badge tone="primary">{isNewDeck ? "Draft" : "Persisted"}</Badge>
-        <Text style={styles.sectionTitle}>Deck meta</Text>
+        <Text style={[styles.sectionTitle, { color: colors.ink }]}>Deck meta</Text>
         <TextField onChangeText={setTitle} placeholder="Deck title" value={title} />
         <TextField
           multiline
@@ -156,7 +158,7 @@ export default function DeckEditorScreen() {
 
       <Panel>
         <View style={styles.rowHeader}>
-          <Text style={styles.sectionTitle}>Cards</Text>
+          <Text style={[styles.sectionTitle, { color: colors.ink }]}>Cards</Text>
           <AppButton
             onPress={() => setCards((current) => [...current, createEmptyCard()])}
             variant="ghost"
@@ -166,8 +168,11 @@ export default function DeckEditorScreen() {
         </View>
 
         {cards.map((card, index) => (
-          <View key={card.id ?? `card_${index}`} style={styles.cardEditor}>
-            <Text style={styles.cardIndex}>Card {index + 1}</Text>
+          <View
+            key={card.id ?? `card_${index}`}
+            style={[styles.cardEditor, { borderTopColor: colors.line }]}
+          >
+            <Text style={[styles.cardIndex, { color: colors.muted }]}>Card {index + 1}</Text>
             <TextField
               onChangeText={(value) => updateCard(index, { term: value })}
               placeholder="Term"
@@ -195,9 +200,9 @@ export default function DeckEditorScreen() {
         ))}
       </Panel>
 
-      <Panel accentColor={tokens.colors.info}>
-        <Text style={styles.sectionTitle}>Save state</Text>
-        <Text style={styles.helpText}>
+      <Panel accentColor={colors.info}>
+        <Text style={[styles.sectionTitle, { color: colors.ink }]}>Save state</Text>
+        <Text style={[styles.helpText, { color: colors.muted }]}>
           저장 시 deck + deck_cards를 함께 갱신합니다. 결제/권한 테이블과는 분리되어 있어 무료 개인 학습 기능을 먼저 완성할 수 있습니다.
         </Text>
         <AppButton onPress={() => void handleSave()} disabled={!canSave}>
@@ -212,7 +217,6 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 22,
     fontWeight: "700",
-    color: tokens.colors.ink,
   },
   multilineInput: {
     minHeight: 88,
@@ -228,17 +232,14 @@ const styles = StyleSheet.create({
     gap: tokens.spacing.s,
     paddingTop: tokens.spacing.s,
     borderTopWidth: 1,
-    borderTopColor: tokens.colors.line,
   },
   cardIndex: {
     fontSize: 13,
     letterSpacing: 1,
     textTransform: "uppercase",
-    color: tokens.colors.muted,
   },
   helpText: {
     fontSize: 15,
     lineHeight: 22,
-    color: tokens.colors.muted,
   },
 });

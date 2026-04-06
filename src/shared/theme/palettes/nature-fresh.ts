@@ -1,0 +1,25 @@
+import { ColorScheme } from "@/src/shared/theme/palettes/types";
+
+export const natureFresh: ColorScheme = {
+  canvas: "#F0FDF4",
+  surface: "#FFFFFF",
+  surfaceStrong: "#FFFFFF",
+  ink: "#14532D",
+  muted: "#4B5563",
+  primary: "#16A34A",
+  primarySoft: "#DCFCE7",
+  accent: "#F97316",
+  accentSoft: "#FFEDD5",
+  info: "#0284C7",
+  infoSoft: "#E0F2FE",
+  line: "#BBF7D0",
+  onPrimary: "#FFFFFF",
+  overlayWhite: "rgba(255,255,255,0.7)",
+  primaryGlow: "rgba(22,163,74,0.1)",
+  accentGlow: "rgba(249,115,22,0.1)",
+  neutralGlow: "rgba(20,83,45,0.08)",
+  chipAgainBg: "#FFEDD5",
+  chipAgainBorder: "rgba(249,115,22,0.2)",
+  chipEasyBg: "#DCFCE7",
+  chipEasyBorder: "rgba(22,163,74,0.2)",
+};

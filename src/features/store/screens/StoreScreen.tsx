@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 
 import { useBundleCatalogQuery } from "@/src/features/store/hooks/useStoreQueries";
+import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { AppButton } from "@/src/shared/ui/AppButton";
 import { Badge } from "@/src/shared/ui/Badge";
 import { Panel } from "@/src/shared/ui/Panel";
@@ -10,6 +11,7 @@ import { tokens } from "@/src/shared/theme/tokens";
 
 export default function StoreScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
   const bundleQuery = useBundleCatalogQuery();
   const bundles = bundleQuery.data ?? [];
 
@@ -18,10 +20,10 @@ export default function StoreScreen() {
       title="Store"
       subtitle="공식 단어장 번들 카탈로그와 구매 권한을 분리해 두었습니다. 실제 결제 구현체는 나중에 연결하면 됩니다."
     >
-      <Panel accentColor={tokens.colors.accent}>
+      <Panel accentColor={colors.accent}>
         <Badge tone="accent">Paid Layer</Badge>
-        <Text style={styles.heroTitle}>Official bundle catalog</Text>
-        <Text style={styles.heroBody}>
+        <Text style={[styles.heroTitle, { color: colors.ink }]}>Official bundle catalog</Text>
+        <Text style={[styles.heroBody, { color: colors.muted }]}>
           번들 목록은 로컬 캐시로 읽고, entitlement는 추후 스토어 SDK와 Supabase 동기화로 교체할 수 있게 분리했습니다.
         </Text>
       </Panel>
@@ -30,8 +32,8 @@ export default function StoreScreen() {
         <Panel key={bundle.id} accentColor={bundle.coverColor}>
           <View style={styles.row}>
             <View style={styles.copy}>
-              <Text style={styles.bundleTitle}>{bundle.title}</Text>
-              <Text style={styles.bundleMeta}>
+              <Text style={[styles.bundleTitle, { color: colors.ink }]}>{bundle.title}</Text>
+              <Text style={[styles.bundleMeta, { color: colors.muted }]}>
                 {bundle.deckCount} decks · {bundle.priceText}
               </Text>
             </View>
@@ -39,7 +41,7 @@ export default function StoreScreen() {
               {bundle.owned ? "Owned" : "Locked"}
             </Badge>
           </View>
-          <Text style={styles.bundleDescription}>{bundle.description}</Text>
+          <Text style={[styles.bundleDescription, { color: colors.muted }]}>{bundle.description}</Text>
           <AppButton
             onPress={() =>
               router.push({
@@ -61,12 +63,10 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: 26,
     fontWeight: "800",
-    color: tokens.colors.ink,
   },
   heroBody: {
     fontSize: 15,
     lineHeight: 23,
-    color: tokens.colors.muted,
   },
   row: {
     flexDirection: "row",
@@ -81,15 +81,12 @@ const styles = StyleSheet.create({
   bundleTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: tokens.colors.ink,
   },
   bundleMeta: {
     fontSize: 13,
-    color: tokens.colors.muted,
   },
   bundleDescription: {
     fontSize: 15,
     lineHeight: 22,
-    color: tokens.colors.muted,
   },
 });

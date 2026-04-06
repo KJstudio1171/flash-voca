@@ -2,6 +2,7 @@ import { useRouter } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 
 import { useDeckListQuery } from "@/src/features/decks/hooks/useDeckQueries";
+import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { AppButton } from "@/src/shared/ui/AppButton";
 import { Badge } from "@/src/shared/ui/Badge";
 import { Panel } from "@/src/shared/ui/Panel";
@@ -10,6 +11,7 @@ import { tokens } from "@/src/shared/theme/tokens";
 
 export default function MyDecksScreen() {
   const router = useRouter();
+  const { colors } = useTheme();
   const deckQuery = useDeckListQuery();
   const decks = deckQuery.data ?? [];
 
@@ -35,8 +37,8 @@ export default function MyDecksScreen() {
         <Panel key={deck.id} accentColor={deck.accentColor}>
           <View style={styles.row}>
             <View style={styles.copy}>
-              <Text style={styles.deckTitle}>{deck.title}</Text>
-              <Text style={styles.deckDescription}>
+              <Text style={[styles.deckTitle, { color: colors.ink }]}>{deck.title}</Text>
+              <Text style={[styles.deckDescription, { color: colors.muted }]}>
                 {deck.description || "설명이 아직 없는 단어장입니다."}
               </Text>
             </View>
@@ -44,7 +46,7 @@ export default function MyDecksScreen() {
               {deck.sourceType === "official" ? "Official" : "Personal"}
             </Badge>
           </View>
-          <Text style={styles.meta}>{deck.cardCount} cards ready</Text>
+          <Text style={[styles.meta, { color: colors.muted }]}>{deck.cardCount} cards ready</Text>
           <View style={styles.actions}>
             <AppButton
               onPress={() =>
@@ -88,18 +90,15 @@ const styles = StyleSheet.create({
   deckTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: tokens.colors.ink,
   },
   deckDescription: {
     fontSize: 14,
     lineHeight: 21,
-    color: tokens.colors.muted,
   },
   meta: {
     fontSize: 13,
     textTransform: "uppercase",
     letterSpacing: 1,
-    color: tokens.colors.muted,
   },
   actions: {
     flexDirection: "row",

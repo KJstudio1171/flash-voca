@@ -1,0 +1,25 @@
+import { ColorScheme } from "@/src/shared/theme/palettes/types";
+
+export const coolModern: ColorScheme = {
+  canvas: "#F8FAFC",
+  surface: "#FFFFFF",
+  surfaceStrong: "#FFFFFF",
+  ink: "#0F172A",
+  muted: "#64748B",
+  primary: "#6366F1",
+  primarySoft: "#EEF2FF",
+  accent: "#F43F5E",
+  accentSoft: "#FFF1F2",
+  info: "#0EA5E9",
+  infoSoft: "#E0F2FE",
+  line: "#E2E8F0",
+  onPrimary: "#FFFFFF",
+  overlayWhite: "rgba(255,255,255,0.7)",
+  primaryGlow: "rgba(99,102,241,0.1)",
+  accentGlow: "rgba(244,63,94,0.1)",
+  neutralGlow: "rgba(15,23,42,0.08)",
+  chipAgainBg: "#FFF1F2",
+  chipAgainBorder: "rgba(244,63,94,0.2)",
+  chipEasyBg: "#EEF2FF",
+  chipEasyBorder: "rgba(99,102,241,0.2)",
+};

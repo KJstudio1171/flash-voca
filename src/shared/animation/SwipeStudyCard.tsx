@@ -11,6 +11,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 
+import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { tokens } from "@/src/shared/theme/tokens";
 
 type SwipeDirection = "left" | "right" | "up";
@@ -34,6 +35,7 @@ export function SwipeStudyCard({
   upActionLabel,
   onSwipeComplete,
 }: SwipeStudyCardProps) {
+  const { colors } = useTheme();
   const translateX = useSharedValue(0);
   const translateY = useSharedValue(0);
 
@@ -116,11 +118,11 @@ export function SwipeStudyCard({
 
     let bgColor: string;
     if (isUpward) {
-      bgColor = "rgba(20, 51, 45, 0.08)";
+      bgColor = colors.neutralGlow;
     } else if (translateX.value >= 0) {
-      bgColor = "rgba(15, 118, 110, 0.1)";
+      bgColor = colors.primaryGlow;
     } else {
-      bgColor = "rgba(234, 88, 12, 0.1)";
+      bgColor = colors.accentGlow;
     }
 
     return {
@@ -149,24 +151,27 @@ export function SwipeStudyCard({
       <Animated.View style={[styles.wrapper, animatedStyle]}>
         <Animated.View pointerEvents="none" style={[styles.glow, glowStyle]} />
         {leftActionLabel ? (
-          <Animated.View pointerEvents="none" style={[styles.actionChip, styles.leftChip, leftLabelStyle]}>
-            <Text style={[styles.actionLabel, styles.leftLabel]}>{leftActionLabel}</Text>
+          <Animated.View
+            pointerEvents="none"
+            style={[styles.actionChip, styles.leftChip, { backgroundColor: colors.chipAgainBg, borderColor: colors.chipAgainBorder }, leftLabelStyle]}
+          >
+            <Text style={[styles.actionLabel, { color: colors.accent }]}>{leftActionLabel}</Text>
           </Animated.View>
         ) : null}
         {rightActionLabel ? (
           <Animated.View
             pointerEvents="none"
-            style={[styles.actionChip, styles.rightChip, rightLabelStyle]}
+            style={[styles.actionChip, styles.rightChip, { backgroundColor: colors.chipEasyBg, borderColor: colors.chipEasyBorder }, rightLabelStyle]}
           >
-            <Text style={[styles.actionLabel, styles.rightLabel]}>{rightActionLabel}</Text>
+            <Text style={[styles.actionLabel, { color: colors.primary }]}>{rightActionLabel}</Text>
           </Animated.View>
         ) : null}
         {upActionLabel ? (
           <Animated.View
             pointerEvents="none"
-            style={[styles.actionChip, styles.upChip, upLabelStyle]}
+            style={[styles.actionChip, styles.upChip, { backgroundColor: colors.surface, borderColor: colors.line }, upLabelStyle]}
           >
-            <Text style={[styles.actionLabel, styles.upLabel]}>{upActionLabel}</Text>
+            <Text style={[styles.actionLabel, { color: colors.ink }]}>{upActionLabel}</Text>
           </Animated.View>
         ) : null}
         {children}
@@ -194,34 +199,19 @@ const styles = StyleSheet.create({
   },
   leftChip: {
     left: tokens.spacing.m,
-    backgroundColor: tokens.colors.accentSoft,
-    borderColor: "rgba(234, 88, 12, 0.2)",
   },
   rightChip: {
     right: tokens.spacing.m,
-    backgroundColor: tokens.colors.primarySoft,
-    borderColor: "rgba(15, 118, 110, 0.2)",
   },
   upChip: {
     top: tokens.spacing.m,
     left: "50%",
     transform: [{ translateX: -24 }],
-    backgroundColor: tokens.colors.surface,
-    borderColor: tokens.colors.line,
   },
   actionLabel: {
     fontSize: 13,
     fontWeight: "800",
     letterSpacing: 0.4,
     textTransform: "uppercase",
-  },
-  leftLabel: {
-    color: tokens.colors.accent,
-  },
-  rightLabel: {
-    color: tokens.colors.primary,
-  },
-  upLabel: {
-    color: tokens.colors.ink,
   },
 });
