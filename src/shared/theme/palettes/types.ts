@@ -22,4 +22,7 @@ export type ColorScheme = {
   chipAgainBorder: string;
   chipEasyBg: string;
   chipEasyBorder: string;
+  primarySoftStrong: string;
+  cardShadowFront: string;
+  cardShadowBack: string;
 };

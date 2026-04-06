@@ -22,4 +22,7 @@ export const neutralClean: ColorScheme = {
   chipAgainBorder: "rgba(245,158,11,0.2)",
   chipEasyBg: "#DBEAFE",
   chipEasyBorder: "rgba(37,99,235,0.2)",
+  primarySoftStrong: "#BFDBFE",
+  cardShadowFront: "#2563EB",
+  cardShadowBack: "#F59E0B",
 };

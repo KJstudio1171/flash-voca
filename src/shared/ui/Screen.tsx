@@ -48,8 +48,6 @@ export function Screen({
 
   return (
     <SafeAreaView edges={["top"]} style={[styles.safeArea, { backgroundColor: colors.canvas }]}>
-      <View style={[styles.backgroundOrbA, { backgroundColor: colors.primaryGlow }]} />
-      <View style={[styles.backgroundOrbB, { backgroundColor: colors.accentGlow }]} />
       {scroll ? (
         <ScrollView
           contentContainerStyle={styles.scrollContent}
@@ -97,21 +95,5 @@ const styles = StyleSheet.create({
   },
   body: {
     gap: tokens.spacing.l,
-  },
-  backgroundOrbA: {
-    position: "absolute",
-    right: -32,
-    top: 12,
-    width: 140,
-    height: 140,
-    borderRadius: 70,
-  },
-  backgroundOrbB: {
-    position: "absolute",
-    left: -48,
-    top: 200,
-    width: 180,
-    height: 180,
-    borderRadius: 90,
   },
 });

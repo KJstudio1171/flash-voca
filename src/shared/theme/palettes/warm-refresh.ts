@@ -22,4 +22,7 @@ export const warmRefresh: ColorScheme = {
   chipAgainBorder: "rgba(220,38,38,0.2)",
   chipEasyBg: "#FEF3C7",
   chipEasyBorder: "rgba(217,119,6,0.2)",
+  primarySoftStrong: "#FDE68A",
+  cardShadowFront: "#D97706",
+  cardShadowBack: "#DC2626",
 };
