@@ -1,6 +1,7 @@
 import { memo } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
+import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { tokens } from "@/src/shared/theme/tokens";
 
 type StudyHeaderProps = {
@@ -18,28 +19,29 @@ function StudyHeaderComponent({
   dueCount,
   masteredCount,
 }: StudyHeaderProps) {
+  const { colors } = useTheme();
   const progress = totalCards > 0 ? currentIndex / totalCards : 0;
 
   return (
     <View style={styles.root}>
       <View style={styles.titleRow}>
-        <Text style={styles.title} numberOfLines={1}>
+        <Text style={[styles.title, { color: colors.ink }]} numberOfLines={1}>
           {deckTitle}
         </Text>
-        <Text style={styles.streak}>🔥</Text>
+        <Text style={[styles.streak, { color: colors.primary }]}>🔥</Text>
       </View>
 
-      <View style={styles.progressTrack}>
-        <View style={[styles.progressFill, { width: `${progress * 100}%` }]} />
+      <View style={[styles.progressTrack, { backgroundColor: colors.line }]}>
+        <View style={[styles.progressFill, { backgroundColor: colors.primary, width: `${progress * 100}%` }]} />
       </View>
 
       <View style={styles.countersRow}>
-        <Text style={styles.counter}>{currentIndex} / {totalCards}</Text>
+        <Text style={[styles.counter, { color: colors.muted }]}>{currentIndex} / {totalCards}</Text>
         <View style={styles.countersRight}>
-          <Text style={[styles.counterLabel, { color: tokens.colors.accent }]}>
+          <Text style={[styles.counterLabel, { color: colors.accent }]}>
             {dueCount} due
           </Text>
-          <Text style={[styles.counterLabel, { color: tokens.colors.primary }]}>
+          <Text style={[styles.counterLabel, { color: colors.primary }]}>
             {masteredCount} mastered
           </Text>
         </View>
@@ -63,23 +65,19 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 20,
     fontWeight: "800",
-    color: tokens.colors.ink,
   },
   streak: {
     fontSize: 13,
     fontWeight: "700",
-    color: tokens.colors.primary,
   },
   progressTrack: {
     height: 6,
-    backgroundColor: tokens.colors.line,
     borderRadius: 3,
     overflow: "hidden",
   },
   progressFill: {
     height: "100%",
     borderRadius: 3,
-    backgroundColor: tokens.colors.primary,
   },
   countersRow: {
     flexDirection: "row",
@@ -89,7 +87,6 @@ const styles = StyleSheet.create({
   counter: {
     fontSize: 12,
     fontWeight: "600",
-    color: tokens.colors.muted,
   },
   countersRight: {
     flexDirection: "row",

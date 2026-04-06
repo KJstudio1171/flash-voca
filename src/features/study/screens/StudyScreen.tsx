@@ -11,16 +11,18 @@ import {
   useStudyDeckQuery,
 } from "@/src/features/study/hooks/useStudyQueries";
 import { useStudySession } from "@/src/features/study/hooks/useStudySession";
+import { useTheme } from "@/src/shared/theme/ThemeProvider";
+import { tokens } from "@/src/shared/theme/tokens";
 import { Badge } from "@/src/shared/ui/Badge";
 import { Panel } from "@/src/shared/ui/Panel";
 import { Screen } from "@/src/shared/ui/Screen";
-import { tokens } from "@/src/shared/theme/tokens";
 
 function getParamValue(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value ?? "";
 }
 
 export default function StudyScreen() {
+  const { colors } = useTheme();
   const params = useLocalSearchParams<{ deckId: string | string[] }>();
   const deckId = getParamValue(params.deckId);
   const studyQuery = useStudyDeckQuery(deckId);
@@ -76,14 +78,14 @@ export default function StudyScreen() {
       {studyQuery.isLoading && !hasSnapshot ? (
         <Panel>
           <Badge tone="info">Loading</Badge>
-          <Text style={styles.body}>학습 세션을 준비하고 있습니다.</Text>
+          <Text style={[styles.body, { color: colors.muted }]}>학습 세션을 준비하고 있습니다.</Text>
         </Panel>
       ) : null}
 
       {studyQuery.isError ? (
-        <Panel accentColor={tokens.colors.accent}>
+        <Panel accentColor={colors.accent}>
           <Badge tone="accent">Error</Badge>
-          <Text style={styles.body}>
+          <Text style={[styles.body, { color: colors.muted }]}>
             {studyQuery.error instanceof Error
               ? studyQuery.error.message
               : "학습 데이터를 불러올 수 없습니다."}
@@ -94,7 +96,7 @@ export default function StudyScreen() {
       {showEmptyState ? (
         <Panel>
           <Badge tone="info">Empty</Badge>
-          <Text style={styles.body}>
+          <Text style={[styles.body, { color: colors.muted }]}>
             카드가 없습니다. 먼저 카드를 추가한 후 다시 시도하세요.
           </Text>
         </Panel>
@@ -110,9 +112,9 @@ export default function StudyScreen() {
       ) : null}
 
       {session.lastError ? (
-        <Panel accentColor={tokens.colors.accent}>
+        <Panel accentColor={colors.accent}>
           <Badge tone="accent">저장 오류</Badge>
-          <Text style={styles.body}>{session.lastError}</Text>
+          <Text style={[styles.body, { color: colors.muted }]}>{session.lastError}</Text>
         </Panel>
       ) : null}
 
@@ -135,6 +137,5 @@ const styles = StyleSheet.create({
   body: {
     fontSize: 15,
     lineHeight: 22,
-    color: tokens.colors.muted,
   },
 });
