@@ -1,14 +1,14 @@
+import { coolModern } from "@/src/shared/theme/palettes/cool-modern";
+import { natureFresh } from "@/src/shared/theme/palettes/nature-fresh";
+import { neutralClean } from "@/src/shared/theme/palettes/neutral-clean";
+import { ColorScheme, PaletteId } from "@/src/shared/theme/palettes/types";
+import { warmRefresh } from "@/src/shared/theme/palettes/warm-refresh";
+
 export type { ColorScheme, PaletteId } from "@/src/shared/theme/palettes/types";
 export { coolModern } from "@/src/shared/theme/palettes/cool-modern";
 export { warmRefresh } from "@/src/shared/theme/palettes/warm-refresh";
 export { natureFresh } from "@/src/shared/theme/palettes/nature-fresh";
 export { neutralClean } from "@/src/shared/theme/palettes/neutral-clean";
-
-import { coolModern } from "@/src/shared/theme/palettes/cool-modern";
-import { warmRefresh } from "@/src/shared/theme/palettes/warm-refresh";
-import { natureFresh } from "@/src/shared/theme/palettes/nature-fresh";
-import { neutralClean } from "@/src/shared/theme/palettes/neutral-clean";
-import { ColorScheme, PaletteId } from "@/src/shared/theme/palettes/types";
 
 export const DEFAULT_PALETTE_ID: PaletteId = "cool-modern";
 
