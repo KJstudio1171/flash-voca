@@ -10,6 +10,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { AnimatedScreen } from "@/src/shared/animation/AnimatedScreen";
+import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { tokens } from "@/src/shared/theme/tokens";
 
 type ScreenProps = PropsWithChildren<{
@@ -28,12 +29,14 @@ export function Screen({
   contentStyle,
   children,
 }: ScreenProps) {
+  const { colors } = useTheme();
+
   const content = (
     <View style={[styles.content, contentStyle]}>
       <AnimatedScreen style={styles.header}>
         <View style={styles.headerCopy}>
-          <Text style={styles.title}>{title}</Text>
-          {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+          <Text style={[styles.title, { color: colors.ink }]}>{title}</Text>
+          {subtitle ? <Text style={[styles.subtitle, { color: colors.muted }]}>{subtitle}</Text> : null}
         </View>
         {rightSlot ? <View>{rightSlot}</View> : null}
       </AnimatedScreen>
@@ -44,9 +47,9 @@ export function Screen({
   );
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.safeArea}>
-      <View style={styles.backgroundOrbA} />
-      <View style={styles.backgroundOrbB} />
+    <SafeAreaView edges={["top"]} style={[styles.safeArea, { backgroundColor: colors.canvas }]}>
+      <View style={[styles.backgroundOrbA, { backgroundColor: colors.primaryGlow }]} />
+      <View style={[styles.backgroundOrbB, { backgroundColor: colors.accentGlow }]} />
       {scroll ? (
         <ScrollView
           contentContainerStyle={styles.scrollContent}
@@ -64,7 +67,6 @@ export function Screen({
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: tokens.colors.canvas,
   },
   scrollContent: {
     paddingBottom: tokens.spacing.xxl,
@@ -88,12 +90,10 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 32,
     fontWeight: "800",
-    color: tokens.colors.ink,
   },
   subtitle: {
     fontSize: 15,
     lineHeight: 22,
-    color: tokens.colors.muted,
   },
   body: {
     gap: tokens.spacing.l,
@@ -105,7 +105,6 @@ const styles = StyleSheet.create({
     width: 140,
     height: 140,
     borderRadius: 70,
-    backgroundColor: "rgba(15, 118, 110, 0.09)",
   },
   backgroundOrbB: {
     position: "absolute",
@@ -114,6 +113,5 @@ const styles = StyleSheet.create({
     width: 180,
     height: 180,
     borderRadius: 90,
-    backgroundColor: "rgba(234, 88, 12, 0.06)",
   },
 });
