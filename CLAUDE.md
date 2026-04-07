@@ -10,9 +10,10 @@ npx expo start         # start Expo dev server
 npx expo run:android   # build and run on Android
 npm run typecheck      # tsc --noEmit
 npm run lint           # expo lint (eslint)
+npm test               # jest 전체 실행
+npm run test:watch     # jest watch 모드
+npx jest path/to/test  # 단일 테스트 파일 실행
 ```
-
-No test runner is configured yet.
 
 ## Architecture
 
@@ -60,6 +61,13 @@ Expo Router file-based routing in `app/`. Tab layout at `app/(tabs)/` with four 
 - Avoid large speculative refactors.
 - Preserve the `BillingGateway` abstraction for future in-app purchases.
 
+## Testing
+
+- Test files live in `__tests__/`, mirroring the source structure (`services/`, `repositories/`, etc.).
+- Mock data: use factory functions in `__tests__/helpers/factories.ts`.
+- Mock repositories: use helpers in `__tests__/helpers/mockRepositories.ts`.
+- Service tests use interface-based manual mocks. Do not use `jest.mock()`.
+
 ## Verification checklist
 
-Before finishing work: run `npm run typecheck` and `npm run lint`.
+Before finishing work: run `npm run typecheck`, `npm run lint`, and `npm test`.
