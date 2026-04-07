@@ -88,15 +88,13 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   deckTitle: {
-    fontSize: 20,
-    fontWeight: "700",
+    ...tokens.typography.heading,
   },
   deckDescription: {
-    fontSize: 14,
-    lineHeight: 21,
+    ...tokens.typography.body,
   },
   meta: {
-    fontSize: 13,
+    ...tokens.typography.caption,
     textTransform: "uppercase",
     letterSpacing: 1,
   },

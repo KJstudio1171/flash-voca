@@ -86,11 +86,10 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   title: {
-    fontSize: 15,
-    fontWeight: "700",
+    ...tokens.typography.bodyBold,
   },
   meta: {
-    fontSize: 12,
+    ...tokens.typography.label,
   },
   action: {
     borderRadius: tokens.radius.s,
@@ -98,7 +97,6 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
   },
   actionLabel: {
-    fontSize: 12,
-    fontWeight: "700",
+    ...tokens.typography.label,
   },
 });

@@ -63,18 +63,15 @@ export default function ProfileScreen() {
 
 const styles = StyleSheet.create({
   title: {
-    fontSize: 22,
-    fontWeight: "700",
+    ...tokens.typography.heading,
   },
   body: {
-    fontSize: 15,
-    lineHeight: 23,
+    ...tokens.typography.body,
   },
   list: {
     gap: tokens.spacing.s,
   },
   listItem: {
-    fontSize: 15,
-    lineHeight: 21,
+    ...tokens.typography.body,
   },
 });

@@ -80,18 +80,15 @@ const styles = StyleSheet.create({
     gap: tokens.spacing.s,
   },
   eyebrow: {
-    fontSize: 12,
-    fontWeight: "700",
+    ...tokens.typography.label,
     letterSpacing: 1.2,
     textTransform: "uppercase",
   },
   title: {
-    fontSize: 26,
-    fontWeight: "700",
+    ...tokens.typography.hero,
   },
   message: {
-    fontSize: 15,
-    lineHeight: 22,
+    ...tokens.typography.body,
   },
   loader: {
     marginTop: tokens.spacing.s,

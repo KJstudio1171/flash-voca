@@ -64,16 +64,13 @@ export default function BundleDetailScreen() {
 
 const styles = StyleSheet.create({
   price: {
-    fontSize: 28,
-    fontWeight: "800",
+    ...tokens.typography.hero,
   },
   body: {
-    fontSize: 15,
-    lineHeight: 22,
+    ...tokens.typography.body,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: "700",
+    ...tokens.typography.heading,
   },
   itemRow: {
     flexDirection: "row",
@@ -87,10 +84,9 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   itemTitle: {
-    fontSize: 16,
-    fontWeight: "700",
+    ...tokens.typography.subheading,
   },
   itemMeta: {
-    fontSize: 13,
+    ...tokens.typography.caption,
   },
 });

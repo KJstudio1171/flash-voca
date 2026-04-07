@@ -85,12 +85,10 @@ const styles = StyleSheet.create({
     fontSize: 56,
   },
   title: {
-    fontSize: 24,
-    fontWeight: "800",
+    ...tokens.typography.hero,
   },
   subtitle: {
-    fontSize: 13,
-    fontWeight: "700",
+    ...tokens.typography.captionBold,
   },
   statsRow: {
     flexDirection: "row",
@@ -104,12 +102,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   statValue: {
-    fontSize: 22,
-    fontWeight: "800",
+    ...tokens.typography.heading,
   },
   statLabel: {
-    fontSize: 10,
-    fontWeight: "700",
+    ...tokens.typography.micro,
     letterSpacing: 0.5,
   },
   masteryBar: {
@@ -123,13 +119,11 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
   },
   masteryLabel: {
-    fontSize: 10,
-    fontWeight: "700",
+    ...tokens.typography.micro,
     letterSpacing: 0.5,
   },
   masteryPercent: {
-    fontSize: 10,
-    fontWeight: "700",
+    ...tokens.typography.micro,
   },
   masteryTrack: {
     height: 6,

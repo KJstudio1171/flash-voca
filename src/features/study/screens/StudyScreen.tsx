@@ -135,7 +135,6 @@ const styles = StyleSheet.create({
     paddingBottom: tokens.spacing.l,
   },
   body: {
-    fontSize: 15,
-    lineHeight: 22,
+    ...tokens.typography.body,
   },
 });

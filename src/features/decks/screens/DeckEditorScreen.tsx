@@ -215,8 +215,7 @@ export default function DeckEditorScreen() {
 
 const styles = StyleSheet.create({
   sectionTitle: {
-    fontSize: 22,
-    fontWeight: "700",
+    ...tokens.typography.heading,
   },
   multilineInput: {
     minHeight: 88,
@@ -234,12 +233,11 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
   },
   cardIndex: {
-    fontSize: 13,
+    ...tokens.typography.caption,
     letterSpacing: 1,
     textTransform: "uppercase",
   },
   helpText: {
-    fontSize: 15,
-    lineHeight: 22,
+    ...tokens.typography.body,
   },
 });

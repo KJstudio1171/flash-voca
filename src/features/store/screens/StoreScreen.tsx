@@ -61,12 +61,10 @@ export default function StoreScreen() {
 
 const styles = StyleSheet.create({
   heroTitle: {
-    fontSize: 26,
-    fontWeight: "800",
+    ...tokens.typography.hero,
   },
   heroBody: {
-    fontSize: 15,
-    lineHeight: 23,
+    ...tokens.typography.body,
   },
   row: {
     flexDirection: "row",
@@ -79,14 +77,12 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   bundleTitle: {
-    fontSize: 20,
-    fontWeight: "700",
+    ...tokens.typography.heading,
   },
   bundleMeta: {
-    fontSize: 13,
+    ...tokens.typography.caption,
   },
   bundleDescription: {
-    fontSize: 15,
-    lineHeight: 22,
+    ...tokens.typography.body,
   },
 });

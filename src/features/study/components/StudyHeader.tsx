@@ -63,12 +63,10 @@ const styles = StyleSheet.create({
   },
   title: {
     flex: 1,
-    fontSize: 20,
-    fontWeight: "800",
+    ...tokens.typography.heading,
   },
   streak: {
-    fontSize: 13,
-    fontWeight: "700",
+    ...tokens.typography.captionBold,
   },
   progressTrack: {
     height: 6,
@@ -85,15 +83,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   counter: {
-    fontSize: 12,
-    fontWeight: "600",
+    ...tokens.typography.label,
   },
   countersRight: {
     flexDirection: "row",
     gap: tokens.spacing.s,
   },
   counterLabel: {
-    fontSize: 11,
-    fontWeight: "600",
+    ...tokens.typography.micro,
   },
 });

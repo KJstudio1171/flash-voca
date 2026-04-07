@@ -4,6 +4,7 @@ import { StyleSheet, Text } from "react-native";
 import { DeckCard } from "@/src/features/home/components/DeckCard";
 import { useDeckSummaryListQuery } from "@/src/features/home/hooks/useHomeSummaryQuery";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
+import { tokens } from "@/src/shared/theme/tokens";
 import { AppButton } from "@/src/shared/ui/AppButton";
 import { Panel } from "@/src/shared/ui/Panel";
 import { Screen } from "@/src/shared/ui/Screen";
@@ -62,7 +63,6 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   emptyText: {
-    fontSize: 15,
-    lineHeight: 22,
+    ...tokens.typography.body,
   },
 });
