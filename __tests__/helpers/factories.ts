@@ -1,0 +1,85 @@
+import type {
+  Deck,
+  DeckCard,
+  DeckDetail,
+  LogReviewInput,
+  UserCardState,
+} from "@/src/core/domain/models";
+
+let counter = 0;
+function nextId(): string {
+  counter += 1;
+  return `mock-${counter}`;
+}
+
+export function createMockDeck(overrides?: Partial<Deck>): Deck {
+  const id = overrides?.id ?? nextId();
+  return {
+    id,
+    title: `Deck ${id}`,
+    description: null,
+    sourceType: "user",
+    ownerId: "local-user",
+    accentColor: "#6366F1",
+    cardCount: 0,
+    createdAt: "2026-01-01T00:00:00Z",
+    updatedAt: "2026-01-01T00:00:00Z",
+    ...overrides,
+  };
+}
+
+export function createMockDeckCard(overrides?: Partial<DeckCard>): DeckCard {
+  const id = overrides?.id ?? nextId();
+  return {
+    id,
+    deckId: "deck-1",
+    term: `term-${id}`,
+    meaning: `meaning-${id}`,
+    example: null,
+    note: null,
+    position: 0,
+    ...overrides,
+  };
+}
+
+export function createMockDeckDetail(
+  overrides?: Partial<DeckDetail>,
+): DeckDetail {
+  const base = createMockDeck(overrides);
+  return {
+    ...base,
+    cards: overrides?.cards ?? [],
+    cardCount: overrides?.cardCount ?? (overrides?.cards?.length ?? 0),
+  };
+}
+
+export function createMockCardState(
+  overrides?: Partial<UserCardState>,
+): UserCardState {
+  const id = overrides?.id ?? nextId();
+  return {
+    id,
+    deckId: "deck-1",
+    cardId: "card-1",
+    userId: "local-user",
+    masteryLevel: 0,
+    easeFactor: 2.5,
+    intervalDays: 0,
+    nextReviewAt: null,
+    lastReviewedAt: null,
+    updatedAt: "2026-01-01T00:00:00Z",
+    ...overrides,
+  };
+}
+
+export function createMockLogReviewInput(
+  overrides?: Partial<LogReviewInput>,
+): LogReviewInput {
+  return {
+    deckId: "deck-1",
+    cardId: "card-1",
+    rating: 3,
+    elapsedMs: 2000,
+    ...overrides,
+  };
+}
