@@ -1,14 +1,11 @@
 import { memo, useState } from "react";
-import { Dimensions, Platform, StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, View } from "react-native";
 
 import { StudyCard } from "@/src/core/domain/models";
 import { AnimatedFlipCard } from "@/src/shared/animation/AnimatedFlipCard";
 import { SwipeStudyCard } from "@/src/shared/animation/SwipeStudyCard";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { tokens } from "@/src/shared/theme/tokens";
-
-const SCREEN_HEIGHT = Dimensions.get("window").height;
-const CARD_HEIGHT = Math.min(400, Math.max(240, SCREEN_HEIGHT * 0.42));
 
 type StudyFlashcardProps = {
   card: StudyCard;
@@ -102,8 +99,6 @@ function StudyFlashcardComponent({
           </View>
         </AnimatedFlipCard>
       </SwipeStudyCard>
-
-      <Text style={[styles.swipeHint, { color: colors.muted }]}>← Again   ↑ Good   Easy →</Text>
     </View>
   );
 }
@@ -115,7 +110,7 @@ const styles = StyleSheet.create({
     gap: tokens.spacing.xs,
   },
   card: {
-    minHeight: CARD_HEIGHT,
+    aspectRatio: 0.67,
     borderRadius: tokens.radius.l,
     padding: tokens.spacing.xl,
     justifyContent: "center",
@@ -158,9 +153,5 @@ const styles = StyleSheet.create({
   },
   hint: {
     fontSize: 12,
-  },
-  swipeHint: {
-    textAlign: "center",
-    fontSize: 11,
   },
 });

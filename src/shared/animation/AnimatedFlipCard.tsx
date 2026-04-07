@@ -24,8 +24,8 @@ function AnimatedFlipCardComponent({
 
   useEffect(() => {
     rotation.value = withTiming(flipped ? 1 : 0, {
-      duration: 240,
-      easing: Easing.out(Easing.cubic),
+      duration: 500,
+      easing: Easing.bezier(0.4, 0.0, 0.2, 1),
     });
   }, [flipped, rotation]);
 
@@ -33,18 +33,18 @@ function AnimatedFlipCardComponent({
     transform: [
       { perspective: 1200 },
       { rotateY: `${interpolate(rotation.value, [0, 1], [0, 180])}deg` },
-      { scale: interpolate(rotation.value, [0, 0.5, 1], [1, 0.985, 1]) },
+      { scale: interpolate(rotation.value, [0, 0.3, 0.7, 1], [1, 0.96, 0.96, 1]) },
     ],
-    opacity: interpolate(rotation.value, [0, 0.45, 1], [1, 0, 0]),
+    opacity: interpolate(rotation.value, [0, 0.5, 0.5, 1], [1, 1, 0, 0]),
   }));
 
   const backStyle = useAnimatedStyle(() => ({
     transform: [
       { perspective: 1200 },
       { rotateY: `${interpolate(rotation.value, [0, 1], [180, 360])}deg` },
-      { scale: interpolate(rotation.value, [0, 0.5, 1], [1, 0.985, 1]) },
+      { scale: interpolate(rotation.value, [0, 0.3, 0.7, 1], [1, 0.96, 0.96, 1]) },
     ],
-    opacity: interpolate(rotation.value, [0, 0.55, 1], [0, 0, 1]),
+    opacity: interpolate(rotation.value, [0, 0.5, 0.5, 1], [0, 0, 1, 1]),
   }));
 
   return (
