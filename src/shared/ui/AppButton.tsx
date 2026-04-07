@@ -57,8 +57,7 @@ const styles = StyleSheet.create({
     opacity: 0.45,
   },
   label: {
-    fontSize: 15,
-    fontWeight: "700",
+    ...tokens.typography.bodyBold,
   },
 });
 

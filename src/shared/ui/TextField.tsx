@@ -26,6 +26,6 @@ const styles = StyleSheet.create({
   },
   input: {
     minHeight: 22,
-    fontSize: 15,
+    ...tokens.typography.body,
   },
 });

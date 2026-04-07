@@ -30,8 +30,7 @@ const styles = StyleSheet.create({
     borderRadius: tokens.radius.pill,
   },
   label: {
-    fontSize: 12,
-    fontWeight: "700",
+    ...tokens.typography.label,
   },
 });
 

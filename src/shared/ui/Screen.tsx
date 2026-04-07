@@ -86,12 +86,10 @@ const styles = StyleSheet.create({
     gap: tokens.spacing.xs,
   },
   title: {
-    fontSize: 32,
-    fontWeight: "800",
+    ...tokens.typography.screenTitle,
   },
   subtitle: {
-    fontSize: 15,
-    lineHeight: 22,
+    ...tokens.typography.body,
   },
   body: {
     gap: tokens.spacing.l,
