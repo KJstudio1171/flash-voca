@@ -8,10 +8,10 @@ import { AppBootstrapGate } from "@/src/app/bootstrap/AppBootstrapGate";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 
 function RootNavigator() {
-  const { colors } = useTheme();
+  const { colors, colorMode } = useTheme();
   return (
     <>
-      <StatusBar style="dark" />
+      <StatusBar style={colorMode === "dark" ? "light" : "dark"} />
       <Stack
         screenOptions={{
           headerShown: false,

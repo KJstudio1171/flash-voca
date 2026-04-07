@@ -1,7 +1,7 @@
 import { coolModern } from "@/src/shared/theme/palettes/cool-modern";
 import { natureFresh } from "@/src/shared/theme/palettes/nature-fresh";
 import { neutralClean } from "@/src/shared/theme/palettes/neutral-clean";
-import { ColorMode, ColorScheme, PaletteId, PaletteSet } from "@/src/shared/theme/palettes/types";
+import { ColorMode, PaletteId, PaletteSet } from "@/src/shared/theme/palettes/types";
 import { warmRefresh } from "@/src/shared/theme/palettes/warm-refresh";
 
 export type { ColorMode, ColorScheme, PaletteId, PaletteSet } from "@/src/shared/theme/palettes/types";

@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Switch, Text, View } from "react-native";
 
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { ColorScheme, PaletteId, paletteList, palettes } from "@/src/shared/theme/palettes";
@@ -14,7 +14,7 @@ function PaletteRow({
 }: {
   id: PaletteId;
   name: string;
-  palette: ColorScheme;
+  palette: ColorScheme;  // resolved for current colorMode
   selected: boolean;
   onSelect: () => void;
 }) {
@@ -44,10 +44,27 @@ function PaletteRow({
 }
 
 export default function SettingsScreen() {
-  const { colors, paletteId, setPalette } = useTheme();
+  const { colors, paletteId, setPalette, colorMode, setColorMode } = useTheme();
+  const isDark = colorMode === "dark";
 
   return (
     <Screen title="Settings" subtitle="앱 설정을 관리합니다">
+      <Text style={[styles.sectionLabel, { color: colors.muted }]}>APPEARANCE</Text>
+      <View
+        style={[
+          styles.darkModeRow,
+          { backgroundColor: colors.surfaceStrong, borderColor: colors.line },
+        ]}
+      >
+        <Text style={[styles.darkModeLabel, { color: colors.ink }]}>다크 모드</Text>
+        <Switch
+          value={isDark}
+          onValueChange={(v) => setColorMode(v ? "dark" : "light")}
+          trackColor={{ false: colors.line, true: colors.primary }}
+          thumbColor={colors.onPrimary}
+        />
+      </View>
+
       <Text style={[styles.sectionLabel, { color: colors.muted }]}>COLOR PALETTE</Text>
       <View style={styles.paletteList}>
         {paletteList.map((item) => (
@@ -55,7 +72,7 @@ export default function SettingsScreen() {
             key={item.id}
             id={item.id}
             name={item.name}
-            palette={palettes[item.id]}
+            palette={palettes[item.id][colorMode]}
             selected={paletteId === item.id}
             onSelect={() => setPalette(item.id)}
           />
@@ -67,10 +84,22 @@ export default function SettingsScreen() {
 
 const styles = StyleSheet.create({
   sectionLabel: {
-    fontSize: 11,
-    fontWeight: "600",
+    ...tokens.typography.micro,
     letterSpacing: 1,
     textTransform: "uppercase",
+    marginBottom: tokens.spacing.xs,
+  },
+  darkModeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: tokens.spacing.m,
+    borderRadius: tokens.radius.m,
+    borderWidth: 1,
+    marginBottom: tokens.layout.sectionGap,
+  },
+  darkModeLabel: {
+    ...tokens.typography.bodyBold,
   },
   paletteList: {
     gap: tokens.spacing.s,
@@ -93,10 +122,9 @@ const styles = StyleSheet.create({
   },
   paletteName: {
     flex: 1,
-    fontSize: 14,
-    fontWeight: "700",
+    ...tokens.typography.captionBold,
   },
   check: {
-    fontSize: 16,
+    ...tokens.typography.subheading,
   },
 });
