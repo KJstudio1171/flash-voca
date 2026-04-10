@@ -1,5 +1,6 @@
 import { LOCAL_USER_ID } from "@/src/core/config/constants";
 import { getDatabaseAsync } from "@/src/core/database/client";
+import { DeckSaveError, DeckDeleteError } from "@/src/core/errors";
 import {
   LocalDeckCardRecord,
   LocalDeckRecord,
@@ -133,152 +134,166 @@ export class SqliteDeckRepository {
   }
 
   async saveDeckAsync(payload: SaveDeckPayload) {
-    const db = await getDatabaseAsync();
     const deckId = payload.id ?? createId("deck");
-    const now = new Date().toISOString();
-    const normalizedTitle = payload.title.trim();
-    const normalizedDescription = normalizeOptionalText(payload.description);
-    const accentColor = payload.accentColor ?? "#0F766E";
-    const persistedCards = [...payload.cards]
-      .sort((left, right) => left.position - right.position)
-      .map((card) => ({
-        id: card.id ?? createId("card"),
-        term: card.term.trim(),
-        meaning: card.meaning.trim(),
-        example: normalizeOptionalText(card.example),
-        note: normalizeOptionalText(card.note),
-        position: card.position,
-        createdAt: now,
-        updatedAt: now,
-      }));
+    try {
+      const db = await getDatabaseAsync();
+      const now = new Date().toISOString();
+      const normalizedTitle = payload.title.trim();
+      const normalizedDescription = normalizeOptionalText(payload.description);
+      const accentColor = payload.accentColor ?? "#0F766E";
+      const persistedCards = [...payload.cards]
+        .sort((left, right) => left.position - right.position)
+        .map((card) => ({
+          id: card.id ?? createId("card"),
+          term: card.term.trim(),
+          meaning: card.meaning.trim(),
+          example: normalizeOptionalText(card.example),
+          note: normalizeOptionalText(card.note),
+          position: card.position,
+          createdAt: now,
+          updatedAt: now,
+        }));
 
-    await db.withExclusiveTransactionAsync(async (tx) => {
-      const existingDeck = await tx.getFirstAsync<{ createdAt: string }>(
-        `
-          SELECT created_at as createdAt
-          FROM local_decks
-          WHERE id = ?
-          LIMIT 1;
-        `,
-        [deckId],
-      );
+      await db.withExclusiveTransactionAsync(async (tx) => {
+        const existingDeck = await tx.getFirstAsync<{ createdAt: string }>(
+          `
+            SELECT created_at as createdAt
+            FROM local_decks
+            WHERE id = ?
+            LIMIT 1;
+          `,
+          [deckId],
+        );
 
-      const createdAt = existingDeck?.createdAt ?? now;
+        const createdAt = existingDeck?.createdAt ?? now;
 
-      await tx.runAsync(
-        `
-          INSERT INTO local_decks (
-            id, owner_id, title, description, source_type, accent_color, is_deleted, sync_state, last_synced_at, created_at, updated_at
-          )
-          VALUES (?, ?, ?, ?, 'user', ?, 0, 'pending', NULL, ?, ?)
-          ON CONFLICT(id) DO UPDATE SET
-            owner_id = excluded.owner_id,
-            title = excluded.title,
-            description = excluded.description,
-            accent_color = excluded.accent_color,
-            is_deleted = 0,
-            sync_state = excluded.sync_state,
-            last_synced_at = NULL,
-            updated_at = excluded.updated_at;
-        `,
-        [
-          deckId,
-          LOCAL_USER_ID,
-          normalizedTitle,
-          normalizedDescription,
-          accentColor,
-          createdAt,
-          now,
-        ],
-      );
-
-      await tx.runAsync("DELETE FROM local_deck_cards WHERE deck_id = ?;", [deckId]);
-
-      for (const card of persistedCards) {
         await tx.runAsync(
           `
-            INSERT INTO local_deck_cards (
-              id, deck_id, term, meaning, example, note, position, created_at, updated_at
+            INSERT INTO local_decks (
+              id, owner_id, title, description, source_type, accent_color, is_deleted, sync_state, last_synced_at, created_at, updated_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+            VALUES (?, ?, ?, ?, 'user', ?, 0, 'pending', NULL, ?, ?)
+            ON CONFLICT(id) DO UPDATE SET
+              owner_id = excluded.owner_id,
+              title = excluded.title,
+              description = excluded.description,
+              accent_color = excluded.accent_color,
+              is_deleted = 0,
+              sync_state = excluded.sync_state,
+              last_synced_at = NULL,
+              updated_at = excluded.updated_at;
           `,
           [
-            card.id,
             deckId,
-            card.term,
-            card.meaning,
-            card.example,
-            card.note,
-            card.position,
-            card.createdAt,
-            card.updatedAt,
+            LOCAL_USER_ID,
+            normalizedTitle,
+            normalizedDescription,
+            accentColor,
+            createdAt,
+            now,
           ],
         );
+
+        await tx.runAsync("DELETE FROM local_deck_cards WHERE deck_id = ?;", [deckId]);
+
+        for (const card of persistedCards) {
+          await tx.runAsync(
+            `
+              INSERT INTO local_deck_cards (
+                id, deck_id, term, meaning, example, note, position, created_at, updated_at
+              )
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+            `,
+            [
+              card.id,
+              deckId,
+              card.term,
+              card.meaning,
+              card.example,
+              card.note,
+              card.position,
+              card.createdAt,
+              card.updatedAt,
+            ],
+          );
+        }
+
+        await enqueuePendingSyncOperationAsync(tx, {
+          entityType: "deck",
+          entityId: deckId,
+          operationType: "upsert",
+          payload: {
+            id: deckId,
+            ownerId: LOCAL_USER_ID,
+            title: normalizedTitle,
+            description: normalizedDescription,
+            sourceType: "user",
+            accentColor,
+            createdAt,
+            updatedAt: now,
+            cards: persistedCards.map((card) => ({
+              id: card.id,
+              deckId,
+              term: card.term,
+              meaning: card.meaning,
+              example: card.example,
+              note: card.note,
+              position: card.position,
+              createdAt: card.createdAt,
+              updatedAt: card.updatedAt,
+            })),
+          },
+        });
+      });
+
+      const savedDeck = await this.getDeckByIdAsync(deckId);
+
+      if (!savedDeck) {
+        throw new DeckSaveError({ context: { deckId } });
       }
 
-      await enqueuePendingSyncOperationAsync(tx, {
-        entityType: "deck",
-        entityId: deckId,
-        operationType: "upsert",
-        payload: {
-          id: deckId,
-          ownerId: LOCAL_USER_ID,
-          title: normalizedTitle,
-          description: normalizedDescription,
-          sourceType: "user",
-          accentColor,
-          createdAt,
-          updatedAt: now,
-          cards: persistedCards.map((card) => ({
-            id: card.id,
-            deckId,
-            term: card.term,
-            meaning: card.meaning,
-            example: card.example,
-            note: card.note,
-            position: card.position,
-            createdAt: card.createdAt,
-            updatedAt: card.updatedAt,
-          })),
-        },
-      });
-    });
-
-    const savedDeck = await this.getDeckByIdAsync(deckId);
-
-    if (!savedDeck) {
-      throw new Error("Deck save failed");
+      return savedDeck;
+    } catch (error) {
+      if (error instanceof DeckSaveError) {
+        throw error;
+      }
+      throw new DeckSaveError({ context: { deckId }, cause: error });
     }
-
-    return savedDeck;
   }
 
   async deleteDeckAsync(deckId: string) {
-    const db = await getDatabaseAsync();
-    const now = new Date().toISOString();
+    try {
+      const db = await getDatabaseAsync();
+      const now = new Date().toISOString();
 
-    await db.withExclusiveTransactionAsync(async (tx) => {
-      await tx.runAsync(
-        `
-          UPDATE local_decks
-          SET is_deleted = 1,
-              sync_state = 'pending',
-              last_synced_at = NULL,
-              updated_at = ?
-          WHERE id = ?;
-        `,
-        [now, deckId],
-      );
+      await db.withExclusiveTransactionAsync(async (tx) => {
+        await tx.runAsync(
+          `
+            UPDATE local_decks
+            SET is_deleted = 1,
+                sync_state = 'pending',
+                last_synced_at = NULL,
+                updated_at = ?
+            WHERE id = ?;
+          `,
+          [now, deckId],
+        );
 
-      await enqueuePendingSyncOperationAsync(tx, {
-        entityType: "deck",
-        entityId: deckId,
-        operationType: "delete",
-        payload: {
-          id: deckId,
-          deletedAt: now,
-        },
+        await enqueuePendingSyncOperationAsync(tx, {
+          entityType: "deck",
+          entityId: deckId,
+          operationType: "delete",
+          payload: {
+            id: deckId,
+            deletedAt: now,
+          },
+        });
       });
-    });
+    } catch (error) {
+      if (error instanceof DeckDeleteError) {
+        throw error;
+      }
+      throw new DeckDeleteError({ context: { deckId }, cause: error });
+    }
   }
 }

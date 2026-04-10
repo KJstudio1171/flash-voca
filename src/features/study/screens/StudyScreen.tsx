@@ -1,8 +1,7 @@
 import { useLocalSearchParams } from "expo-router";
-import { useCallback } from "react";
 import { StyleSheet, Text } from "react-native";
 
-import { LogReviewInput } from "@/src/core/domain/models";
+import { AppError } from "@/src/core/errors";
 import { SessionCompleteCard } from "@/src/features/study/components/SessionCompleteCard";
 import { StudyFlashcard } from "@/src/features/study/components/StudyFlashcard";
 import { StudyHeader } from "@/src/features/study/components/StudyHeader";
@@ -30,29 +29,10 @@ export default function StudyScreen() {
   const snapshot = studyQuery.data;
   const cards = snapshot?.cards ?? [];
 
-  const recordReview = useCallback(
-    ({
-      input,
-      onError,
-    }: {
-      input: LogReviewInput;
-      onError?: (error: Error) => void;
-    }) => {
-      reviewMutation.mutate(input, {
-        onError: (error) => {
-          const normalizedError =
-            error instanceof Error ? error : new Error("Failed to save study result.");
-          onError?.(normalizedError);
-        },
-      });
-    },
-    [reviewMutation],
-  );
-
   const session = useStudySession({
     deckId,
     cards,
-    recordReview,
+    recordReview: reviewMutation.mutate,
   });
 
   const currentCard = session.currentCard;
@@ -86,8 +66,8 @@ export default function StudyScreen() {
         <Panel>
           <Badge tone="accent">Error</Badge>
           <Text style={[styles.body, { color: colors.muted }]}>
-            {studyQuery.error instanceof Error
-              ? studyQuery.error.message
+            {studyQuery.error instanceof AppError
+              ? studyQuery.error.userMessage
               : "학습 데이터를 불러올 수 없습니다."}
           </Text>
         </Panel>
@@ -109,13 +89,6 @@ export default function StudyScreen() {
           disabled={session.isTransitioning}
           onRate={session.rateCard}
         />
-      ) : null}
-
-      {session.lastError ? (
-        <Panel>
-          <Badge tone="accent">저장 오류</Badge>
-          <Text style={[styles.body, { color: colors.muted }]}>{session.lastError}</Text>
-        </Panel>
       ) : null}
 
       {session.completed ? (

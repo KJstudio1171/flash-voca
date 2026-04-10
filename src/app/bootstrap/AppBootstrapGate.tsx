@@ -2,6 +2,7 @@ import { PropsWithChildren, useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 import { useAppServices } from "@/src/app/AppProviders";
+import { AppError } from "@/src/core/errors";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { tokens } from "@/src/shared/theme/tokens";
 
@@ -27,7 +28,11 @@ export function AppBootstrapGate({ children }: PropsWithChildren) {
         if (isMounted) {
           setState("error");
           setErrorMessage(
-            error instanceof Error ? error.message : "Failed to bootstrap the app.",
+            error instanceof AppError
+              ? error.userMessage
+              : error instanceof Error
+                ? error.message
+                : "Failed to bootstrap the app.",
           );
         }
       }
