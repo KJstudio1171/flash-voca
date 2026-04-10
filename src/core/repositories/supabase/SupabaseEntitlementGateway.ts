@@ -1,3 +1,4 @@
+import { EntitlementFetchError } from "@/src/core/errors";
 import { RemoteEntitlementGateway } from "@/src/core/repositories/contracts/RemoteEntitlementGateway";
 import { getSupabaseClient } from "@/src/core/supabase/client";
 
@@ -17,7 +18,7 @@ export class SupabaseEntitlementGateway implements RemoteEntitlementGateway {
       .eq("user_id", userId);
 
     if (error) {
-      throw new Error(error.message);
+      throw new EntitlementFetchError({ context: { userId }, cause: error });
     }
 
     return (data ?? []).map((row) => ({
