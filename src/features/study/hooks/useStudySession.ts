@@ -4,15 +4,10 @@ import { LogReviewInput, StudyCard } from "@/src/core/domain/models";
 
 type StudyRating = 1 | 2 | 3;
 
-type RecordReviewParams = {
-  input: LogReviewInput;
-  onError?: (error: Error) => void;
-};
-
 type UseStudySessionOptions = {
   deckId: string;
   cards: StudyCard[];
-  recordReview: (params: RecordReviewParams) => void;
+  recordReview: (input: LogReviewInput) => void;
 };
 
 export function useStudySession({
@@ -22,7 +17,6 @@ export function useStudySession({
 }: UseStudySessionOptions) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
-  const [lastError, setLastError] = useState<string | null>(null);
   const [ratingCounts, setRatingCounts] = useState({ again: 0, good: 0, easy: 0 });
   const actionLockRef = useRef(false);
   const startedAtRef = useRef(Date.now());
@@ -35,7 +29,6 @@ export function useStudySession({
     startedAtRef.current = Date.now();
     setCurrentIndex(0);
     setIsTransitioning(false);
-    setLastError(null);
     setRatingCounts({ again: 0, good: 0, easy: 0 });
   }, []);
 
@@ -59,7 +52,6 @@ export function useStudySession({
 
       actionLockRef.current = true;
       setIsTransitioning(true);
-      setLastError(null);
 
       setRatingCounts((prev) => ({
         ...prev,
@@ -69,17 +61,10 @@ export function useStudySession({
       }));
 
       recordReview({
-        input: {
-          deckId,
-          cardId: activeCard.card.id,
-          rating,
-          elapsedMs: Math.max(0, Date.now() - startedAtRef.current),
-        },
-        onError: (error) => {
-          actionLockRef.current = false;
-          setIsTransitioning(false);
-          setLastError(error.message);
-        },
+        deckId,
+        cardId: activeCard.card.id,
+        rating,
+        elapsedMs: Math.max(0, Date.now() - startedAtRef.current),
       });
 
       setCurrentIndex((value) => value + 1);
@@ -92,7 +77,6 @@ export function useStudySession({
     currentCard,
     currentIndex,
     isTransitioning,
-    lastError,
     rateCard,
     ratingCounts,
     restartSession,
