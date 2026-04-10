@@ -94,6 +94,20 @@ export class BootstrapError extends DatabaseError {
     super("App bootstrap failed", options);
   }
 }
+
+export class BundleQueryError extends DatabaseError {
+  readonly userMessage = "번들 정보를 불러올 수 없습니다.";
+  constructor(options?: { context?: Record<string, unknown>; cause?: unknown }) {
+    super("Bundle query failed", options);
+  }
+}
+
+export class EntitlementCacheError extends DatabaseError {
+  readonly userMessage = "구매 캐시 처리에 실패했습니다.";
+  constructor(options?: { context?: Record<string, unknown>; cause?: unknown }) {
+    super("Entitlement cache operation failed", options);
+  }
+}
 ```
 
 ### Network Errors
@@ -273,8 +287,8 @@ const queryClient = new QueryClient({
 | `SqliteDeckRepository.saveDeckAsync` | 기존 `throw new Error("Deck save failed")` → `throw new DeckSaveError({ context: { deckId } })`. DB 트랜잭션 전체를 try-catch로 감싸서 예상치 못한 SQLite 에러도 `DeckSaveError`로 변환. |
 | `SqliteDeckRepository.deleteDeckAsync` | try-catch 추가 → `throw new DeckDeleteError({ context: { deckId }, cause: error })` |
 | `SqliteStudyRepository.logReviewAsync` | try-catch 추가 → `throw new StudyRecordError({ context: { deckId, cardId }, cause: error })` |
-| `SqliteBundleRepository` | DB 조회 실패 시 적절한 `DatabaseError` 하위 에러로 감싸기 |
-| `SqliteEntitlementRepository` | DB 조회 실패 시 적절한 `DatabaseError` 하위 에러로 감싸기 |
+| `SqliteBundleRepository` | `listBundlesAsync`, `getBundleByIdAsync`를 try-catch로 감싸서 `BundleQueryError`로 변환. |
+| `SqliteEntitlementRepository` | `replaceCachedEntitlementsAsync`, `clearCachedEntitlementsAsync`를 try-catch로 감싸서 `EntitlementCacheError`로 변환. 읽기 전용 메서드(`listActiveEntitlementsAsync`, `hasBundleAccessAsync`)도 동일하게 감싸기. |
 | `SupabaseEntitlementGateway` | try-catch → `throw new EntitlementFetchError({ cause: error })` |
 
 ### Service Layer — 대부분 변경 없음
