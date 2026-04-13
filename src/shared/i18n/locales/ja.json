@@ -1,0 +1,21 @@
+{
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "retry": "再試行",
+    "confirm": "確認",
+    "close": "閉じる"
+  },
+  "errors": {
+    "deckSave": "デッキの保存に失敗しました。",
+    "deckDelete": "デッキの削除に失敗しました。",
+    "deckNotFound": "デッキが見つかりません。",
+    "studyRecord": "学習記録の保存に失敗しました。",
+    "bootstrap": "アプリの初期化に失敗しました。",
+    "bundleQuery": "バンドル情報を読み込めませんでした。",
+    "entitlementCache": "購入キャッシュの処理に失敗しました。",
+    "sync": "同期に失敗しました。",
+    "entitlementFetch": "購入情報を読み込めませんでした。",
+    "unknown": "不明なエラーが発生しました。"
+  }
+}

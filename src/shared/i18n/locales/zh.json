@@ -1,0 +1,21 @@
+{
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "retry": "重试",
+    "confirm": "确认",
+    "close": "关闭"
+  },
+  "errors": {
+    "deckSave": "保存卡组失败。",
+    "deckDelete": "删除卡组失败。",
+    "deckNotFound": "未找到卡组。",
+    "studyRecord": "保存学习记录失败。",
+    "bootstrap": "应用初始化失败。",
+    "bundleQuery": "无法加载套装信息。",
+    "entitlementCache": "处理购买缓存失败。",
+    "sync": "同步失败。",
+    "entitlementFetch": "无法加载购买信息。",
+    "unknown": "发生未知错误。"
+  }
+}

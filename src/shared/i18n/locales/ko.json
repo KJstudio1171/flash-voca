@@ -1,0 +1,21 @@
+{
+  "common": {
+    "save": "저장",
+    "cancel": "취소",
+    "retry": "다시 시도",
+    "confirm": "확인",
+    "close": "닫기"
+  },
+  "errors": {
+    "deckSave": "덱 저장에 실패했습니다.",
+    "deckDelete": "덱 삭제에 실패했습니다.",
+    "deckNotFound": "덱을 찾을 수 없습니다.",
+    "studyRecord": "학습 기록 저장에 실패했습니다.",
+    "bootstrap": "앱 초기화에 실패했습니다.",
+    "bundleQuery": "번들 정보를 불러올 수 없습니다.",
+    "entitlementCache": "구매 캐시 처리에 실패했습니다.",
+    "sync": "동기화에 실패했습니다.",
+    "entitlementFetch": "구매 정보를 불러올 수 없습니다.",
+    "unknown": "알 수 없는 오류가 발생했습니다."
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "retry": "Retry",
+    "confirm": "Confirm",
+    "close": "Close"
+  },
+  "errors": {
+    "deckSave": "Failed to save deck.",
+    "deckDelete": "Failed to delete deck.",
+    "deckNotFound": "Deck not found.",
+    "studyRecord": "Failed to save study record.",
+    "bootstrap": "Failed to initialize the app.",
+    "bundleQuery": "Failed to load bundle.",
+    "entitlementCache": "Failed to process entitlement cache.",
+    "sync": "Sync failed.",
+    "entitlementFetch": "Failed to load entitlements.",
+    "unknown": "An unknown error occurred."
+  }
+}
