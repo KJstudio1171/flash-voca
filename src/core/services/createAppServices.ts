@@ -9,6 +9,11 @@ import { EntitlementService } from "@/src/core/services/EntitlementService";
 import { StoreService } from "@/src/core/services/StoreService";
 import { StudySessionService } from "@/src/core/services/StudySessionService";
 import { NoopBillingGateway } from "@/src/core/services/billing/NoopBillingGateway";
+import {
+  AsyncStorageLocaleStorage,
+  ExpoLocaleDetector,
+  LocaleService,
+} from "@/src/shared/i18n";
 
 export function createAppServices() {
   const deckRepository = new SqliteDeckRepository();
@@ -20,9 +25,14 @@ export function createAppServices() {
     new SupabaseEntitlementGateway(),
     new NoopBillingGateway(),
   );
+  const localeService = new LocaleService(
+    new AsyncStorageLocaleStorage(),
+    new ExpoLocaleDetector(),
+  );
 
   return {
-    bootstrapService: new BootstrapService(),
+    bootstrapService: new BootstrapService(localeService),
+    localeService,
     deckService: new DeckService(deckRepository),
     storeService: new StoreService(bundleRepository, entitlementService),
     entitlementService,
