@@ -17,7 +17,7 @@ export function clearRelativeTimeFormatCache(): void {
 
 type Unit = Intl.RelativeTimeFormatUnit;
 
-const UNIT_BOUNDS: ReadonlyArray<{ unit: Unit; seconds: number }> = [
+const UNIT_BOUNDS: readonly { unit: Unit; seconds: number }[] = [
   { unit: "year", seconds: 60 * 60 * 24 * 365 },
   { unit: "month", seconds: 60 * 60 * 24 * 30 },
   { unit: "week", seconds: 60 * 60 * 24 * 7 },
