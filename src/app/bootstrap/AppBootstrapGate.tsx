@@ -1,9 +1,18 @@
 import { PropsWithChildren, useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
-import { useAppServices } from "@/src/app/AppProviders";
+import { QueryLayer, useAppServices } from "@/src/app/AppProviders";
+import { ObservabilityErrorBoundary } from "@/src/app/ObservabilityErrorBoundary";
 import { AppError } from "@/src/core/errors";
-import { useT } from "@/src/shared/i18n";
+import {
+  ConsoleAnalyticsSink,
+  ConsoleErrorSink,
+  getAnalytics,
+  getErrorReporter,
+  initializeObservability,
+} from "@/src/core/observability";
+import { installGlobalErrorHandler } from "@/src/core/observability/globalHandler";
+import { i18next, useT } from "@/src/shared/i18n";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { tokens } from "@/src/shared/theme/tokens";
 
@@ -23,9 +32,14 @@ export function AppBootstrapGate({ children }: PropsWithChildren) {
       try {
         setState("loading");
         await bootstrapService.prepareAppAsync();
-        if (isMounted) {
-          setState("ready");
-        }
+        await initializeObservability({
+          errorSink: new ConsoleErrorSink(),
+          analyticsSink: new ConsoleAnalyticsSink(),
+          getLocale: () => i18next.language,
+        });
+        installGlobalErrorHandler(getErrorReporter());
+        void getAnalytics().track("app_opened");
+        if (isMounted) setState("ready");
       } catch (error) {
         if (isMounted) {
           setState("error");
@@ -48,7 +62,11 @@ export function AppBootstrapGate({ children }: PropsWithChildren) {
   }, [bootstrapService, t]);
 
   if (state === "ready") {
-    return children;
+    return (
+      <ObservabilityErrorBoundary>
+        <QueryLayer>{children}</QueryLayer>
+      </ObservabilityErrorBoundary>
+    );
   }
 
   return (
