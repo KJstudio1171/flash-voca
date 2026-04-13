@@ -1,5 +1,5 @@
 import { AppError, AppErrorOptions } from "@/src/core/errors/AppError";
-import type { TranslationKey } from "@/src/shared/i18n";
+import type { TranslationKey } from "@/src/shared/i18n/types";
 
 export abstract class NetworkError extends AppError {
   readonly category = "network";

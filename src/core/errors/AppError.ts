@@ -1,5 +1,5 @@
-import { i18next } from "@/src/shared/i18n";
-import type { TranslationKey } from "@/src/shared/i18n";
+import { i18next } from "@/src/shared/i18n/i18nInstance";
+import type { TranslationKey } from "@/src/shared/i18n/types";
 
 export type AppErrorOptions = {
   context?: Record<string, unknown>;
