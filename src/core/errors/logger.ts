@@ -1,10 +1,8 @@
-import { AppError } from "@/src/core/errors/AppError";
-
-type LogLevel = "DEBUG" | "INFO" | "WARN" | "ERROR";
+type LogLevel = "DEBUG" | "INFO" | "WARN";
 
 type LogEntry = {
   level: LogLevel;
-  category: string;
+  category: "app";
   message: string;
   context?: Record<string, unknown>;
   timestamp: string;
@@ -12,9 +10,7 @@ type LogEntry = {
 
 function formatEntry(entry: LogEntry): string {
   const output: LogEntry = { ...entry };
-  if (output.context === undefined) {
-    delete output.context;
-  }
+  if (output.context === undefined) delete output.context;
   return JSON.stringify(output, null, 2);
 }
 
@@ -32,27 +28,18 @@ function createEntry(
   };
 }
 
+function isDev(): boolean {
+  return (globalThis as { __DEV__?: boolean }).__DEV__ === true;
+}
+
 export const logger = {
   debug(message: string, context?: Record<string, unknown>): void {
-    console.debug(formatEntry(createEntry("DEBUG", message, context)));
+    if (isDev()) console.debug(formatEntry(createEntry("DEBUG", message, context)));
   },
-
   info(message: string, context?: Record<string, unknown>): void {
-    console.info(formatEntry(createEntry("INFO", message, context)));
+    if (isDev()) console.info(formatEntry(createEntry("INFO", message, context)));
   },
-
   warn(message: string, context?: Record<string, unknown>): void {
-    console.warn(formatEntry(createEntry("WARN", message, context)));
-  },
-
-  error(appError: AppError): void {
-    const entry: LogEntry = {
-      level: "ERROR",
-      category: appError.category,
-      message: `${appError.name}: ${appError.message}`,
-      context: appError.context,
-      timestamp: appError.timestamp,
-    };
-    console.error(formatEntry(entry));
+    if (isDev()) console.warn(formatEntry(createEntry("WARN", message, context)));
   },
 };

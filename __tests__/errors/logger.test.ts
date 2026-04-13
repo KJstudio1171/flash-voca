@@ -1,31 +1,15 @@
-import { DeckSaveError } from "@/src/core/errors";
 import { logger } from "@/src/core/errors/logger";
 
 describe("logger", () => {
   beforeEach(() => {
+    (globalThis as { __DEV__?: boolean }).__DEV__ = true;
     jest.spyOn(console, "debug").mockImplementation();
     jest.spyOn(console, "info").mockImplementation();
     jest.spyOn(console, "warn").mockImplementation();
-    jest.spyOn(console, "error").mockImplementation();
   });
 
   afterEach(() => {
     jest.restoreAllMocks();
-  });
-
-  describe("error", () => {
-    it("logs AppError as structured JSON to console.error", () => {
-      const appError = new DeckSaveError({ context: { deckId: "deck-1" } });
-      logger.error(appError);
-
-      expect(console.error).toHaveBeenCalledTimes(1);
-      const logged = JSON.parse((console.error as jest.Mock).mock.calls[0][0]);
-      expect(logged.level).toBe("ERROR");
-      expect(logged.category).toBe("database");
-      expect(logged.message).toBe("DeckSaveError: Deck save failed");
-      expect(logged.context).toEqual({ deckId: "deck-1" });
-      expect(logged.timestamp).toBe(appError.timestamp);
-    });
   });
 
   describe("debug", () => {
