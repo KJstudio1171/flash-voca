@@ -16,7 +16,8 @@ const AppServicesContext = createContext<AppServices | null>(null);
 function QueryLayer({ children }: PropsWithChildren) {
   const toast = useToast();
   const [queryClient] = useState(() => {
-    const handleError = createErrorHandler(toast);
+    // TODO(observability): replace with real ErrorReporter in Task 17 bootstrap wiring
+    const handleError = createErrorHandler(toast, { report: async () => {} });
     return new QueryClient({
       defaultOptions: {
         queries: {
