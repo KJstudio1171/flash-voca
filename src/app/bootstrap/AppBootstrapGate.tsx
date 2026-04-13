@@ -3,6 +3,7 @@ import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 import { useAppServices } from "@/src/app/AppProviders";
 import { AppError } from "@/src/core/errors";
+import { useT } from "@/src/shared/i18n";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { tokens } from "@/src/shared/theme/tokens";
 
@@ -11,6 +12,7 @@ type BootstrapState = "idle" | "loading" | "ready" | "error";
 export function AppBootstrapGate({ children }: PropsWithChildren) {
   const { bootstrapService } = useAppServices();
   const { colors } = useTheme();
+  const { t } = useT();
   const [state, setState] = useState<BootstrapState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -27,13 +29,13 @@ export function AppBootstrapGate({ children }: PropsWithChildren) {
       } catch (error) {
         if (isMounted) {
           setState("error");
-          setErrorMessage(
-            error instanceof AppError
-              ? error.userMessage
-              : error instanceof Error
-                ? error.message
-                : "Failed to bootstrap the app.",
-          );
+          if (error instanceof AppError) {
+            setErrorMessage(t(error.messageKey, error.messageParams));
+          } else if (error instanceof Error) {
+            setErrorMessage(error.message);
+          } else {
+            setErrorMessage(t("errors.unknown"));
+          }
         }
       }
     }
@@ -43,7 +45,7 @@ export function AppBootstrapGate({ children }: PropsWithChildren) {
     return () => {
       isMounted = false;
     };
-  }, [bootstrapService]);
+  }, [bootstrapService, t]);
 
   if (state === "ready") {
     return children;
