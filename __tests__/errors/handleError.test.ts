@@ -1,5 +1,10 @@
 import { DeckSaveError, UnknownError } from "@/src/core/errors";
 import { normalizeError, createErrorHandler } from "@/src/core/errors/handleError";
+import { setupI18nForTest } from "@/__tests__/helpers/i18nTestSetup";
+
+beforeAll(async () => {
+  await setupI18nForTest("ko");
+});
 
 describe("normalizeError", () => {
   it("returns AppError as-is", () => {
