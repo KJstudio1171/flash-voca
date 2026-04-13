@@ -8,6 +8,10 @@ import { BreadcrumbBuffer } from "@/src/core/observability/breadcrumbBuffer";
 import { ConsentStore } from "@/src/core/observability/consent";
 import { ContextEnricher } from "@/src/core/observability/contextEnricher";
 import { ErrorReporter } from "@/src/core/observability/errorReporter";
+import type {
+  AnalyticsEventName,
+  AnalyticsEventProperties,
+} from "@/src/core/observability/eventRegistry";
 import { getOrCreateInstallId } from "@/src/core/observability/installId";
 import { SqliteKeyValueStore } from "@/src/core/observability/storage";
 import type {
@@ -57,6 +61,14 @@ export function getAnalytics(): Analytics {
     throw new Error("Observability not initialized. Call initializeObservability first.");
   }
   return analytics;
+}
+
+export function trackSafely<N extends AnalyticsEventName>(
+  name: N,
+  properties?: AnalyticsEventProperties<N>,
+): void {
+  if (!analytics) return;
+  void analytics.track(name, properties);
 }
 
 export function resetObservabilityForTests(): void {
