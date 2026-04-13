@@ -1,8 +1,9 @@
 import { AppError, AppErrorOptions } from "@/src/core/errors/AppError";
+import type { TranslationKey } from "@/src/shared/i18n";
 
 export class UnknownError extends AppError {
   readonly category = "unknown";
-  readonly userMessage = "알 수 없는 오류가 발생했습니다.";
+  readonly messageKey: TranslationKey = "errors.unknown";
   constructor(options?: AppErrorOptions) {
     super("Unknown error", options);
   }
