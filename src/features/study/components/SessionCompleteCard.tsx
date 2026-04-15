@@ -1,9 +1,15 @@
 import { memo } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TextInput, View } from "react-native";
+import Animated, { useAnimatedProps } from "react-native-reanimated";
 
+import { bounceIn, fadeInUp } from "@/src/shared/animation/motionPresets";
+import { motion } from "@/src/shared/animation/motionTokens";
+import { useCountUp } from "@/src/shared/animation/useCountUp";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
-import { AppButton } from "@/src/shared/ui/AppButton";
 import { tokens } from "@/src/shared/theme/tokens";
+import { AppButton } from "@/src/shared/ui/AppButton";
+
+const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 
 type RatingCounts = {
   again: number;
@@ -18,6 +24,30 @@ type SessionCompleteCardProps = {
   onRestart: () => void;
 };
 
+function AnimatedCountText({
+  target,
+  color,
+}: {
+  target: number;
+  color: string;
+}) {
+  const value = useCountUp(target);
+  const animatedProps = useAnimatedProps(
+    () =>
+      ({
+        text: String(Math.round(value.value)),
+      }) as unknown as object,
+  );
+  return (
+    <AnimatedTextInput
+      editable={false}
+      defaultValue={String(target)}
+      animatedProps={animatedProps}
+      style={[styles.statValue, { color }]}
+    />
+  );
+}
+
 function SessionCompleteCardComponent({
   totalCards,
   masteredCount,
@@ -29,30 +59,36 @@ function SessionCompleteCardComponent({
     totalCards > 0 ? Math.round((masteredCount / totalCards) * 100) : 0;
 
   return (
-    <View style={[styles.root, { backgroundColor: colors.primarySoft }]}>
+    <Animated.View
+      entering={bounceIn()}
+      style={[styles.root, { backgroundColor: colors.primarySoft }]}
+    >
       <Text style={styles.trophy}>🏆</Text>
       <Text style={[styles.title, { color: colors.ink }]}>세션 완료!</Text>
-      <Text style={[styles.subtitle, { color: colors.primary }]}>🔥 {totalCards}장 완료</Text>
+      <Text style={[styles.subtitle, { color: colors.primary }]}>{totalCards}장 완료</Text>
 
       <View style={styles.statsRow}>
-        <View style={[styles.statCard, { backgroundColor: colors.accentSoft }]}>
-          <Text style={[styles.statValue, { color: colors.accent }]}>
-            {ratingCounts.again}
-          </Text>
+        <Animated.View
+          entering={fadeInUp(0 * motion.delay.stagger)}
+          style={[styles.statCard, { backgroundColor: colors.accentSoft }]}
+        >
+          <AnimatedCountText target={ratingCounts.again} color={colors.accent} />
           <Text style={[styles.statLabel, { color: colors.accent }]}>AGAIN</Text>
-        </View>
-        <View style={[styles.statCard, { backgroundColor: colors.surface }]}>
-          <Text style={[styles.statValue, { color: colors.ink }]}>
-            {ratingCounts.good}
-          </Text>
+        </Animated.View>
+        <Animated.View
+          entering={fadeInUp(1 * motion.delay.stagger)}
+          style={[styles.statCard, { backgroundColor: colors.surface }]}
+        >
+          <AnimatedCountText target={ratingCounts.good} color={colors.ink} />
           <Text style={[styles.statLabel, { color: colors.muted }]}>GOOD</Text>
-        </View>
-        <View style={[styles.statCard, { backgroundColor: colors.primarySoft }]}>
-          <Text style={[styles.statValue, { color: colors.primary }]}>
-            {ratingCounts.easy}
-          </Text>
+        </Animated.View>
+        <Animated.View
+          entering={fadeInUp(2 * motion.delay.stagger)}
+          style={[styles.statCard, { backgroundColor: colors.primarySoft }]}
+        >
+          <AnimatedCountText target={ratingCounts.easy} color={colors.primary} />
           <Text style={[styles.statLabel, { color: colors.primary }]}>EASY</Text>
-        </View>
+        </Animated.View>
       </View>
 
       <View style={[styles.masteryBar, { backgroundColor: colors.overlayWhite }]}>
@@ -68,7 +104,7 @@ function SessionCompleteCardComponent({
       <AppButton onPress={onRestart} style={styles.restartButton}>
         다시 학습하기
       </AppButton>
-    </View>
+    </Animated.View>
   );
 }
 
@@ -103,6 +139,8 @@ const styles = StyleSheet.create({
   },
   statValue: {
     ...tokens.typography.heading,
+    padding: 0,
+    textAlign: "center",
   },
   statLabel: {
     ...tokens.typography.micro,
