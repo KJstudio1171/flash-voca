@@ -1,7 +1,10 @@
 import { useLocalSearchParams } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
+import Animated from "react-native-reanimated";
 
 import { useBundleDetailQuery } from "@/src/features/store/hooks/useStoreQueries";
+import { fadeInUp } from "@/src/shared/animation/motionPresets";
+import { motion } from "@/src/shared/animation/motionTokens";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { AppButton } from "@/src/shared/ui/AppButton";
 import { Badge } from "@/src/shared/ui/Badge";
@@ -35,29 +38,33 @@ export default function BundleDetailScreen() {
       title={bundle.title}
       subtitle="번들 상세는 구매 UI와 권한 판단을 분리한 상태로 시작합니다."
     >
-      <Panel>
-        <Badge tone={bundle.owned ? "primary" : "accent"}>
-          {bundle.owned ? "Unlocked" : "Paid Bundle"}
-        </Badge>
-        <Text style={[styles.price, { color: colors.ink }]}>{bundle.priceText}</Text>
-        <Text style={[styles.body, { color: colors.muted }]}>{bundle.description}</Text>
-        <AppButton disabled={!bundle.owned}>
-          {bundle.owned ? "Unlocked for this account" : "Billing hook comes next"}
-        </AppButton>
-      </Panel>
+      <Animated.View entering={fadeInUp(0)}>
+        <Panel>
+          <Badge tone={bundle.owned ? "primary" : "accent"}>
+            {bundle.owned ? "Unlocked" : "Paid Bundle"}
+          </Badge>
+          <Text style={[styles.price, { color: colors.ink }]}>{bundle.priceText}</Text>
+          <Text style={[styles.body, { color: colors.muted }]}>{bundle.description}</Text>
+          <AppButton disabled={!bundle.owned}>
+            {bundle.owned ? "Unlocked for this account" : "Billing hook comes next"}
+          </AppButton>
+        </Panel>
+      </Animated.View>
 
-      <Panel>
-        <Text style={[styles.sectionTitle, { color: colors.ink }]}>Included decks</Text>
-        {bundle.items.map((item) => (
-          <View key={item.id} style={styles.itemRow}>
-            <View style={styles.copy}>
-              <Text style={[styles.itemTitle, { color: colors.ink }]}>{item.deckTitle}</Text>
-              <Text style={[styles.itemMeta, { color: colors.muted }]}>{item.cardCount} cards</Text>
+      <Animated.View entering={fadeInUp(motion.delay.stagger)}>
+        <Panel>
+          <Text style={[styles.sectionTitle, { color: colors.ink }]}>Included decks</Text>
+          {bundle.items.map((item) => (
+            <View key={item.id} style={styles.itemRow}>
+              <View style={styles.copy}>
+                <Text style={[styles.itemTitle, { color: colors.ink }]}>{item.deckTitle}</Text>
+                <Text style={[styles.itemMeta, { color: colors.muted }]}>{item.cardCount} cards</Text>
+              </View>
+              <Badge tone="info">#{item.position + 1}</Badge>
             </View>
-            <Badge tone="info">#{item.position + 1}</Badge>
-          </View>
-        ))}
-      </Panel>
+          ))}
+        </Panel>
+      </Animated.View>
     </Screen>
   );
 }
