@@ -1,6 +1,7 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { Tabs } from "expo-router";
 
+import { tabShiftOptions } from "@/src/shared/animation/motionPresets";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 
 export default function TabsLayout() {
@@ -18,6 +19,7 @@ export default function TabsLayout() {
           backgroundColor: colors.surface,
           borderTopColor: colors.line,
         },
+        ...tabShiftOptions(),
       }}
     >
       <Tabs.Screen
