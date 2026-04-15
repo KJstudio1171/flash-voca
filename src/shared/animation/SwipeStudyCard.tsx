@@ -2,7 +2,6 @@ import { PropsWithChildren } from "react";
 import { Dimensions, StyleSheet, Text } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
-  Easing,
   interpolate,
   runOnJS,
   useAnimatedStyle,
@@ -13,6 +12,8 @@ import Animated, {
 
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { tokens } from "@/src/shared/theme/tokens";
+
+import { motion } from "./motionTokens";
 
 type SwipeDirection = "left" | "right" | "up";
 
@@ -54,8 +55,8 @@ export function SwipeStudyCard({
       const isHorizontal = absX > SWIPE_THRESHOLD;
 
       if (!isVertical && !isHorizontal) {
-        translateX.value = withSpring(0, { damping: 18, stiffness: 220 });
-        translateY.value = withSpring(0, { damping: 18, stiffness: 220 });
+        translateX.value = withSpring(0, motion.spring.snappy);
+        translateY.value = withSpring(0, motion.spring.snappy);
         return;
       }
 
@@ -78,7 +79,7 @@ export function SwipeStudyCard({
       ) => {
         sv.value = withTiming(
           target,
-          { duration: 180, easing: Easing.out(Easing.cubic) },
+          { duration: motion.duration.fast, easing: motion.easing.accelerate },
           cb,
         );
       };
