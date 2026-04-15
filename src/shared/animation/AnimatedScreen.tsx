@@ -1,6 +1,8 @@
 import { PropsWithChildren } from "react";
 import { StyleProp, ViewStyle } from "react-native";
-import Animated, { FadeInDown } from "react-native-reanimated";
+import Animated from "react-native-reanimated";
+
+import { fadeInUp } from "./motionPresets";
 
 type AnimatedScreenProps = PropsWithChildren<{
   style?: StyleProp<ViewStyle>;
@@ -13,10 +15,7 @@ export function AnimatedScreen({
   delay = 0,
 }: AnimatedScreenProps) {
   return (
-    <Animated.View
-      entering={FadeInDown.delay(delay).duration(420)}
-      style={style}
-    >
+    <Animated.View entering={fadeInUp(delay)} style={style}>
       {children}
     </Animated.View>
   );
