@@ -1,6 +1,9 @@
-import { useEffect, useRef } from "react";
-import { Animated, StyleSheet, Text } from "react-native";
+import { useEffect } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import Animated, { FadeOut } from "react-native-reanimated";
 
+import { fadeInDown } from "@/src/shared/animation/motionPresets";
+import { motion } from "@/src/shared/animation/motionTokens";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { tokens } from "@/src/shared/theme/tokens";
 
@@ -15,33 +18,27 @@ type ToastContainerProps = {
   onDismiss: (id: string) => void;
 };
 
-function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: (id: string) => void }) {
+function ToastItem({
+  toast,
+  onDismiss,
+}: {
+  toast: Toast;
+  onDismiss: (id: string) => void;
+}) {
   const { colors } = useTheme();
-  const opacity = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.timing(opacity, {
-      toValue: 1,
-      duration: 200,
-      useNativeDriver: true,
-    }).start();
-
-    const timer = setTimeout(() => {
-      Animated.timing(opacity, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }).start(() => onDismiss(toast.id));
-    }, toast.duration);
-
+    const timer = setTimeout(() => onDismiss(toast.id), toast.duration);
     return () => clearTimeout(timer);
-  }, [opacity, toast.id, toast.duration, onDismiss]);
+  }, [toast.id, toast.duration, onDismiss]);
 
   return (
     <Animated.View
+      entering={fadeInDown()}
+      exiting={FadeOut.duration(motion.duration.fast)}
       style={[
         styles.toast,
-        { backgroundColor: colors.surfaceStrong, borderColor: colors.line, opacity },
+        { backgroundColor: colors.surfaceStrong, borderColor: colors.line },
       ]}
     >
       <Text style={[styles.message, { color: colors.ink }]}>{toast.message}</Text>
@@ -55,11 +52,11 @@ export function ToastContainer({ toasts, onDismiss }: ToastContainerProps) {
   }
 
   return (
-    <Animated.View style={styles.container} pointerEvents="none">
+    <View style={styles.container} pointerEvents="none">
       {toasts.map((toast) => (
         <ToastItem key={toast.id} toast={toast} onDismiss={onDismiss} />
       ))}
-    </Animated.View>
+    </View>
   );
 }
 
