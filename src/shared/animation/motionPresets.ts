@@ -52,3 +52,24 @@ export function cardStackEnter() {
 }
 
 export { FadeIn, FadeOut, SlideInDown };
+
+export function stackPushOptions() {
+  return {
+    animation: "slide_from_right" as const,
+    animationDuration: motion.duration.normal,
+  };
+}
+
+export function modalPushOptions() {
+  return {
+    animation: "slide_from_bottom" as const,
+    animationDuration: motion.duration.normal,
+  };
+}
+
+export function tabShiftOptions() {
+  return {
+    animation: "shift" as const,
+    animationDuration: motion.duration.fast,
+  };
+}
