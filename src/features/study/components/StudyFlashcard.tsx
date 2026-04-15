@@ -1,8 +1,10 @@
 import { memo, useState } from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
+import Animated from "react-native-reanimated";
 
 import { StudyCard } from "@/src/core/domain/models";
 import { AnimatedFlipCard } from "@/src/shared/animation/AnimatedFlipCard";
+import { cardStackEnter } from "@/src/shared/animation/motionPresets";
 import { SwipeStudyCard } from "@/src/shared/animation/SwipeStudyCard";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { tokens } from "@/src/shared/theme/tokens";
@@ -48,7 +50,7 @@ function StudyFlashcardComponent({
   });
 
   return (
-    <View style={styles.root}>
+    <Animated.View key={card.card.id} entering={cardStackEnter()} style={styles.root}>
       <SwipeStudyCard
         disabled={disabled}
         leftActionLabel="Again"
@@ -99,7 +101,7 @@ function StudyFlashcardComponent({
           </View>
         </AnimatedFlipCard>
       </SwipeStudyCard>
-    </View>
+    </Animated.View>
   );
 }
 
