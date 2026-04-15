@@ -1,7 +1,9 @@
 import { useRouter } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
+import Animated from "react-native-reanimated";
 
 import { useDeckListQuery } from "@/src/features/decks/hooks/useDeckQueries";
+import { staggeredList } from "@/src/shared/animation/motionPresets";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { AppButton } from "@/src/shared/ui/AppButton";
 import { Badge } from "@/src/shared/ui/Badge";
@@ -33,8 +35,9 @@ export default function MyDecksScreen() {
         </AppButton>
       }
     >
-      {decks.map((deck) => (
-        <Panel key={deck.id}>
+      {decks.map((deck, index) => (
+        <Animated.View key={deck.id} entering={staggeredList(index)}>
+        <Panel>
           <View style={styles.row}>
             <View style={styles.copy}>
               <Text style={[styles.deckTitle, { color: colors.ink }]}>{deck.title}</Text>
@@ -71,6 +74,7 @@ export default function MyDecksScreen() {
             </AppButton>
           </View>
         </Panel>
+        </Animated.View>
       ))}
     </Screen>
   );
