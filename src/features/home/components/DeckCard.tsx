@@ -1,9 +1,14 @@
 import { memo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
+import Animated from "react-native-reanimated";
 
+import { staggeredList } from "@/src/shared/animation/motionPresets";
+import { useScalePress } from "@/src/shared/animation/useScalePress";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { tokens } from "@/src/shared/theme/tokens";
 import { CircularProgress } from "@/src/shared/ui/CircularProgress";
+
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 type DeckCardProps = {
   title: string;
@@ -11,6 +16,7 @@ type DeckCardProps = {
   dueCount: number;
   masteredCount: number;
   onPress: () => void;
+  index?: number;
 };
 
 function DeckCardComponent({
@@ -19,21 +25,23 @@ function DeckCardComponent({
   dueCount,
   masteredCount,
   onPress,
+  index = 0,
 }: DeckCardProps) {
   const { colors } = useTheme();
+  const { animatedStyle, pressHandlers } = useScalePress();
   const progress = cardCount > 0 ? masteredCount / cardCount : 0;
   const isDone = dueCount === 0;
 
   return (
-    <Pressable
+    <AnimatedPressable
       onPress={onPress}
-      style={({ pressed }) => [
+      onPressIn={pressHandlers.onPressIn}
+      onPressOut={pressHandlers.onPressOut}
+      entering={staggeredList(index)}
+      style={[
         styles.root,
-        {
-          backgroundColor: colors.surface,
-          borderColor: colors.line,
-        },
-        pressed && styles.pressed,
+        { backgroundColor: colors.surface, borderColor: colors.line },
+        animatedStyle,
       ]}
     >
       <CircularProgress progress={progress} />
@@ -48,9 +56,7 @@ function DeckCardComponent({
       <View
         style={[
           styles.action,
-          {
-            backgroundColor: isDone ? colors.surfaceStrong : colors.primary,
-          },
+          { backgroundColor: isDone ? colors.surfaceStrong : colors.primary },
         ]}
       >
         <Text
@@ -62,7 +68,7 @@ function DeckCardComponent({
           {isDone ? "Done" : "Study"}
         </Text>
       </View>
-    </Pressable>
+    </AnimatedPressable>
   );
 }
 
@@ -76,10 +82,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: tokens.radius.l,
     padding: tokens.spacing.m,
-  },
-  pressed: {
-    opacity: 0.84,
-    transform: [{ scale: 0.99 }],
   },
   content: {
     flex: 1,

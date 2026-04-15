@@ -42,7 +42,7 @@ export default function HomeScreen() {
         </Panel>
       ) : null}
 
-      {decks.map((deck) => (
+      {decks.map((deck, index) => (
         <DeckCard
           key={deck.id}
           title={deck.title}
@@ -55,6 +55,7 @@ export default function HomeScreen() {
               params: { deckId: deck.id },
             })
           }
+          index={index}
         />
       ))}
     </Screen>
