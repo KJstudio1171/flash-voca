@@ -1,8 +1,10 @@
 import { useRouter } from "expo-router";
 import { StyleSheet, Text } from "react-native";
+import Animated from "react-native-reanimated";
 
 import { DeckCard } from "@/src/features/home/components/DeckCard";
 import { useDeckSummaryListQuery } from "@/src/features/home/hooks/useHomeSummaryQuery";
+import { fadeInScale } from "@/src/shared/animation/motionPresets";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { tokens } from "@/src/shared/theme/tokens";
 import { AppButton } from "@/src/shared/ui/AppButton";
@@ -25,21 +27,23 @@ export default function HomeScreen() {
   return (
     <Screen title="Home" subtitle={buildSubtitle(totalDue, decks.length > 0)}>
       {decks.length === 0 && !summaryQuery.isLoading ? (
-        <Panel>
-          <Text style={[styles.emptyText, { color: colors.muted }]}>
-            첫 단어장을 만들어보세요
-          </Text>
-          <AppButton
-            onPress={() =>
-              router.push({
-                pathname: "/decks/[deckId]/edit",
-                params: { deckId: "new" },
-              })
-            }
-          >
-            Create Deck
-          </AppButton>
-        </Panel>
+        <Animated.View entering={fadeInScale()}>
+          <Panel>
+            <Text style={[styles.emptyText, { color: colors.muted }]}>
+              첫 단어장을 만들어보세요
+            </Text>
+            <AppButton
+              onPress={() =>
+                router.push({
+                  pathname: "/decks/[deckId]/edit",
+                  params: { deckId: "new" },
+                })
+              }
+            >
+              Create Deck
+            </AppButton>
+          </Panel>
+        </Animated.View>
       ) : null}
 
       {decks.map((deck, index) => (
