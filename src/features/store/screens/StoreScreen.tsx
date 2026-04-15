@@ -1,7 +1,9 @@
 import { useRouter } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
+import Animated from "react-native-reanimated";
 
 import { useBundleCatalogQuery } from "@/src/features/store/hooks/useStoreQueries";
+import { staggeredList } from "@/src/shared/animation/motionPresets";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { AppButton } from "@/src/shared/ui/AppButton";
 import { Badge } from "@/src/shared/ui/Badge";
@@ -28,32 +30,34 @@ export default function StoreScreen() {
         </Text>
       </Panel>
 
-      {bundles.map((bundle) => (
-        <Panel key={bundle.id}>
-          <View style={styles.row}>
-            <View style={styles.copy}>
-              <Text style={[styles.bundleTitle, { color: colors.ink }]}>{bundle.title}</Text>
-              <Text style={[styles.bundleMeta, { color: colors.muted }]}>
-                {bundle.deckCount} decks · {bundle.priceText}
-              </Text>
+      {bundles.map((bundle, index) => (
+        <Animated.View key={bundle.id} entering={staggeredList(index)}>
+          <Panel>
+            <View style={styles.row}>
+              <View style={styles.copy}>
+                <Text style={[styles.bundleTitle, { color: colors.ink }]}>{bundle.title}</Text>
+                <Text style={[styles.bundleMeta, { color: colors.muted }]}>
+                  {bundle.deckCount} decks · {bundle.priceText}
+                </Text>
+              </View>
+              <Badge tone={bundle.owned ? "primary" : "accent"}>
+                {bundle.owned ? "Owned" : "Locked"}
+              </Badge>
             </View>
-            <Badge tone={bundle.owned ? "primary" : "accent"}>
-              {bundle.owned ? "Owned" : "Locked"}
-            </Badge>
-          </View>
-          <Text style={[styles.bundleDescription, { color: colors.muted }]}>{bundle.description}</Text>
-          <AppButton
-            onPress={() =>
-              router.push({
-                pathname: "/bundles/[bundleId]",
-                params: { bundleId: bundle.id },
-              })
-            }
-            variant="secondary"
-          >
-            View Bundle
-          </AppButton>
-        </Panel>
+            <Text style={[styles.bundleDescription, { color: colors.muted }]}>{bundle.description}</Text>
+            <AppButton
+              onPress={() =>
+                router.push({
+                  pathname: "/bundles/[bundleId]",
+                  params: { bundleId: bundle.id },
+                })
+              }
+              variant="secondary"
+            >
+              View Bundle
+            </AppButton>
+          </Panel>
+        </Animated.View>
       ))}
     </Screen>
   );
