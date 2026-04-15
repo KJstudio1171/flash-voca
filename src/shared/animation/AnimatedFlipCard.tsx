@@ -1,12 +1,13 @@
 import { memo, PropsWithChildren, ReactNode, useEffect } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import Animated, {
-  Easing,
   interpolate,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+
+import { motion } from "./motionTokens";
 
 type AnimatedFlipCardProps = PropsWithChildren<{
   back: ReactNode;
@@ -24,8 +25,8 @@ function AnimatedFlipCardComponent({
 
   useEffect(() => {
     rotation.value = withTiming(flipped ? 1 : 0, {
-      duration: 500,
-      easing: Easing.bezier(0.4, 0.0, 0.2, 1),
+      duration: motion.duration.normal,
+      easing: motion.easing.standard,
     });
   }, [flipped, rotation]);
 
