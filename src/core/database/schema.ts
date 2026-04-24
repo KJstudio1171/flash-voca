@@ -73,6 +73,18 @@ CREATE TABLE IF NOT EXISTS local_review_logs (
 );
 `;
 
+export const CATALOG_DECK_SUMMARIES_TABLE_SQL = `
+CREATE TABLE IF NOT EXISTS catalog_deck_summaries (
+  deck_id TEXT PRIMARY KEY NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  card_count INTEGER NOT NULL DEFAULT 0,
+  accent_color TEXT NOT NULL DEFAULT '#EA580C',
+  is_published INTEGER NOT NULL DEFAULT 1,
+  updated_at TEXT NOT NULL
+);
+`;
+
 export const PENDING_SYNC_OPERATIONS_TABLE_SQL = `
 CREATE TABLE IF NOT EXISTS pending_sync_operations (
   id TEXT PRIMARY KEY NOT NULL,
@@ -155,6 +167,9 @@ ON cached_entitlements(user_id, status);
 
 CREATE INDEX IF NOT EXISTS idx_bundle_items_bundle_id
 ON bundle_items(bundle_id);
+
+CREATE INDEX IF NOT EXISTS idx_catalog_deck_summaries_published
+ON catalog_deck_summaries(is_published, updated_at DESC);
 `;
 
 export const LOCAL_DATABASE_SCHEMA_SQL = [
@@ -163,6 +178,7 @@ export const LOCAL_DATABASE_SCHEMA_SQL = [
   LOCAL_DECK_CARDS_TABLE_SQL,
   LOCAL_USER_CARD_STATES_TABLE_SQL,
   LOCAL_REVIEW_LOGS_TABLE_SQL,
+  CATALOG_DECK_SUMMARIES_TABLE_SQL,
   PENDING_SYNC_OPERATIONS_TABLE_SQL,
   CACHED_ENTITLEMENTS_TABLE_SQL,
   BUNDLES_TABLE_SQL,

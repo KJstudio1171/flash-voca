@@ -55,8 +55,8 @@ export function SwipeStudyCard({
       const isHorizontal = absX > SWIPE_THRESHOLD;
 
       if (!isVertical && !isHorizontal) {
-        translateX.value = withSpring(0, motion.spring.snappy);
-        translateY.value = withSpring(0, motion.spring.snappy);
+        translateX.value = withSpring(0, motion.spring.gentle);
+        translateY.value = withSpring(0, motion.spring.gentle);
         return;
       }
 

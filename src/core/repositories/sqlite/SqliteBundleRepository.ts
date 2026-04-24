@@ -104,11 +104,12 @@ export class SqliteBundleRepository {
             bi.id as id,
             bi.bundle_id as bundleId,
             bi.deck_id as deckId,
-            d.title as deckTitle,
+            COALESCE(cds.title, d.title) as deckTitle,
             bi.position as position,
-            COUNT(c.id) as cardCount
+            COALESCE(cds.card_count, COUNT(c.id)) as cardCount
           FROM bundle_items bi
           INNER JOIN local_decks d ON d.id = bi.deck_id
+          LEFT JOIN catalog_deck_summaries cds ON cds.deck_id = bi.deck_id
           LEFT JOIN local_deck_cards c ON c.deck_id = d.id
           WHERE bi.bundle_id = ? AND d.is_deleted = 0
           GROUP BY bi.id

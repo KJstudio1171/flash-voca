@@ -27,7 +27,7 @@ function RootNavigator() {
       >
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="decks/[deckId]/edit" />
-        <Stack.Screen name="study/[deckId]" options={modalPushOptions()} />
+        <Stack.Screen name="study/[deckId]" />
         <Stack.Screen name="bundles/[bundleId]" options={modalPushOptions()} />
         <Stack.Screen name="settings/index" />
       </Stack>

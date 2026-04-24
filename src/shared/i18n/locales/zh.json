@@ -17,5 +17,73 @@
     "sync": "同步失败。",
     "entitlementFetch": "无法加载购买信息。",
     "unknown": "发生未知错误。"
+  },
+  "settings": {
+    "title": "设置",
+    "subtitle": "管理应用设置",
+    "appearance": "外观",
+    "darkMode": "深色模式",
+    "colorPalette": "配色方案",
+    "flashcardFont": "闪卡字体",
+    "saveFlashcardFont": "保存闪卡字体",
+    "flashcardFontSaved": "已保存闪卡字体。",
+    "flashcardFonts": {
+      "balanced": {
+        "name": "均衡",
+        "description": "默认可读性"
+      },
+      "rounded": {
+        "name": "圆润",
+        "description": "更柔和的卡片观感"
+      },
+      "serif": {
+        "name": "衬线",
+        "description": "沉稳的阅读感"
+      },
+      "compact": {
+        "name": "紧凑",
+        "description": "适合长单词和句子"
+      },
+      "spacious": {
+        "name": "宽松",
+        "description": "短词显示更清晰"
+      }
+    }
+  },
+  "store": {
+    "title": "商店",
+    "subtitle": "官方词汇套装目录与购买权限保持分离。实际支付实现可稍后接入。",
+    "paidLayerBadge": "付费层",
+    "heroTitle": "官方套装目录",
+    "heroBody": "套装列表从 Supabase public catalog 拉取并缓存到 SQLite，entitlement 作为独立权限层保留。",
+    "loading": "正在检查 Supabase 目录。",
+    "catalogErrorBadge": "目录错误",
+    "catalogErrorTitle": "无法加载目录",
+    "catalogErrorMessage": "请检查 Supabase public catalog 设置和网络状态。",
+    "emptyCatalogBadge": "空目录",
+    "localModeBadge": "本地模式",
+    "emptyCatalogTitle": "目录仍为空",
+    "supabaseRequiredTitle": "需要 Supabase 设置",
+    "emptyCatalogMessage": "在 Supabase public catalog 中添加 published bundle 后会显示在这里。",
+    "supabaseRequiredMessage": "设置 EXPO_PUBLIC_SUPABASE_URL 和 EXPO_PUBLIC_SUPABASE_ANON_KEY 后即可同步付费套装目录。",
+    "bundleMeta": "{{deckCount}} 个卡组 · {{priceText}}",
+    "ownedBadge": "已拥有",
+    "lockedBadge": "已锁定",
+    "viewBundle": "查看套装"
+  },
+  "bundleDetail": {
+    "title": "套装",
+    "loadingSubtitle": "正在检查 Supabase 目录缓存。",
+    "loadingBody": "正在加载套装详情。",
+    "errorSubtitle": "同步目录时出现问题。",
+    "missingSubtitle": "该套装未注册或仍在加载。",
+    "missingBody": "商店目录和 entitlement sync 仍保持分离。",
+    "subtitle": "套装详情从支付 UI 与权限判断分离的状态开始。",
+    "unlockedBadge": "已解锁",
+    "paidBadge": "付费套装",
+    "unlockedAction": "此账号已解锁",
+    "billingComingSoon": "支付接入将在下一步完成",
+    "includedDecks": "包含的卡组",
+    "cardCount": "{{count}} 张卡片"
   }
 }

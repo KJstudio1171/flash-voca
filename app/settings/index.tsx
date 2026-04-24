@@ -1,9 +1,17 @@
+import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Switch, Text, View } from "react-native";
 
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
+import {
+  FlashcardFontId,
+  flashcardFontPresets,
+} from "@/src/shared/theme/flashcardFonts";
 import { ColorScheme, PaletteId, paletteList, palettes } from "@/src/shared/theme/palettes";
+import { AppButton } from "@/src/shared/ui/AppButton";
 import { Screen } from "@/src/shared/ui/Screen";
 import { tokens } from "@/src/shared/theme/tokens";
+import { useToast } from "@/src/shared/ui/toast";
+import { useT } from "@/src/shared/i18n";
 
 function PaletteRow({
   id,
@@ -43,20 +51,77 @@ function PaletteRow({
   );
 }
 
-export default function SettingsScreen() {
-  const { colors, paletteId, setPalette, colorMode, setColorMode } = useTheme();
-  const isDark = colorMode === "dark";
+function FontRow({
+  id,
+  name,
+  description,
+  selected,
+  onSelect,
+}: {
+  id: FlashcardFontId;
+  name: string;
+  description: string;
+  selected: boolean;
+  onSelect: () => void;
+}) {
+  const { colors } = useTheme();
 
   return (
-    <Screen title="Settings" subtitle="앱 설정을 관리합니다">
-      <Text style={[styles.sectionLabel, { color: colors.muted }]}>APPEARANCE</Text>
+    <Pressable
+      onPress={onSelect}
+      style={[
+        styles.fontRow,
+        {
+          backgroundColor: colors.surfaceStrong,
+          borderColor: selected ? colors.primary : colors.line,
+          borderWidth: selected ? 2 : 1,
+        },
+      ]}
+    >
+      <View style={styles.fontCopy}>
+        <Text style={[styles.fontName, { color: colors.ink }]}>{name}</Text>
+        <Text style={[styles.fontDescription, { color: colors.muted }]}>{description}</Text>
+      </View>
+      {selected ? <Text style={[styles.check, { color: colors.primary }]}>✓</Text> : null}
+    </Pressable>
+  );
+}
+
+export default function SettingsScreen() {
+  const { t } = useT();
+  const {
+    colors,
+    paletteId,
+    setPalette,
+    colorMode,
+    setColorMode,
+    flashcardFontId,
+    setFlashcardFont,
+  } = useTheme();
+  const toast = useToast();
+  const [draftFlashcardFontId, setDraftFlashcardFontId] =
+    useState<FlashcardFontId>(flashcardFontId);
+  const isDark = colorMode === "dark";
+  const hasFontChange = draftFlashcardFontId !== flashcardFontId;
+
+  useEffect(() => {
+    setDraftFlashcardFontId(flashcardFontId);
+  }, [flashcardFontId]);
+
+  return (
+    <Screen title={t("settings.title")} subtitle={t("settings.subtitle")}>
+      <Text style={[styles.sectionLabel, { color: colors.muted }]}>
+        {t("settings.appearance")}
+      </Text>
       <View
         style={[
           styles.darkModeRow,
           { backgroundColor: colors.surfaceStrong, borderColor: colors.line },
         ]}
       >
-        <Text style={[styles.darkModeLabel, { color: colors.ink }]}>다크 모드</Text>
+        <Text style={[styles.darkModeLabel, { color: colors.ink }]}>
+          {t("settings.darkMode")}
+        </Text>
         <Switch
           value={isDark}
           onValueChange={(v) => setColorMode(v ? "dark" : "light")}
@@ -65,7 +130,9 @@ export default function SettingsScreen() {
         />
       </View>
 
-      <Text style={[styles.sectionLabel, { color: colors.muted }]}>COLOR PALETTE</Text>
+      <Text style={[styles.sectionLabel, { color: colors.muted }]}>
+        {t("settings.colorPalette")}
+      </Text>
       <View style={styles.paletteList}>
         {paletteList.map((item) => (
           <PaletteRow
@@ -78,6 +145,32 @@ export default function SettingsScreen() {
           />
         ))}
       </View>
+
+      <Text style={[styles.sectionLabel, { color: colors.muted }]}>
+        {t("settings.flashcardFont")}
+      </Text>
+      <View style={styles.fontList}>
+        {flashcardFontPresets.map((item) => (
+          <FontRow
+            key={item.id}
+            id={item.id}
+            name={t(item.nameKey)}
+            description={t(item.descriptionKey)}
+            selected={draftFlashcardFontId === item.id}
+            onSelect={() => setDraftFlashcardFontId(item.id)}
+          />
+        ))}
+      </View>
+      <AppButton
+        disabled={!hasFontChange}
+        onPress={() => {
+          setFlashcardFont(draftFlashcardFontId);
+          toast.show(t("settings.flashcardFontSaved"));
+        }}
+        style={styles.saveButton}
+      >
+        {t("settings.saveFlashcardFont")}
+      </AppButton>
     </Screen>
   );
 }
@@ -104,6 +197,9 @@ const styles = StyleSheet.create({
   paletteList: {
     gap: tokens.spacing.s,
   },
+  fontList: {
+    gap: tokens.spacing.s,
+  },
   paletteRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -124,7 +220,27 @@ const styles = StyleSheet.create({
     flex: 1,
     ...tokens.typography.captionBold,
   },
+  fontRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: tokens.spacing.s,
+    padding: tokens.spacing.m,
+    borderRadius: tokens.radius.m,
+  },
+  fontCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  fontName: {
+    ...tokens.typography.captionBold,
+  },
+  fontDescription: {
+    ...tokens.typography.caption,
+  },
   check: {
     ...tokens.typography.subheading,
+  },
+  saveButton: {
+    marginTop: -tokens.spacing.xs,
   },
 });

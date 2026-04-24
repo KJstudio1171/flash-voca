@@ -3,6 +3,12 @@ import { createContext, PropsWithChildren, useCallback, useContext, useEffect, u
 
 import { getDatabaseAsync } from "@/src/core/database/client";
 import {
+  DEFAULT_FLASHCARD_FONT_ID,
+  FlashcardFontId,
+  flashcardFontById,
+  isFlashcardFontId,
+} from "@/src/shared/theme/flashcardFonts";
+import {
   ColorMode,
   ColorScheme,
   DEFAULT_COLOR_MODE,
@@ -17,6 +23,9 @@ type ThemeContextValue = {
   setPalette: (id: PaletteId) => void;
   colorMode: ColorMode;
   setColorMode: (mode: ColorMode) => void;
+  flashcardFontId: FlashcardFontId;
+  flashcardTextStyle: (typeof flashcardFontById)[FlashcardFontId]["textStyle"];
+  setFlashcardFont: (id: FlashcardFontId) => void;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -24,11 +33,15 @@ const ThemeContext = createContext<ThemeContextValue | null>(null);
 export function ThemeProvider({ children }: PropsWithChildren) {
   const [paletteId, setPaletteId] = useState<PaletteId>(DEFAULT_PALETTE_ID);
   const [colorMode, setColorModeState] = useState<ColorMode>(DEFAULT_COLOR_MODE);
+  const [flashcardFontId, setFlashcardFontId] = useState<FlashcardFontId>(
+    DEFAULT_FLASHCARD_FONT_ID,
+  );
 
   useEffect(() => {
-    void loadThemePrefsAsync().then(({ paletteId: pid, colorMode: cm }) => {
+    void loadThemePrefsAsync().then(({ paletteId: pid, colorMode: cm, flashcardFontId: fid }) => {
       setPaletteId(pid);
       setColorModeState(cm);
+      setFlashcardFontId(fid);
     });
   }, []);
 
@@ -42,12 +55,20 @@ export function ThemeProvider({ children }: PropsWithChildren) {
     void saveThemePref("color_mode", mode);
   }, []);
 
+  const setFlashcardFont = useCallback((id: FlashcardFontId) => {
+    setFlashcardFontId(id);
+    void saveThemePref("flashcard_font_id", id);
+  }, []);
+
   const value: ThemeContextValue = {
     colors: palettes[paletteId][colorMode],
     paletteId,
     setPalette,
     colorMode,
     setColorMode,
+    flashcardFontId,
+    flashcardTextStyle: flashcardFontById[flashcardFontId].textStyle,
+    setFlashcardFont,
   };
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
@@ -72,22 +93,29 @@ async function saveThemePref(key: string, value: string) {
 
 const COLOR_MODES: Set<string> = new Set(["light", "dark"]);
 
-async function loadThemePrefsAsync(): Promise<{ paletteId: PaletteId; colorMode: ColorMode }> {
+async function loadThemePrefsAsync(): Promise<{
+  paletteId: PaletteId;
+  colorMode: ColorMode;
+  flashcardFontId: FlashcardFontId;
+}> {
   const db = await getDatabaseAsync();
   const rows = await db.getAllAsync<{ key: string; value: string }>(
-    `SELECT key, value FROM app_meta WHERE key IN ('palette_id', 'color_mode')`,
+    `SELECT key, value FROM app_meta WHERE key IN ('palette_id', 'color_mode', 'flashcard_font_id')`,
   );
 
   let paletteId: PaletteId = DEFAULT_PALETTE_ID;
   let colorMode: ColorMode = DEFAULT_COLOR_MODE;
+  let flashcardFontId: FlashcardFontId = DEFAULT_FLASHCARD_FONT_ID;
 
   for (const row of rows) {
     if (row.key === "palette_id" && row.value in palettes) {
       paletteId = row.value as PaletteId;
     } else if (row.key === "color_mode" && COLOR_MODES.has(row.value)) {
       colorMode = row.value as ColorMode;
+    } else if (row.key === "flashcard_font_id" && isFlashcardFontId(row.value)) {
+      flashcardFontId = row.value;
     }
   }
 
-  return { paletteId, colorMode };
+  return { paletteId, colorMode, flashcardFontId };
 }

@@ -18,14 +18,6 @@ const sampleDecks = [
     sourceType: "user",
     accentColor: "#1D4ED8",
   },
-  {
-    id: "deck_toeic_core",
-    ownerId: null,
-    title: "TOEIC Core 300",
-    description: "Starter official deck for exam-focused vocabulary drills.",
-    sourceType: "official",
-    accentColor: "#EA580C",
-  },
 ] as const;
 
 const sampleCards = [
@@ -64,42 +56,6 @@ const sampleCards = [
     example: "I'll follow up with the client tomorrow.",
     note: null,
     position: 1,
-  },
-  {
-    id: "card_allocate",
-    deckId: "deck_toeic_core",
-    term: "allocate",
-    meaning: "assign for a purpose",
-    example: "The manager allocated extra budget to the project.",
-    note: null,
-    position: 0,
-  },
-  {
-    id: "card_invoice",
-    deckId: "deck_toeic_core",
-    term: "invoice",
-    meaning: "invoice",
-    example: "Please submit the invoice by Friday.",
-    note: null,
-    position: 1,
-  },
-] as const;
-
-const sampleBundle = {
-  id: "bundle_exam_starter",
-  title: "Exam Starter Pack",
-  description: "Sample paid bundle wired to the local catalog and entitlement cache.",
-  priceText: "$4.99",
-  currencyCode: "USD",
-  coverColor: "#EA580C",
-};
-
-const sampleBundleItems = [
-  {
-    id: "bundle_item_exam_starter_1",
-    bundleId: "bundle_exam_starter",
-    deckId: "deck_toeic_core",
-    position: 0,
   },
 ] as const;
 
@@ -157,46 +113,6 @@ export async function seedMvpDataAsync() {
           now,
           now,
         ],
-      );
-    }
-
-    await tx.runAsync(
-      `
-        INSERT INTO bundles (
-          id, title, description, price_text, currency_code, cover_color, created_at, updated_at
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        ON CONFLICT(id) DO UPDATE SET
-          title = excluded.title,
-          description = excluded.description,
-          price_text = excluded.price_text,
-          currency_code = excluded.currency_code,
-          cover_color = excluded.cover_color,
-          updated_at = excluded.updated_at;
-      `,
-      [
-        sampleBundle.id,
-        sampleBundle.title,
-        sampleBundle.description,
-        sampleBundle.priceText,
-        sampleBundle.currencyCode,
-        sampleBundle.coverColor,
-        now,
-        now,
-      ],
-    );
-
-    for (const item of sampleBundleItems) {
-      await tx.runAsync(
-        `
-          INSERT INTO bundle_items (id, bundle_id, deck_id, position)
-          VALUES (?, ?, ?, ?)
-          ON CONFLICT(id) DO UPDATE SET
-            bundle_id = excluded.bundle_id,
-            deck_id = excluded.deck_id,
-            position = excluded.position;
-        `,
-        [item.id, item.bundleId, item.deckId, item.position],
       );
     }
   });

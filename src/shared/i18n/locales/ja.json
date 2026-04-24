@@ -17,5 +17,73 @@
     "sync": "同期に失敗しました。",
     "entitlementFetch": "購入情報を読み込めませんでした。",
     "unknown": "不明なエラーが発生しました。"
+  },
+  "settings": {
+    "title": "設定",
+    "subtitle": "アプリ設定を管理します",
+    "appearance": "表示",
+    "darkMode": "ダークモード",
+    "colorPalette": "カラーパレット",
+    "flashcardFont": "フラッシュカードのフォント",
+    "saveFlashcardFont": "フォントを保存",
+    "flashcardFontSaved": "フラッシュカードのフォントを保存しました。",
+    "flashcardFonts": {
+      "balanced": {
+        "name": "バランス",
+        "description": "標準の読みやすさ"
+      },
+      "rounded": {
+        "name": "丸み",
+        "description": "やわらかなカード印象"
+      },
+      "serif": {
+        "name": "セリフ",
+        "description": "落ち着いた読み心地"
+      },
+      "compact": {
+        "name": "コンパクト",
+        "description": "長い単語や文に適しています"
+      },
+      "spacious": {
+        "name": "ゆったり",
+        "description": "短い単語をはっきり表示"
+      }
+    }
+  },
+  "store": {
+    "title": "ストア",
+    "subtitle": "公式単語帳バンドルのカタログと購入権限を分離しています。実際の決済実装は後から接続できます。",
+    "paidLayerBadge": "有料レイヤー",
+    "heroTitle": "公式バンドルカタログ",
+    "heroBody": "バンドル一覧はSupabase public catalogから取得してSQLiteにキャッシュし、entitlementは別の権限レイヤーとして維持します。",
+    "loading": "Supabaseカタログを確認しています。",
+    "catalogErrorBadge": "カタログエラー",
+    "catalogErrorTitle": "カタログを読み込めませんでした",
+    "catalogErrorMessage": "Supabase public catalogの設定とネットワーク状態を確認してください。",
+    "emptyCatalogBadge": "空のカタログ",
+    "localModeBadge": "ローカルモード",
+    "emptyCatalogTitle": "カタログはまだ空です",
+    "supabaseRequiredTitle": "Supabase設定が必要です",
+    "emptyCatalogMessage": "Supabase public catalogに公開済みバンドルを追加すると、この画面に表示されます。",
+    "supabaseRequiredMessage": "EXPO_PUBLIC_SUPABASE_URLとEXPO_PUBLIC_SUPABASE_ANON_KEYを設定すると、有料バンドルカタログを同期します。",
+    "bundleMeta": "{{deckCount}}個のデッキ · {{priceText}}",
+    "ownedBadge": "所有済み",
+    "lockedBadge": "ロック中",
+    "viewBundle": "バンドルを見る"
+  },
+  "bundleDetail": {
+    "title": "バンドル",
+    "loadingSubtitle": "Supabaseカタログキャッシュを確認しています。",
+    "loadingBody": "バンドル詳細を読み込んでいます。",
+    "errorSubtitle": "カタログ同期中に問題が発生しました。",
+    "missingSubtitle": "登録されていないか、まだ読み込み中のバンドルです。",
+    "missingBody": "ストアカタログとentitlement syncは分離された状態を維持します。",
+    "subtitle": "バンドル詳細は購入UIと権限判定を分離した状態で開始します。",
+    "unlockedBadge": "解除済み",
+    "paidBadge": "有料バンドル",
+    "unlockedAction": "このアカウントで利用できます",
+    "billingComingSoon": "決済連携は次の段階です",
+    "includedDecks": "含まれるデッキ",
+    "cardCount": "{{count}}枚のカード"
   }
 }

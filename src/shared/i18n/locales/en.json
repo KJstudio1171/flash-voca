@@ -17,5 +17,73 @@
     "sync": "Sync failed.",
     "entitlementFetch": "Failed to load entitlements.",
     "unknown": "An unknown error occurred."
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage app settings",
+    "appearance": "Appearance",
+    "darkMode": "Dark mode",
+    "colorPalette": "Color palette",
+    "flashcardFont": "Flashcard font",
+    "saveFlashcardFont": "Save flashcard font",
+    "flashcardFontSaved": "Flashcard font saved.",
+    "flashcardFonts": {
+      "balanced": {
+        "name": "Balanced",
+        "description": "Default readability"
+      },
+      "rounded": {
+        "name": "Rounded",
+        "description": "Softer card feel"
+      },
+      "serif": {
+        "name": "Serif",
+        "description": "Calm reading feel"
+      },
+      "compact": {
+        "name": "Compact",
+        "description": "Good for long words and sentences"
+      },
+      "spacious": {
+        "name": "Spacious",
+        "description": "Clearer short words"
+      }
+    }
+  },
+  "store": {
+    "title": "Store",
+    "subtitle": "Official vocabulary bundle catalog and purchase entitlements are kept separate. The real billing implementation can be connected later.",
+    "paidLayerBadge": "Paid Layer",
+    "heroTitle": "Official bundle catalog",
+    "heroBody": "Bundles are pulled from the Supabase public catalog, cached in SQLite, and kept separate from the entitlement layer.",
+    "loading": "Checking the Supabase catalog.",
+    "catalogErrorBadge": "Catalog Error",
+    "catalogErrorTitle": "Could not load catalog",
+    "catalogErrorMessage": "Check the Supabase public catalog setup and network connection.",
+    "emptyCatalogBadge": "Empty Catalog",
+    "localModeBadge": "Local Mode",
+    "emptyCatalogTitle": "The catalog is empty",
+    "supabaseRequiredTitle": "Supabase setup required",
+    "emptyCatalogMessage": "Published bundles in the Supabase public catalog will appear here.",
+    "supabaseRequiredMessage": "Set EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY to sync paid bundle catalogs.",
+    "bundleMeta": "{{deckCount}} decks · {{priceText}}",
+    "ownedBadge": "Owned",
+    "lockedBadge": "Locked",
+    "viewBundle": "View Bundle"
+  },
+  "bundleDetail": {
+    "title": "Bundle",
+    "loadingSubtitle": "Checking the Supabase catalog cache.",
+    "loadingBody": "Loading bundle details.",
+    "errorSubtitle": "There was a problem syncing the catalog.",
+    "missingSubtitle": "This bundle is not registered or is still loading.",
+    "missingBody": "The store catalog and entitlement sync remain separated.",
+    "subtitle": "Bundle detail starts with billing UI and entitlement checks separated.",
+    "unlockedBadge": "Unlocked",
+    "paidBadge": "Paid Bundle",
+    "unlockedAction": "Unlocked for this account",
+    "billingComingSoon": "Billing hook comes next",
+    "includedDecks": "Included decks",
+    "cardCount": "{{count}} cards"
   }
 }

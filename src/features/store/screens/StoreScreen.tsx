@@ -1,9 +1,11 @@
 import { useRouter } from "expo-router";
-import { StyleSheet, Text, View } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import Animated from "react-native-reanimated";
 
+import { hasSupabaseConfig } from "@/src/core/supabase/config";
 import { useBundleCatalogQuery } from "@/src/features/store/hooks/useStoreQueries";
 import { staggeredList } from "@/src/shared/animation/motionPresets";
+import { useT } from "@/src/shared/i18n";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { AppButton } from "@/src/shared/ui/AppButton";
 import { Badge } from "@/src/shared/ui/Badge";
@@ -12,23 +14,63 @@ import { Screen } from "@/src/shared/ui/Screen";
 import { tokens } from "@/src/shared/theme/tokens";
 
 export default function StoreScreen() {
+  const { t } = useT();
   const router = useRouter();
   const { colors } = useTheme();
   const bundleQuery = useBundleCatalogQuery();
   const bundles = bundleQuery.data ?? [];
+  const emptyTitle = hasSupabaseConfig
+    ? t("store.emptyCatalogTitle")
+    : t("store.supabaseRequiredTitle");
+  const emptyMessage = hasSupabaseConfig
+    ? t("store.emptyCatalogMessage")
+    : t("store.supabaseRequiredMessage");
 
   return (
     <Screen
-      title="Store"
-      subtitle="공식 단어장 번들 카탈로그와 구매 권한을 분리해 두었습니다. 실제 결제 구현체는 나중에 연결하면 됩니다."
+      title={t("store.title")}
+      subtitle={t("store.subtitle")}
     >
       <Panel>
-        <Badge tone="accent">Paid Layer</Badge>
-        <Text style={[styles.heroTitle, { color: colors.ink }]}>Official bundle catalog</Text>
+        <Badge tone="accent">{t("store.paidLayerBadge")}</Badge>
+        <Text style={[styles.heroTitle, { color: colors.ink }]}>
+          {t("store.heroTitle")}
+        </Text>
         <Text style={[styles.heroBody, { color: colors.muted }]}>
-          번들 목록은 로컬 캐시로 읽고, entitlement는 추후 스토어 SDK와 Supabase 동기화로 교체할 수 있게 분리했습니다.
+          {t("store.heroBody")}
         </Text>
       </Panel>
+
+      {bundleQuery.isLoading ? (
+        <Panel>
+          <ActivityIndicator color={colors.primary} />
+          <Text style={[styles.stateText, { color: colors.muted }]}>
+            {t("store.loading")}
+          </Text>
+        </Panel>
+      ) : null}
+
+      {bundleQuery.isError ? (
+        <Panel>
+          <Badge tone="info">{t("store.catalogErrorBadge")}</Badge>
+          <Text style={[styles.stateTitle, { color: colors.ink }]}>
+            {t("store.catalogErrorTitle")}
+          </Text>
+          <Text style={[styles.stateText, { color: colors.muted }]}>
+            {t("store.catalogErrorMessage")}
+          </Text>
+        </Panel>
+      ) : null}
+
+      {!bundleQuery.isLoading && !bundleQuery.isError && bundles.length === 0 ? (
+        <Panel>
+          <Badge tone="info">
+            {hasSupabaseConfig ? t("store.emptyCatalogBadge") : t("store.localModeBadge")}
+          </Badge>
+          <Text style={[styles.stateTitle, { color: colors.ink }]}>{emptyTitle}</Text>
+          <Text style={[styles.stateText, { color: colors.muted }]}>{emptyMessage}</Text>
+        </Panel>
+      ) : null}
 
       {bundles.map((bundle, index) => (
         <Animated.View key={bundle.id} entering={staggeredList(index)}>
@@ -37,11 +79,14 @@ export default function StoreScreen() {
               <View style={styles.copy}>
                 <Text style={[styles.bundleTitle, { color: colors.ink }]}>{bundle.title}</Text>
                 <Text style={[styles.bundleMeta, { color: colors.muted }]}>
-                  {bundle.deckCount} decks · {bundle.priceText}
+                  {t("store.bundleMeta", {
+                    deckCount: bundle.deckCount,
+                    priceText: bundle.priceText,
+                  })}
                 </Text>
               </View>
               <Badge tone={bundle.owned ? "primary" : "accent"}>
-                {bundle.owned ? "Owned" : "Locked"}
+                {bundle.owned ? t("store.ownedBadge") : t("store.lockedBadge")}
               </Badge>
             </View>
             <Text style={[styles.bundleDescription, { color: colors.muted }]}>{bundle.description}</Text>
@@ -54,7 +99,7 @@ export default function StoreScreen() {
               }
               variant="secondary"
             >
-              View Bundle
+              {t("store.viewBundle")}
             </AppButton>
           </Panel>
         </Animated.View>
@@ -87,6 +132,12 @@ const styles = StyleSheet.create({
     ...tokens.typography.caption,
   },
   bundleDescription: {
+    ...tokens.typography.body,
+  },
+  stateTitle: {
+    ...tokens.typography.heading,
+  },
+  stateText: {
     ...tokens.typography.body,
   },
 });

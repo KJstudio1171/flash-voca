@@ -17,5 +17,73 @@
     "sync": "동기화에 실패했습니다.",
     "entitlementFetch": "구매 정보를 불러올 수 없습니다.",
     "unknown": "알 수 없는 오류가 발생했습니다."
+  },
+  "settings": {
+    "title": "설정",
+    "subtitle": "앱 설정을 관리합니다",
+    "appearance": "화면 모드",
+    "darkMode": "다크 모드",
+    "colorPalette": "색상 팔레트",
+    "flashcardFont": "플래시카드 글꼴",
+    "saveFlashcardFont": "플래시카드 글꼴 저장",
+    "flashcardFontSaved": "플래시카드 글꼴을 저장했습니다.",
+    "flashcardFonts": {
+      "balanced": {
+        "name": "균형",
+        "description": "기본 가독성 중심"
+      },
+      "rounded": {
+        "name": "둥근 글꼴",
+        "description": "부드러운 카드 인상"
+      },
+      "serif": {
+        "name": "세리프",
+        "description": "차분한 읽기 느낌"
+      },
+      "compact": {
+        "name": "촘촘하게",
+        "description": "긴 단어와 문장에 적합"
+      },
+      "spacious": {
+        "name": "넓게",
+        "description": "짧은 단어를 또렷하게"
+      }
+    }
+  },
+  "store": {
+    "title": "스토어",
+    "subtitle": "공식 단어장 번들 카탈로그와 구매 권한을 분리해 두었습니다. 실제 결제 구현체는 나중에 연결하면 됩니다.",
+    "paidLayerBadge": "유료 계층",
+    "heroTitle": "공식 번들 카탈로그",
+    "heroBody": "번들 목록은 Supabase public catalog에서 받아 SQLite에 캐시하고, entitlement는 별도 권한 계층으로 유지합니다.",
+    "loading": "Supabase 카탈로그를 확인하는 중입니다.",
+    "catalogErrorBadge": "카탈로그 오류",
+    "catalogErrorTitle": "카탈로그를 불러오지 못했습니다",
+    "catalogErrorMessage": "Supabase public catalog 설정과 네트워크 상태를 확인해 주세요.",
+    "emptyCatalogBadge": "빈 카탈로그",
+    "localModeBadge": "로컬 모드",
+    "emptyCatalogTitle": "카탈로그가 아직 비어 있습니다",
+    "supabaseRequiredTitle": "Supabase 설정이 필요합니다",
+    "emptyCatalogMessage": "Supabase public catalog에 published bundle을 추가하면 이 화면에 표시됩니다.",
+    "supabaseRequiredMessage": "EXPO_PUBLIC_SUPABASE_URL과 EXPO_PUBLIC_SUPABASE_ANON_KEY를 설정하면 유료 번들 카탈로그를 동기화합니다.",
+    "bundleMeta": "단어장 {{deckCount}}개 · {{priceText}}",
+    "ownedBadge": "보유 중",
+    "lockedBadge": "잠김",
+    "viewBundle": "번들 보기"
+  },
+  "bundleDetail": {
+    "title": "번들",
+    "loadingSubtitle": "Supabase 카탈로그 캐시를 확인하는 중입니다.",
+    "loadingBody": "번들 상세 정보를 불러오고 있습니다.",
+    "errorSubtitle": "카탈로그 동기화 중 문제가 발생했습니다.",
+    "missingSubtitle": "등록되지 않았거나 아직 로딩되지 않은 번들입니다.",
+    "missingBody": "스토어 카탈로그와 entitlement sync가 분리된 상태를 유지합니다.",
+    "subtitle": "번들 상세는 구매 UI와 권한 판단을 분리한 상태로 시작합니다.",
+    "unlockedBadge": "잠금 해제됨",
+    "paidBadge": "유료 번들",
+    "unlockedAction": "이 계정에서 사용할 수 있습니다",
+    "billingComingSoon": "결제 연결은 다음 단계입니다",
+    "includedDecks": "포함된 단어장",
+    "cardCount": "카드 {{count}}개"
   }
 }

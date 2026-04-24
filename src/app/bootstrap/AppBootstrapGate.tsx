@@ -12,7 +12,7 @@ import {
   initializeObservability,
 } from "@/src/core/observability";
 import { installGlobalErrorHandler } from "@/src/core/observability/globalHandler";
-import { i18next, useT } from "@/src/shared/i18n";
+import { i18next } from "@/src/shared/i18n";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { tokens } from "@/src/shared/theme/tokens";
 
@@ -21,7 +21,6 @@ type BootstrapState = "idle" | "loading" | "ready" | "error";
 export function AppBootstrapGate({ children }: PropsWithChildren) {
   const { bootstrapService } = useAppServices();
   const { colors } = useTheme();
-  const { t } = useT();
   const [state, setState] = useState<BootstrapState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -44,11 +43,11 @@ export function AppBootstrapGate({ children }: PropsWithChildren) {
         if (isMounted) {
           setState("error");
           if (error instanceof AppError) {
-            setErrorMessage(t(error.messageKey, error.messageParams));
+            setErrorMessage(i18next.t(error.messageKey, error.messageParams) as string);
           } else if (error instanceof Error) {
             setErrorMessage(error.message);
           } else {
-            setErrorMessage(t("errors.unknown"));
+            setErrorMessage(i18next.t("errors.unknown") as string);
           }
         }
       }
@@ -59,7 +58,7 @@ export function AppBootstrapGate({ children }: PropsWithChildren) {
     return () => {
       isMounted = false;
     };
-  }, [bootstrapService, t]);
+  }, [bootstrapService]);
 
   if (state === "ready") {
     return (

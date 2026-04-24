@@ -4,7 +4,6 @@ import {
   FadeInUp as RNFadeInUp,
   FadeOut,
   SlideInDown,
-  SlideInUp,
   ZoomIn,
 } from "react-native-reanimated";
 
@@ -13,23 +12,19 @@ import { motion } from "./motionTokens";
 export function fadeInUp(delay = 0) {
   return RNFadeInUp.delay(delay)
     .duration(motion.duration.normal)
-    .springify()
-    .damping(motion.spring.bouncy.damping)
-    .stiffness(motion.spring.bouncy.stiffness);
+    .easing(motion.easing.decelerate);
 }
 
 export function fadeInDown(delay = 0) {
   return RNFadeInDown.delay(delay)
     .duration(motion.duration.normal)
-    .springify()
-    .damping(motion.spring.bouncy.damping)
-    .stiffness(motion.spring.bouncy.stiffness);
+    .easing(motion.easing.decelerate);
 }
 
 export function fadeInScale(delay = 0) {
   return ZoomIn.delay(delay)
     .duration(motion.duration.normal)
-    .easing(motion.easing.playful);
+    .easing(motion.easing.decelerate);
 }
 
 export function bounceIn(delay = 0) {
@@ -45,10 +40,7 @@ export function staggeredList(index: number) {
 }
 
 export function cardStackEnter() {
-  return SlideInUp.duration(motion.duration.normal)
-    .springify()
-    .damping(motion.spring.bouncy.damping)
-    .stiffness(motion.spring.bouncy.stiffness);
+  return FadeIn.duration(motion.duration.fast).easing(motion.easing.decelerate);
 }
 
 export { FadeIn, FadeOut, SlideInDown };

@@ -20,7 +20,7 @@ function StudyFlashcardComponent({
   disabled = false,
   onRate,
 }: StudyFlashcardProps) {
-  const { colors } = useTheme();
+  const { colors, flashcardTextStyle } = useTheme();
   const [flipped, setFlipped] = useState(false);
   const masteryLabel =
     card.state == null ? "New" : `Mastery ${card.state.masteryLevel}`;
@@ -72,7 +72,7 @@ function StudyFlashcardComponent({
             >
               <View style={styles.cardCenter}>
                 <Text style={[styles.label, { color: colors.accent }]}>MEANING</Text>
-                <Text style={[styles.meaningText, { color: colors.ink }]}>{card.card.meaning}</Text>
+                <Text style={[styles.meaningText, flashcardTextStyle, { color: colors.ink }]}>{card.card.meaning}</Text>
               </View>
             </View>
           }
@@ -95,7 +95,7 @@ function StudyFlashcardComponent({
             </View>
             <View style={styles.cardCenter}>
               <Text style={[styles.label, { color: colors.primary }]}>TERM</Text>
-              <Text style={[styles.termText, { color: colors.ink }]}>{card.card.term}</Text>
+              <Text style={[styles.termText, flashcardTextStyle, { color: colors.ink }]}>{card.card.term}</Text>
               <Text style={[styles.hint, { color: colors.muted }]}>tap to flip</Text>
             </View>
           </View>
@@ -143,14 +143,10 @@ const styles = StyleSheet.create({
   },
   termText: {
     fontSize: 34,
-    fontWeight: "800",
-    letterSpacing: -0.5,
     textAlign: "center",
   },
   meaningText: {
     fontSize: 32,
-    fontWeight: "800",
-    letterSpacing: -0.3,
     textAlign: "center",
   },
   hint: {

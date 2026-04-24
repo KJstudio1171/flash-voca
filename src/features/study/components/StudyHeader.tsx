@@ -28,7 +28,6 @@ function StudyHeaderComponent({
         <Text style={[styles.title, { color: colors.ink }]} numberOfLines={1}>
           {deckTitle}
         </Text>
-        <Text style={[styles.streak, { color: colors.primary }]}>🔥</Text>
       </View>
 
       <View style={[styles.progressTrack, { backgroundColor: colors.line }]}>
@@ -64,9 +63,6 @@ const styles = StyleSheet.create({
   title: {
     flex: 1,
     ...tokens.typography.heading,
-  },
-  streak: {
-    ...tokens.typography.captionBold,
   },
   progressTrack: {
     height: 6,
