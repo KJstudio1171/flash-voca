@@ -21,6 +21,9 @@ export function createMockDeck(overrides?: Partial<Deck>): Deck {
     sourceType: "user",
     ownerId: "local-user",
     accentColor: "#6366F1",
+    visibility: "private",
+    sourceLanguage: "en",
+    targetLanguage: "ko",
     cardCount: 0,
     createdAt: "2026-01-01T00:00:00Z",
     updatedAt: "2026-01-01T00:00:00Z",
@@ -35,8 +38,18 @@ export function createMockDeckCard(overrides?: Partial<DeckCard>): DeckCard {
     deckId: "deck-1",
     term: `term-${id}`,
     meaning: `meaning-${id}`,
+    pronunciation: null,
+    partOfSpeech: null,
+    difficulty: "medium",
     example: null,
+    exampleTranslation: null,
     note: null,
+    tags: [],
+    synonyms: null,
+    antonyms: null,
+    relatedExpressions: null,
+    source: null,
+    imageUri: null,
     position: 0,
     ...overrides,
   };
@@ -49,6 +62,7 @@ export function createMockDeckDetail(
   return {
     ...base,
     cards: overrides?.cards ?? [],
+    activities: overrides?.activities ?? [],
     cardCount: overrides?.cardCount ?? (overrides?.cards?.length ?? 0),
   };
 }

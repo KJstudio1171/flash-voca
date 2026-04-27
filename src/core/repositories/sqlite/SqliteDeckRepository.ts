@@ -2,13 +2,18 @@ import { LOCAL_USER_ID } from "@/src/core/config/constants";
 import { getDatabaseAsync } from "@/src/core/database/client";
 import { DeckSaveError, DeckDeleteError } from "@/src/core/errors";
 import {
+  LocalDeckActivityRecord,
   LocalDeckCardRecord,
   LocalDeckRecord,
 } from "@/src/core/database/types";
 import {
+  CardDifficulty,
   Deck,
+  DeckActivity,
+  DeckActivityType,
   DeckCard,
   DeckDetail,
+  DeckVisibility,
   SaveDeckPayload,
 } from "@/src/core/domain/models";
 import { enqueuePendingSyncOperationAsync } from "@/src/core/repositories/sqlite/shared/enqueuePendingSyncOperation";
@@ -23,6 +28,37 @@ function normalizeOptionalText(value: string | null | undefined) {
   return trimmed ? trimmed : null;
 }
 
+function normalizeTags(value: string[] | null | undefined) {
+  return JSON.stringify(
+    Array.from(
+      new Set((value ?? []).map((tag) => tag.trim()).filter((tag) => tag.length > 0)),
+    ),
+  );
+}
+
+function parseTags(value: string | null | undefined) {
+  if (!value) {
+    return [];
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    return Array.isArray(parsed)
+      ? parsed.filter((tag): tag is string => typeof tag === "string")
+      : [];
+  } catch {
+    return [];
+  }
+}
+
+function normalizeDifficulty(value: CardDifficulty | null | undefined): CardDifficulty {
+  return value === "easy" || value === "hard" ? value : "medium";
+}
+
+function normalizeVisibility(value: DeckVisibility | null | undefined): DeckVisibility {
+  return value === "public" ? "public" : "private";
+}
+
 function mapDeck(row: DeckSummaryRow): Deck {
   return {
     id: row.id,
@@ -31,6 +67,9 @@ function mapDeck(row: DeckSummaryRow): Deck {
     sourceType: row.sourceType,
     ownerId: row.ownerId,
     accentColor: row.accentColor,
+    visibility: normalizeVisibility(row.visibility),
+    sourceLanguage: row.sourceLanguage ?? "en",
+    targetLanguage: row.targetLanguage ?? "ko",
     cardCount: Number(row.cardCount ?? 0),
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
@@ -43,10 +82,56 @@ function mapCard(row: LocalDeckCardRecord): DeckCard {
     deckId: row.deckId,
     term: row.term,
     meaning: row.meaning,
+    pronunciation: row.pronunciation,
+    partOfSpeech: row.partOfSpeech,
+    difficulty: normalizeDifficulty(row.difficulty),
     example: row.example,
+    exampleTranslation: row.exampleTranslation,
     note: row.note,
+    tags: parseTags(row.tags),
+    synonyms: row.synonyms,
+    antonyms: row.antonyms,
+    relatedExpressions: row.relatedExpressions,
+    source: row.source,
+    imageUri: row.imageUri,
     position: Number(row.position ?? 0),
   };
+}
+
+function mapActivity(row: LocalDeckActivityRecord): DeckActivity {
+  return {
+    id: row.id,
+    deckId: row.deckId,
+    activityType: row.activityType,
+    summary: row.summary,
+    createdAt: row.createdAt,
+  };
+}
+
+type PersistedCardInput = Omit<DeckCard, "deckId"> & {
+  createdAt: string;
+  updatedAt: string;
+  tagsJson: string;
+};
+
+function getCardChangeSignature(card: DeckCard | PersistedCardInput) {
+  return JSON.stringify({
+    term: card.term,
+    meaning: card.meaning,
+    pronunciation: card.pronunciation,
+    partOfSpeech: card.partOfSpeech,
+    difficulty: card.difficulty,
+    example: card.example,
+    exampleTranslation: card.exampleTranslation,
+    note: card.note,
+    tags: card.tags,
+    synonyms: card.synonyms,
+    antonyms: card.antonyms,
+    relatedExpressions: card.relatedExpressions,
+    source: card.source,
+    imageUri: card.imageUri,
+    position: card.position,
+  });
 }
 
 export class SqliteDeckRepository {
@@ -61,6 +146,9 @@ export class SqliteDeckRepository {
           d.description as description,
           d.source_type as sourceType,
           d.accent_color as accentColor,
+          d.visibility as visibility,
+          d.source_language as sourceLanguage,
+          d.target_language as targetLanguage,
           d.is_deleted as isDeleted,
           d.sync_state as syncState,
           d.last_synced_at as lastSyncedAt,
@@ -89,6 +177,9 @@ export class SqliteDeckRepository {
           d.description as description,
           d.source_type as sourceType,
           d.accent_color as accentColor,
+          d.visibility as visibility,
+          d.source_language as sourceLanguage,
+          d.target_language as targetLanguage,
           d.is_deleted as isDeleted,
           d.sync_state as syncState,
           d.last_synced_at as lastSyncedAt,
@@ -115,8 +206,18 @@ export class SqliteDeckRepository {
           deck_id as deckId,
           term,
           meaning,
+          pronunciation,
+          part_of_speech as partOfSpeech,
+          difficulty,
           example,
+          example_translation as exampleTranslation,
           note,
+          tags,
+          synonyms,
+          antonyms,
+          related_expressions as relatedExpressions,
+          source,
+          image_uri as imageUri,
           position,
           created_at as createdAt,
           updated_at as updatedAt
@@ -127,9 +228,26 @@ export class SqliteDeckRepository {
       [deckId],
     );
 
+    const activityRows = await db.getAllAsync<LocalDeckActivityRecord>(
+      `
+        SELECT
+          id,
+          deck_id as deckId,
+          activity_type as activityType,
+          summary,
+          created_at as createdAt
+        FROM local_deck_activities
+        WHERE deck_id = ?
+        ORDER BY created_at DESC
+        LIMIT 10;
+      `,
+      [deckId],
+    );
+
     return {
       ...mapDeck(deckRow),
       cards: cardRows.map(mapCard),
+      activities: activityRows.map(mapActivity),
     } satisfies DeckDetail;
   }
 
@@ -141,18 +259,35 @@ export class SqliteDeckRepository {
       const normalizedTitle = payload.title.trim();
       const normalizedDescription = normalizeOptionalText(payload.description);
       const accentColor = payload.accentColor ?? "#0F766E";
+      const visibility = normalizeVisibility(payload.visibility);
+      const sourceLanguage = normalizeOptionalText(payload.sourceLanguage) ?? "en";
+      const targetLanguage = normalizeOptionalText(payload.targetLanguage) ?? "ko";
       const persistedCards = [...payload.cards]
         .sort((left, right) => left.position - right.position)
-        .map((card) => ({
+        .map((card, index): PersistedCardInput => {
+          const tagsJson = normalizeTags(card.tags);
+          return {
           id: card.id ?? createId("card"),
           term: card.term.trim(),
           meaning: card.meaning.trim(),
+          pronunciation: normalizeOptionalText(card.pronunciation),
+          partOfSpeech: normalizeOptionalText(card.partOfSpeech),
+          difficulty: normalizeDifficulty(card.difficulty),
           example: normalizeOptionalText(card.example),
+          exampleTranslation: normalizeOptionalText(card.exampleTranslation),
           note: normalizeOptionalText(card.note),
-          position: card.position,
+          tags: parseTags(tagsJson),
+          tagsJson,
+          synonyms: normalizeOptionalText(card.synonyms),
+          antonyms: normalizeOptionalText(card.antonyms),
+          relatedExpressions: normalizeOptionalText(card.relatedExpressions),
+          source: normalizeOptionalText(card.source),
+          imageUri: normalizeOptionalText(card.imageUri),
+          position: index,
           createdAt: now,
           updatedAt: now,
-        }));
+        };
+      });
 
       await db.withExclusiveTransactionAsync(async (tx) => {
         const existingDeck = await tx.getFirstAsync<{ createdAt: string }>(
@@ -164,20 +299,54 @@ export class SqliteDeckRepository {
           `,
           [deckId],
         );
+        const existingCardRows = await tx.getAllAsync<LocalDeckCardRecord>(
+          `
+            SELECT
+              id,
+              deck_id as deckId,
+              term,
+              meaning,
+              pronunciation,
+              part_of_speech as partOfSpeech,
+              difficulty,
+              example,
+              example_translation as exampleTranslation,
+              note,
+              tags,
+              synonyms,
+              antonyms,
+              related_expressions as relatedExpressions,
+              source,
+              image_uri as imageUri,
+              position,
+              created_at as createdAt,
+              updated_at as updatedAt
+            FROM local_deck_cards
+            WHERE deck_id = ?;
+          `,
+          [deckId],
+        );
 
         const createdAt = existingDeck?.createdAt ?? now;
+        const existingRowsById = new Map(existingCardRows.map((card) => [card.id, card]));
+        const existingCardsById = new Map(
+          existingCardRows.map((card) => [card.id, mapCard(card)]),
+        );
 
         await tx.runAsync(
           `
             INSERT INTO local_decks (
-              id, owner_id, title, description, source_type, accent_color, is_deleted, sync_state, last_synced_at, created_at, updated_at
+              id, owner_id, title, description, source_type, accent_color, visibility, source_language, target_language, is_deleted, sync_state, last_synced_at, created_at, updated_at
             )
-            VALUES (?, ?, ?, ?, 'user', ?, 0, 'pending', NULL, ?, ?)
+            VALUES (?, ?, ?, ?, 'user', ?, ?, ?, ?, 0, 'pending', NULL, ?, ?)
             ON CONFLICT(id) DO UPDATE SET
               owner_id = excluded.owner_id,
               title = excluded.title,
               description = excluded.description,
               accent_color = excluded.accent_color,
+              visibility = excluded.visibility,
+              source_language = excluded.source_language,
+              target_language = excluded.target_language,
               is_deleted = 0,
               sync_state = excluded.sync_state,
               last_synced_at = NULL,
@@ -189,32 +358,111 @@ export class SqliteDeckRepository {
             normalizedTitle,
             normalizedDescription,
             accentColor,
+            visibility,
+            sourceLanguage,
+            targetLanguage,
             createdAt,
             now,
           ],
         );
 
-        await tx.runAsync("DELETE FROM local_deck_cards WHERE deck_id = ?;", [deckId]);
+        const retainedCardIds = new Set(persistedCards.map((card) => card.id));
+        for (const existingCard of existingCardsById.values()) {
+          if (!retainedCardIds.has(existingCard.id)) {
+            await tx.runAsync("DELETE FROM local_deck_cards WHERE deck_id = ? AND id = ?;", [
+              deckId,
+              existingCard.id,
+            ]);
+          }
+        }
 
         for (const card of persistedCards) {
           await tx.runAsync(
             `
               INSERT INTO local_deck_cards (
-                id, deck_id, term, meaning, example, note, position, created_at, updated_at
+                id, deck_id, term, meaning, pronunciation, part_of_speech, difficulty, example, example_translation, note, tags, synonyms, antonyms, related_expressions, source, image_uri, position, created_at, updated_at
               )
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+              ON CONFLICT(id) DO UPDATE SET
+                deck_id = excluded.deck_id,
+                term = excluded.term,
+                meaning = excluded.meaning,
+                pronunciation = excluded.pronunciation,
+                part_of_speech = excluded.part_of_speech,
+                difficulty = excluded.difficulty,
+                example = excluded.example,
+                example_translation = excluded.example_translation,
+                note = excluded.note,
+                tags = excluded.tags,
+                synonyms = excluded.synonyms,
+                antonyms = excluded.antonyms,
+                related_expressions = excluded.related_expressions,
+                source = excluded.source,
+                image_uri = excluded.image_uri,
+                position = excluded.position,
+                updated_at = excluded.updated_at;
             `,
             [
               card.id,
               deckId,
               card.term,
               card.meaning,
+              card.pronunciation,
+              card.partOfSpeech,
+              card.difficulty,
               card.example,
+              card.exampleTranslation,
               card.note,
+              card.tagsJson,
+              card.synonyms,
+              card.antonyms,
+              card.relatedExpressions,
+              card.source,
+              card.imageUri,
               card.position,
-              card.createdAt,
+              existingRowsById.get(card.id)?.createdAt ?? card.createdAt,
               card.updatedAt,
             ],
+          );
+        }
+
+        const activities: {
+          type: DeckActivityType;
+          subject: string;
+        }[] = [];
+
+        if (existingDeck) {
+          activities.push({ type: "deck_updated", subject: "" });
+        }
+
+        for (const card of persistedCards) {
+          const existingCard = existingCardsById.get(card.id);
+          if (!existingCard) {
+            activities.push({ type: "card_added", subject: card.term });
+            continue;
+          }
+
+          if (getCardChangeSignature(existingCard) !== getCardChangeSignature(card)) {
+            activities.push({ type: "card_updated", subject: card.term });
+          }
+        }
+
+        for (const existingCard of existingCardsById.values()) {
+          if (!retainedCardIds.has(existingCard.id)) {
+            activities.push({
+              type: "card_deleted",
+              subject: existingCard.term,
+            });
+          }
+        }
+
+        for (const activity of activities.slice(-12)) {
+          await tx.runAsync(
+            `
+              INSERT INTO local_deck_activities (id, deck_id, activity_type, summary, created_at)
+              VALUES (?, ?, ?, ?, ?);
+            `,
+            [createId("activity"), deckId, activity.type, activity.subject, now],
           );
         }
 
@@ -229,6 +477,9 @@ export class SqliteDeckRepository {
             description: normalizedDescription,
             sourceType: "user",
             accentColor,
+            visibility,
+            sourceLanguage,
+            targetLanguage,
             createdAt,
             updatedAt: now,
             cards: persistedCards.map((card) => ({
@@ -236,8 +487,18 @@ export class SqliteDeckRepository {
               deckId,
               term: card.term,
               meaning: card.meaning,
+              pronunciation: card.pronunciation,
+              partOfSpeech: card.partOfSpeech,
+              difficulty: card.difficulty,
               example: card.example,
+              exampleTranslation: card.exampleTranslation,
               note: card.note,
+              tags: card.tags,
+              synonyms: card.synonyms,
+              antonyms: card.antonyms,
+              relatedExpressions: card.relatedExpressions,
+              source: card.source,
+              imageUri: card.imageUri,
               position: card.position,
               createdAt: card.createdAt,
               updatedAt: card.updatedAt,

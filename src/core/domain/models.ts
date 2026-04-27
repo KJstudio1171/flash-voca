@@ -1,4 +1,6 @@
 export type DeckSourceType = "official" | "user";
+export type DeckVisibility = "private" | "public";
+export type CardDifficulty = "easy" | "medium" | "hard";
 export type EntitlementStatus = "active" | "expired" | "pending" | "revoked";
 
 export interface Deck {
@@ -8,6 +10,9 @@ export interface Deck {
   sourceType: DeckSourceType;
   ownerId: string | null;
   accentColor: string;
+  visibility: DeckVisibility;
+  sourceLanguage: string;
+  targetLanguage: string;
   cardCount: number;
   createdAt: string;
   updatedAt: string;
@@ -18,13 +23,34 @@ export interface DeckCard {
   deckId: string;
   term: string;
   meaning: string;
+  pronunciation: string | null;
+  partOfSpeech: string | null;
+  difficulty: CardDifficulty;
   example: string | null;
+  exampleTranslation: string | null;
   note: string | null;
+  tags: string[];
+  synonyms: string | null;
+  antonyms: string | null;
+  relatedExpressions: string | null;
+  source: string | null;
+  imageUri: string | null;
   position: number;
 }
 
 export interface DeckDetail extends Deck {
   cards: DeckCard[];
+  activities: DeckActivity[];
+}
+
+export type DeckActivityType = "card_added" | "card_updated" | "card_deleted" | "deck_updated";
+
+export interface DeckActivity {
+  id: string;
+  deckId: string;
+  activityType: DeckActivityType;
+  summary: string;
+  createdAt: string;
 }
 
 export interface Bundle {
@@ -107,12 +133,25 @@ export interface SaveDeckPayload {
   title: string;
   description?: string | null;
   accentColor?: string;
+  visibility?: DeckVisibility;
+  sourceLanguage?: string;
+  targetLanguage?: string;
   cards: {
     id?: string;
     term: string;
     meaning: string;
+    pronunciation?: string | null;
+    partOfSpeech?: string | null;
+    difficulty?: CardDifficulty;
     example?: string | null;
+    exampleTranslation?: string | null;
     note?: string | null;
+    tags?: string[];
+    synonyms?: string | null;
+    antonyms?: string | null;
+    relatedExpressions?: string | null;
+    source?: string | null;
+    imageUri?: string | null;
     position: number;
   }[];
 }

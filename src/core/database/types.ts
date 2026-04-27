@@ -1,4 +1,10 @@
-import { DeckSourceType, EntitlementStatus } from "@/src/core/domain/models";
+import {
+  CardDifficulty,
+  DeckActivityType,
+  DeckSourceType,
+  DeckVisibility,
+  EntitlementStatus,
+} from "@/src/core/domain/models";
 
 export type LocalSyncState = "failed" | "pending" | "synced";
 export type SyncEntityType = "deck" | "entitlement" | "review_log" | "user_card_state";
@@ -12,6 +18,9 @@ export interface LocalDeckRecord {
   description: string | null;
   sourceType: DeckSourceType;
   accentColor: string;
+  visibility: DeckVisibility;
+  sourceLanguage: string;
+  targetLanguage: string;
   isDeleted: number;
   syncState: LocalSyncState;
   lastSyncedAt: string | null;
@@ -24,11 +33,29 @@ export interface LocalDeckCardRecord {
   deckId: string;
   term: string;
   meaning: string;
+  pronunciation: string | null;
+  partOfSpeech: string | null;
+  difficulty: CardDifficulty;
   example: string | null;
+  exampleTranslation: string | null;
   note: string | null;
+  tags: string;
+  synonyms: string | null;
+  antonyms: string | null;
+  relatedExpressions: string | null;
+  source: string | null;
+  imageUri: string | null;
   position: number;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface LocalDeckActivityRecord {
+  id: string;
+  deckId: string;
+  activityType: DeckActivityType;
+  summary: string;
+  createdAt: string;
 }
 
 export interface LocalUserCardStateRecord {

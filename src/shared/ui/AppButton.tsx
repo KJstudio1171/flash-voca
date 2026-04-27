@@ -1,5 +1,5 @@
 import { PropsWithChildren } from "react";
-import { Pressable, StyleSheet, Text, ViewStyle } from "react-native";
+import { Pressable, StyleProp, StyleSheet, Text, ViewStyle } from "react-native";
 import Animated from "react-native-reanimated";
 
 import { useScalePress } from "@/src/shared/animation/useScalePress";
@@ -12,7 +12,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 type AppButtonProps = PropsWithChildren<{
   onPress?: () => void;
   variant?: "primary" | "secondary" | "ghost";
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   disabled?: boolean;
 }>;
 

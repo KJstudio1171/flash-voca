@@ -1,45 +1,30 @@
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import type { ComponentProps, ReactNode } from "react";
 import { useEffect, useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 
 import {
   useDeckDetailQuery,
   useSaveDeckMutation,
 } from "@/src/features/decks/hooks/useDeckQueries";
+import { toEditableCards } from "@/src/features/decks/utils/deckEditing";
+import { useT } from "@/src/shared/i18n";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
-import { AppButton } from "@/src/shared/ui/AppButton";
-import { Badge } from "@/src/shared/ui/Badge";
-import { Panel } from "@/src/shared/ui/Panel";
-import { Screen } from "@/src/shared/ui/Screen";
-import { TextField } from "@/src/shared/ui/TextField";
 import { tokens } from "@/src/shared/theme/tokens";
-import { createId } from "@/src/shared/utils/createId";
-
-type EditableCard = {
-  id?: string;
-  term: string;
-  meaning: string;
-  example: string;
-  note: string;
-};
+import { AppButton } from "@/src/shared/ui/AppButton";
+import { AppScreenFrame } from "@/src/shared/ui/AppScreenFrame";
+import { CardSurface } from "@/src/shared/ui/CardSurface";
+import { TextField } from "@/src/shared/ui/TextField";
 
 function getParamValue(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value ?? "";
 }
 
-function createEmptyCard(): EditableCard {
-  return {
-    id: createId("draft_card"),
-    term: "",
-    meaning: "",
-    example: "",
-    note: "",
-  };
-}
-
 export default function DeckEditorScreen() {
   const router = useRouter();
   const { colors } = useTheme();
+  const { t } = useT();
   const params = useLocalSearchParams<{ deckId: string | string[] }>();
   const deckId = getParamValue(params.deckId);
   const isNewDeck = deckId === "new";
@@ -48,13 +33,17 @@ export default function DeckEditorScreen() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [cards, setCards] = useState<EditableCard[]>([createEmptyCard(), createEmptyCard()]);
+  const [sourceLanguage, setSourceLanguage] = useState("en");
+  const [targetLanguage, setTargetLanguage] = useState("ko");
+  const [isPublic, setIsPublic] = useState(false);
 
   useEffect(() => {
     if (isNewDeck) {
       setTitle("");
       setDescription("");
-      setCards([createEmptyCard(), createEmptyCard()]);
+      setSourceLanguage("en");
+      setTargetLanguage("ko");
+      setIsPublic(false);
       return;
     }
 
@@ -64,28 +53,16 @@ export default function DeckEditorScreen() {
 
     setTitle(deckQuery.data.title);
     setDescription(deckQuery.data.description ?? "");
-    setCards(
-      deckQuery.data.cards.length > 0
-        ? deckQuery.data.cards.map((card) => ({
-            id: card.id,
-            term: card.term,
-            meaning: card.meaning,
-            example: card.example ?? "",
-            note: card.note ?? "",
-          }))
-        : [createEmptyCard()],
-    );
+    setSourceLanguage(deckQuery.data.sourceLanguage);
+    setTargetLanguage(deckQuery.data.targetLanguage);
+    setIsPublic(deckQuery.data.visibility === "public");
   }, [deckQuery.data, isNewDeck]);
 
-  const completeCards = cards.filter(
-    (card) => card.term.trim().length > 0 && card.meaning.trim().length > 0,
-  );
-  const canSave =
-    title.trim().length > 0 && completeCards.length > 0 && !saveDeckMutation.isPending;
+  const canSave = title.trim().length > 0 && !saveDeckMutation.isPending;
 
   async function handleSave() {
     if (!canSave) {
-      Alert.alert("Incomplete deck", "제목과 term/meaning이 있는 카드 한 장 이상이 필요합니다.");
+      Alert.alert(t("deckEditor.saveAlertTitle"), t("deckEditor.saveAlertBody"));
       return;
     }
 
@@ -93,151 +70,215 @@ export default function DeckEditorScreen() {
       id: isNewDeck ? undefined : deckId,
       title,
       description,
-      cards: completeCards.map((card, index) => ({
-        id: card.id,
-        term: card.term,
-        meaning: card.meaning,
-        example: card.example,
-        note: card.note,
-        position: index,
-      })),
+      sourceLanguage,
+      targetLanguage,
+      visibility: isPublic ? "public" : "private",
+      cards: deckQuery.data ? toEditableCards(deckQuery.data.cards) : [],
     });
 
-    router.replace({
-      pathname: "/decks/[deckId]/edit",
-      params: { deckId: savedDeck.id },
-    });
-  }
-
-  function updateCard(index: number, patch: Partial<EditableCard>) {
-    setCards((current) =>
-      current.map((card, currentIndex) =>
-        currentIndex === index ? { ...card, ...patch } : card,
-      ),
-    );
-  }
-
-  function removeCard(index: number) {
-    setCards((current) =>
-      current.length <= 1 ? [createEmptyCard()] : current.filter((_, i) => i !== index),
-    );
+    router.replace(`/decks/${savedDeck.id}` as never);
   }
 
   return (
-    <Screen
-      title={isNewDeck ? "Create Deck" : "Edit Deck"}
-      subtitle="편집 화면은 UI -> service -> repository 경로만 사용합니다. 화면에서 DB를 직접 호출하지 않습니다."
-      rightSlot={
-        !isNewDeck ? (
-          <AppButton
-            onPress={() =>
-              router.push({
-                pathname: "/study/[deckId]",
-                params: { deckId },
-              })
-            }
-            variant="secondary"
-          >
-            Study
-          </AppButton>
-        ) : undefined
+    <AppScreenFrame
+      bottomInset="none"
+      contentStyle={styles.content}
+      headerSlot={
+        <View style={[styles.topBar, { borderBottomColor: colors.line }]}>
+          <HeaderButton iconName="chevron-left" onPress={() => router.back()} />
+          <Text style={[styles.topTitle, { color: colors.ink }]}>
+            {isNewDeck ? t("deckEditor.createTitle") : t("deckEditor.settingsTitle")}
+          </Text>
+          <HeaderButton iconName="check" onPress={() => void handleSave()} />
+        </View>
       }
     >
-      <Panel>
-        <Badge tone="primary">{isNewDeck ? "Draft" : "Persisted"}</Badge>
-        <Text style={[styles.sectionTitle, { color: colors.ink }]}>Deck meta</Text>
-        <TextField onChangeText={setTitle} placeholder="Deck title" value={title} />
-        <TextField
-          multiline
-          onChangeText={setDescription}
-          placeholder="Short description"
-          style={styles.multilineInput}
-          value={description}
-        />
-      </Panel>
-
-      <Panel>
-        <View style={styles.rowHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.ink }]}>Cards</Text>
-          <AppButton
-            onPress={() => setCards((current) => [...current, createEmptyCard()])}
-            variant="ghost"
-          >
-            Add Card
-          </AppButton>
-        </View>
-
-        {cards.map((card, index) => (
-          <View
-            key={card.id ?? `card_${index}`}
-            style={[styles.cardEditor, { borderTopColor: colors.line }]}
-          >
-            <Text style={[styles.cardIndex, { color: colors.muted }]}>Card {index + 1}</Text>
-            <TextField
-              onChangeText={(value) => updateCard(index, { term: value })}
-              placeholder="Term"
-              value={card.term}
-            />
-            <TextField
-              onChangeText={(value) => updateCard(index, { meaning: value })}
-              placeholder="Meaning"
-              value={card.meaning}
-            />
-            <TextField
-              onChangeText={(value) => updateCard(index, { example: value })}
-              placeholder="Example sentence"
-              value={card.example}
-            />
-            <TextField
-              onChangeText={(value) => updateCard(index, { note: value })}
-              placeholder="Memo"
-              value={card.note}
-            />
-            <AppButton onPress={() => removeCard(index)} variant="ghost">
-              Remove
-            </AppButton>
-          </View>
-        ))}
-      </Panel>
-
-      <Panel>
-        <Text style={[styles.sectionTitle, { color: colors.ink }]}>Save state</Text>
-        <Text style={[styles.helpText, { color: colors.muted }]}>
-          저장 시 deck + deck_cards를 함께 갱신합니다. 결제/권한 테이블과는 분리되어 있어 무료 개인 학습 기능을 먼저 완성할 수 있습니다.
+      <CardSurface elevation="soft" style={styles.form}>
+        <Text style={[styles.sectionTitle, { color: colors.ink }]}>
+          {t("deckEditor.basicInfo")}
         </Text>
-        <AppButton onPress={() => void handleSave()} disabled={!canSave}>
-          {saveDeckMutation.isPending ? "Saving..." : "Save Deck"}
+        <LabeledField label={t("deckEditor.deckName")}>
+          <TextField
+            onChangeText={setTitle}
+            placeholder={t("deckEditor.deckNamePlaceholder")}
+            value={title}
+          />
+        </LabeledField>
+        <LabeledField label={t("deckEditor.description")}>
+          <TextField
+            multiline
+            onChangeText={setDescription}
+            placeholder={t("deckEditor.descriptionPlaceholder")}
+            style={styles.multilineInput}
+            value={description}
+          />
+        </LabeledField>
+        <View style={styles.languageRow}>
+          <LabeledField label={t("deckEditor.sourceLanguage")}>
+            <TextField
+              autoCapitalize="none"
+              onChangeText={setSourceLanguage}
+              placeholder="en"
+              value={sourceLanguage}
+            />
+          </LabeledField>
+          <MaterialCommunityIcons
+            color={colors.muted}
+            name="arrow-right"
+            size={22}
+            style={styles.arrow}
+          />
+          <LabeledField label={t("deckEditor.targetLanguage")}>
+            <TextField
+              autoCapitalize="none"
+              onChangeText={setTargetLanguage}
+              placeholder="ko"
+              value={targetLanguage}
+            />
+          </LabeledField>
+        </View>
+        <Pressable
+          accessibilityRole="switch"
+          accessibilityState={{ checked: isPublic }}
+          onPress={() => setIsPublic((current) => !current)}
+          style={[styles.visibilityRow, { borderColor: colors.line }]}
+        >
+          <View style={styles.visibilityCopy}>
+            <Text style={[styles.label, { color: colors.ink }]}>
+              {t("deckEditor.visibility")}
+            </Text>
+            <Text style={[styles.helpText, { color: colors.muted }]}>
+              {t("deckEditor.visibilityHint")}
+            </Text>
+          </View>
+          <View
+            style={[
+              styles.switchTrack,
+              { backgroundColor: isPublic ? colors.primary : colors.line },
+            ]}
+          >
+            <View
+              style={[
+                styles.switchThumb,
+                { backgroundColor: colors.surface, alignSelf: isPublic ? "flex-end" : "flex-start" },
+              ]}
+            />
+          </View>
+        </Pressable>
+      </CardSurface>
+
+      <View style={styles.footer}>
+        <AppButton disabled={!canSave} onPress={() => void handleSave()}>
+          {saveDeckMutation.isPending ? t("deckEditor.saving") : t("deckEditor.save")}
         </AppButton>
-      </Panel>
-    </Screen>
+      </View>
+    </AppScreenFrame>
+  );
+}
+
+function HeaderButton({
+  iconName,
+  onPress,
+}: {
+  iconName: ComponentProps<typeof MaterialCommunityIcons>["name"];
+  onPress: () => void;
+}) {
+  const { colors } = useTheme();
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [styles.headerButton, { opacity: pressed ? 0.55 : 1 }]}
+    >
+      <MaterialCommunityIcons color={colors.ink} name={iconName} size={30} />
+    </Pressable>
+  );
+}
+
+function LabeledField({ label, children }: { label: string; children: ReactNode }) {
+  const { colors } = useTheme();
+  return (
+    <View style={styles.field}>
+      <Text style={[styles.label, { color: colors.muted }]}>{label}</Text>
+      {children}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  sectionTitle: {
+  topBar: {
+    alignItems: "center",
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    minHeight: 64,
+    paddingHorizontal: tokens.spacing.m,
+  },
+  topTitle: {
     ...tokens.typography.heading,
+  },
+  headerButton: {
+    alignItems: "center",
+    height: 44,
+    justifyContent: "center",
+    width: 44,
+  },
+  content: {
+    gap: tokens.spacing.l,
+  },
+  form: {
+    gap: tokens.spacing.m,
+  },
+  sectionTitle: {
+    ...tokens.typography.subheading,
+  },
+  field: {
+    flex: 1,
+    gap: tokens.spacing.xs,
+  },
+  label: {
+    ...tokens.typography.captionBold,
   },
   multilineInput: {
     minHeight: 88,
     textAlignVertical: "top",
   },
-  rowHeader: {
+  languageRow: {
+    alignItems: "flex-end",
     flexDirection: "row",
-    justifyContent: "space-between",
+    gap: tokens.spacing.s,
+  },
+  arrow: {
+    marginBottom: 14,
+  },
+  visibilityRow: {
     alignItems: "center",
-    gap: tokens.spacing.s,
+    borderRadius: tokens.radius.m,
+    borderWidth: 1,
+    flexDirection: "row",
+    gap: tokens.spacing.m,
+    justifyContent: "space-between",
+    padding: tokens.spacing.m,
   },
-  cardEditor: {
-    gap: tokens.spacing.s,
-    paddingTop: tokens.spacing.s,
-    borderTopWidth: 1,
-  },
-  cardIndex: {
-    ...tokens.typography.caption,
-    letterSpacing: 1,
-    textTransform: "uppercase",
+  visibilityCopy: {
+    flex: 1,
+    gap: 4,
   },
   helpText: {
-    ...tokens.typography.body,
+    ...tokens.typography.caption,
+  },
+  switchTrack: {
+    borderRadius: tokens.radius.pill,
+    justifyContent: "center",
+    padding: 3,
+    width: 48,
+  },
+  switchThumb: {
+    borderRadius: tokens.radius.pill,
+    height: 20,
+    width: 20,
+  },
+  footer: {
+    marginTop: "auto",
   },
 });

@@ -73,10 +73,7 @@ export default function MyDecksScreen() {
               })
             }
             onPress={() =>
-              router.push({
-                pathname: "/study/[deckId]",
-                params: { deckId: deck.id },
-              })
+              router.push(`/decks/${deck.id}` as never)
             }
             title={deck.title}
           />

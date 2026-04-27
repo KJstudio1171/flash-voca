@@ -76,9 +76,9 @@ export async function seedMvpDataAsync() {
       await tx.runAsync(
         `
           INSERT INTO local_decks (
-            id, owner_id, title, description, source_type, accent_color, is_deleted, sync_state, last_synced_at, created_at, updated_at
+            id, owner_id, title, description, source_type, accent_color, visibility, source_language, target_language, is_deleted, sync_state, last_synced_at, created_at, updated_at
           )
-          VALUES (?, ?, ?, ?, ?, ?, 0, 'synced', ?, ?, ?);
+          VALUES (?, ?, ?, ?, ?, ?, 'private', 'en', 'ko', 0, 'synced', ?, ?, ?);
         `,
         [
           deck.id,
@@ -98,9 +98,9 @@ export async function seedMvpDataAsync() {
       await tx.runAsync(
         `
           INSERT INTO local_deck_cards (
-            id, deck_id, term, meaning, example, note, position, created_at, updated_at
+            id, deck_id, term, meaning, pronunciation, part_of_speech, difficulty, example, example_translation, note, tags, synonyms, antonyms, related_expressions, source, image_uri, position, created_at, updated_at
           )
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+          VALUES (?, ?, ?, ?, NULL, NULL, 'medium', ?, NULL, ?, '[]', NULL, NULL, NULL, NULL, NULL, ?, ?, ?);
         `,
         [
           card.id,

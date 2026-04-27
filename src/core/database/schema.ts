@@ -13,6 +13,9 @@ CREATE TABLE IF NOT EXISTS local_decks (
   description TEXT,
   source_type TEXT NOT NULL CHECK (source_type IN ('official', 'user')),
   accent_color TEXT NOT NULL DEFAULT '#0F766E',
+  visibility TEXT NOT NULL DEFAULT 'private' CHECK (visibility IN ('private', 'public')),
+  source_language TEXT NOT NULL DEFAULT 'en',
+  target_language TEXT NOT NULL DEFAULT 'ko',
   is_deleted INTEGER NOT NULL DEFAULT 0,
   sync_state TEXT NOT NULL DEFAULT 'pending' CHECK (sync_state IN ('failed', 'pending', 'synced')),
   last_synced_at TEXT,
@@ -27,11 +30,32 @@ CREATE TABLE IF NOT EXISTS local_deck_cards (
   deck_id TEXT NOT NULL,
   term TEXT NOT NULL,
   meaning TEXT NOT NULL,
+  pronunciation TEXT,
+  part_of_speech TEXT,
+  difficulty TEXT NOT NULL DEFAULT 'medium' CHECK (difficulty IN ('easy', 'medium', 'hard')),
   example TEXT,
+  example_translation TEXT,
   note TEXT,
+  tags TEXT NOT NULL DEFAULT '[]',
+  synonyms TEXT,
+  antonyms TEXT,
+  related_expressions TEXT,
+  source TEXT,
+  image_uri TEXT,
   position INTEGER NOT NULL,
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL,
+  FOREIGN KEY(deck_id) REFERENCES local_decks(id) ON DELETE CASCADE
+);
+`;
+
+export const LOCAL_DECK_ACTIVITIES_TABLE_SQL = `
+CREATE TABLE IF NOT EXISTS local_deck_activities (
+  id TEXT PRIMARY KEY NOT NULL,
+  deck_id TEXT NOT NULL,
+  activity_type TEXT NOT NULL CHECK (activity_type IN ('card_added', 'card_updated', 'card_deleted', 'deck_updated')),
+  summary TEXT NOT NULL,
+  created_at TEXT NOT NULL,
   FOREIGN KEY(deck_id) REFERENCES local_decks(id) ON DELETE CASCADE
 );
 `;
@@ -150,6 +174,9 @@ ON local_decks(owner_id, updated_at DESC);
 CREATE INDEX IF NOT EXISTS idx_local_deck_cards_deck_position
 ON local_deck_cards(deck_id, position ASC);
 
+CREATE INDEX IF NOT EXISTS idx_local_deck_activities_deck_created
+ON local_deck_activities(deck_id, created_at DESC);
+
 CREATE INDEX IF NOT EXISTS idx_local_user_card_states_deck_user
 ON local_user_card_states(deck_id, user_id);
 
@@ -176,6 +203,7 @@ export const LOCAL_DATABASE_SCHEMA_SQL = [
   APP_META_TABLE_SQL,
   LOCAL_DECKS_TABLE_SQL,
   LOCAL_DECK_CARDS_TABLE_SQL,
+  LOCAL_DECK_ACTIVITIES_TABLE_SQL,
   LOCAL_USER_CARD_STATES_TABLE_SQL,
   LOCAL_REVIEW_LOGS_TABLE_SQL,
   CATALOG_DECK_SUMMARIES_TABLE_SQL,
