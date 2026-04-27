@@ -1,8 +1,8 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import type { ComponentProps } from "react";
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
-import { useMemo, useState } from "react";
+import { Alert, Image, Pressable, StyleSheet, Text, View } from "react-native";
+import { useEffect, useMemo, useState } from "react";
 
 import { DeckCard } from "@/src/core/domain/models";
 import {
@@ -378,6 +378,7 @@ function CardRow({
         {selected ? <MaterialCommunityIcons color={colors.onPrimary} name="check" size={16} /> : null}
       </Pressable>
       <Text style={[styles.rowIndex, { color: colors.muted }]}>{index + 1}</Text>
+      {card.imageUri ? <CardThumbnail uri={card.imageUri} /> : null}
       <View style={styles.cardCopy}>
         <Text numberOfLines={1} style={[styles.term, { color: colors.ink }]}>
           {card.term}
@@ -397,6 +398,37 @@ function CardRow({
       </View>
       <MaterialCommunityIcons color={colors.muted} name="dots-vertical" size={24} />
     </Pressable>
+  );
+}
+
+function CardThumbnail({ uri }: { uri: string }) {
+  const { colors } = useTheme();
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    setFailed(false);
+  }, [uri]);
+
+  if (failed) {
+    return (
+      <View
+        style={[
+          styles.thumbnailFallback,
+          { backgroundColor: colors.surfaceStrong, borderColor: colors.line },
+        ]}
+      >
+        <MaterialCommunityIcons color={colors.muted} name="image-broken" size={18} />
+      </View>
+    );
+  }
+
+  return (
+    <Image
+      onError={() => setFailed(true)}
+      resizeMode="cover"
+      source={{ uri }}
+      style={styles.thumbnail}
+    />
   );
 }
 
@@ -531,6 +563,19 @@ const styles = StyleSheet.create({
   rowIndex: {
     ...tokens.typography.body,
     width: 22,
+  },
+  thumbnail: {
+    borderRadius: tokens.radius.s,
+    height: 44,
+    width: 44,
+  },
+  thumbnailFallback: {
+    alignItems: "center",
+    borderRadius: tokens.radius.s,
+    borderWidth: 1,
+    height: 44,
+    justifyContent: "center",
+    width: 44,
   },
   cardCopy: {
     flex: 1,

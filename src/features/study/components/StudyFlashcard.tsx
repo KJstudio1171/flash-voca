@@ -1,6 +1,6 @@
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { ComponentProps, memo, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { ComponentProps, memo, useEffect, useState } from "react";
+import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated from "react-native-reanimated";
 
 import { StudyCard } from "@/src/core/domain/models";
@@ -35,7 +35,12 @@ function StudyFlashcardComponent({
 }: StudyFlashcardProps) {
   const { colors, flashcardTextStyle } = useTheme();
   const [flipped, setFlipped] = useState(false);
+  const [imageFailed, setImageFailed] = useState(false);
   const exampleParts = splitExample(card.card.example, card.card.term);
+
+  useEffect(() => {
+    setImageFailed(false);
+  }, [card.card.id, card.card.imageUri]);
 
   return (
     <Animated.View key={card.card.id} entering={cardStackEnter()} style={styles.root}>
@@ -85,6 +90,14 @@ function StudyFlashcardComponent({
             ]}
           >
             <View style={styles.cardCenter}>
+              {card.card.imageUri && !imageFailed ? (
+                <Image
+                  onError={() => setImageFailed(true)}
+                  resizeMode="cover"
+                  source={{ uri: card.card.imageUri }}
+                  style={styles.studyImage}
+                />
+              ) : null}
               <Text style={[styles.termText, flashcardTextStyle, { color: colors.ink }]}>
                 {card.card.term}
               </Text>
@@ -172,7 +185,13 @@ const styles = StyleSheet.create({
   },
   cardCenter: {
     alignItems: "center",
-    gap: tokens.spacing.l,
+    gap: tokens.spacing.m,
+  },
+  studyImage: {
+    aspectRatio: 1.45,
+    borderRadius: tokens.radius.m,
+    maxHeight: 150,
+    width: "76%",
   },
   termText: {
     ...tokens.typography.flashcardTerm,

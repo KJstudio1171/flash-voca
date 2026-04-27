@@ -17,7 +17,13 @@
         }
       ],
       "expo-font",
-      "expo-localization"
+      "expo-localization",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow Flash Voca to access your photos so you can add images to vocabulary cards."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
