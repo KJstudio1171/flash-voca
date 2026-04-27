@@ -1,5 +1,7 @@
-import { useLocalSearchParams } from "expo-router";
-import { StyleSheet, Text } from "react-native";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { ComponentProps } from "react";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { AppError } from "@/src/core/errors";
 import { SessionCompleteCard } from "@/src/features/study/components/SessionCompleteCard";
@@ -10,18 +12,22 @@ import {
   useStudyDeckQuery,
 } from "@/src/features/study/hooks/useStudyQueries";
 import { useStudySession } from "@/src/features/study/hooks/useStudySession";
+import { AnimatedScreen } from "@/src/shared/animation/AnimatedScreen";
+import { useT } from "@/src/shared/i18n";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { tokens } from "@/src/shared/theme/tokens";
+import { AppScreenFrame } from "@/src/shared/ui/AppScreenFrame";
 import { Badge } from "@/src/shared/ui/Badge";
-import { Panel } from "@/src/shared/ui/Panel";
-import { Screen } from "@/src/shared/ui/Screen";
+import { CardSurface } from "@/src/shared/ui/CardSurface";
 
 function getParamValue(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value ?? "";
 }
 
 export default function StudyScreen() {
+  const router = useRouter();
   const { colors } = useTheme();
+  const { t } = useT();
   const params = useLocalSearchParams<{ deckId: string | string[] }>();
   const deckId = getParamValue(params.deckId);
   const studyQuery = useStudyDeckQuery(deckId);
@@ -40,46 +46,48 @@ export default function StudyScreen() {
   const showEmptyState = !studyQuery.isLoading && hasSnapshot && cards.length === 0;
 
   return (
-    <Screen
-      contentStyle={styles.content}
+    <AppScreenFrame
+      contentStyle={styles.screenContent}
       scroll={false}
-      title={snapshot?.deck.title ?? "Study"}
+      headerSlot={
+        <View style={[styles.topBar, { borderBottomColor: colors.line }]}>
+          <HeaderIconButton iconName="close" onPress={() => router.back()} />
+          <Text numberOfLines={1} style={[styles.topTitle, { color: colors.ink }]}>
+            {snapshot?.deck.title ?? t("study.title")}
+          </Text>
+          <HeaderIconButton iconName="cog-outline" onPress={() => router.push("/settings")} />
+        </View>
+      }
     >
       {hasSnapshot ? (
-        <StudyHeader
-          deckTitle={snapshot.deck.title}
-          currentIndex={session.currentIndex}
-          totalCards={session.totalCards}
-          dueCount={snapshot.dueCount}
-          masteredCount={snapshot.masteredCount}
-        />
+        <AnimatedScreen>
+          <StudyHeader currentIndex={session.currentIndex} totalCards={session.totalCards} />
+        </AnimatedScreen>
       ) : null}
 
       {studyQuery.isLoading && !hasSnapshot ? (
-        <Panel>
-          <Badge tone="info">Loading</Badge>
-          <Text style={[styles.body, { color: colors.muted }]}>학습 세션을 준비하고 있습니다.</Text>
-        </Panel>
+        <CardSurface>
+          <Badge tone="info">{t("study.loadingBadge")}</Badge>
+          <Text style={[styles.body, { color: colors.muted }]}>{t("study.loadingBody")}</Text>
+        </CardSurface>
       ) : null}
 
       {studyQuery.isError ? (
-        <Panel>
-          <Badge tone="accent">Error</Badge>
+        <CardSurface>
+          <Badge tone="accent">{t("study.errorBadge")}</Badge>
           <Text style={[styles.body, { color: colors.muted }]}>
             {studyQuery.error instanceof AppError
               ? studyQuery.error.userMessage
-              : "학습 데이터를 불러올 수 없습니다."}
+              : t("study.errorBody")}
           </Text>
-        </Panel>
+        </CardSurface>
       ) : null}
 
       {showEmptyState ? (
-        <Panel>
-          <Badge tone="info">Empty</Badge>
-          <Text style={[styles.body, { color: colors.muted }]}>
-            카드가 없습니다. 먼저 카드를 추가한 후 다시 시도하세요.
-          </Text>
-        </Panel>
+        <CardSurface>
+          <Badge tone="info">{t("study.emptyBadge")}</Badge>
+          <Text style={[styles.body, { color: colors.muted }]}>{t("study.emptyBody")}</Text>
+        </CardSurface>
       ) : null}
 
       {currentCard ? (
@@ -87,25 +95,79 @@ export default function StudyScreen() {
           key={currentCard.card.id}
           card={currentCard}
           disabled={session.isTransitioning}
+          labels={{
+            tapToReveal: t("study.tapToReveal"),
+            again: t("study.ratings.again"),
+            againSub: t("study.ratings.againSub"),
+            good: t("study.ratings.good"),
+            goodSub: t("study.ratings.goodSub"),
+            easy: t("study.ratings.easy"),
+            easySub: t("study.ratings.easySub"),
+            swipeHint: t("study.swipeHint"),
+            listen: t("study.listen"),
+          }}
           onRate={session.rateCard}
         />
       ) : null}
 
       {session.completed ? (
         <SessionCompleteCard
-          totalCards={session.totalCards}
           masteredCount={snapshot?.masteredCount ?? 0}
-          ratingCounts={session.ratingCounts}
           onRestart={session.restartSession}
+          ratingCounts={session.ratingCounts}
+          totalCards={session.totalCards}
         />
       ) : null}
-    </Screen>
+    </AppScreenFrame>
+  );
+}
+
+function HeaderIconButton({
+  iconName,
+  onPress,
+}: {
+  iconName: ComponentProps<typeof MaterialCommunityIcons>["name"];
+  onPress: () => void;
+}) {
+  const { colors } = useTheme();
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [
+        styles.headerButton,
+        { opacity: pressed ? 0.55 : 1 },
+      ]}
+    >
+      <MaterialCommunityIcons color={colors.ink} name={iconName} size={32} />
+    </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
-  content: {
-    paddingBottom: tokens.spacing.l,
+  topBar: {
+    alignItems: "center",
+    borderBottomWidth: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    minHeight: 64,
+    paddingHorizontal: tokens.spacing.l,
+  },
+  topTitle: {
+    ...tokens.typography.heading,
+    flex: 1,
+    textAlign: "center",
+  },
+  headerButton: {
+    alignItems: "center",
+    height: 44,
+    justifyContent: "center",
+    width: 44,
+  },
+  screenContent: {
+    gap: tokens.spacing.l,
+    paddingTop: tokens.spacing.l,
   },
   body: {
     ...tokens.typography.body,

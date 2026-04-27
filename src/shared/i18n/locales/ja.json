@@ -6,6 +6,13 @@
     "confirm": "確認",
     "close": "閉じる"
   },
+  "tabs": {
+    "home": "ホーム",
+    "decks": "単語帳",
+    "study": "学習",
+    "store": "ストア",
+    "profile": "プロフィール"
+  },
   "errors": {
     "deckSave": "デッキの保存に失敗しました。",
     "deckDelete": "デッキの削除に失敗しました。",
@@ -50,10 +57,93 @@
       }
     }
   },
+  "home": {
+    "greeting": "🔥 今日もがんばろう！",
+    "title": "今日の学習",
+    "summary": {
+      "progressLabel": "一日の目標",
+      "studiedCards": "習得済みカード",
+      "studyTime": "学習時間",
+      "streak": "連続学習",
+      "minutesValue": "{{count}}分",
+      "daysValue": "{{count}}日"
+    },
+    "recommendedSection": "おすすめ単語帳",
+    "recommended": {
+      "title": "TOEIC 必須単語 600",
+      "meta": "中級 · 600枚",
+      "bookTitle": "TOEIC",
+      "bookSub": "600",
+      "action": "学習する"
+    },
+    "recentSection": "最近の学習活動",
+    "recent": {
+      "empty": "カードを復習すると最近の学習活動が表示されます。"
+    },
+    "quickSection": "クイック実行",
+    "quickActions": {
+      "myDecks": "マイ単語帳",
+      "review": "復習 ({{count}})",
+      "randomStudy": "ランダム学習",
+      "stats": "統計"
+    }
+  },
+  "decks": {
+    "title": "マイ単語帳",
+    "personalSection": "自分で作った単語帳",
+    "freeEditHint": "作成と編集は無料です！✨",
+    "cardCount": "{{count}}枚",
+    "createDeck": "新しい単語帳を作成",
+    "emptyTitle": "作成した単語帳はまだありません",
+    "emptyBody": "下のボタンから最初の単語帳を作成してください。"
+  },
+  "study": {
+    "title": "学習",
+    "loadingBadge": "準備中",
+    "loadingBody": "学習セッションを準備しています。",
+    "errorBadge": "エラー",
+    "errorBody": "学習データを読み込めませんでした。",
+    "emptyBadge": "空",
+    "emptyBody": "カードがありません。カードを追加してからもう一度お試しください。",
+    "tapToReveal": "タップして意味を見る",
+    "listen": "発音を聞く",
+    "swipeHint": "左右スワイプでも評価できます",
+    "ratings": {
+      "again": "Again",
+      "againSub": "もう一度",
+      "good": "Good",
+      "goodSub": "良い",
+      "easy": "Easy",
+      "easySub": "簡単"
+    }
+  },
+  "studyHub": {
+    "eyebrow": "今日の学習",
+    "title": "学習",
+    "subtitle": "単語帳を選んで学習を続けましょう。",
+    "todayTitle": "今日の復習",
+    "todayMeta": "復習 {{due}}枚 · 単語帳 {{decks}}個",
+    "start": "学習を開始",
+    "createDeck": "単語帳を作成",
+    "continueTitle": "続きから学習",
+    "continueAction": "続ける",
+    "deckMeta": "{{cards}}枚 · 復習 {{due}}枚",
+    "emptyTitle": "学習する単語帳がありません",
+    "emptyBody": "個人単語帳を作成すると、ここからすぐ学習できます。",
+    "quickTitle": "クイック実行",
+    "quick": {
+      "review": "復習を開始",
+      "random": "ランダム学習",
+      "decks": "マイ単語帳",
+      "store": "ストア"
+    }
+  },
   "store": {
     "title": "ストア",
     "subtitle": "公式単語帳バンドルのカタログと購入権限を分離しています。実際の決済実装は後から接続できます。",
     "paidLayerBadge": "有料レイヤー",
+    "officialSectionTitle": "公式バンドル",
+    "officialSectionSubtitle": "専門家が厳選したプレミアム単語帳です。",
     "heroTitle": "公式バンドルカタログ",
     "heroBody": "バンドル一覧はSupabase public catalogから取得してSQLiteにキャッシュし、entitlementは別の権限レイヤーとして維持します。",
     "loading": "Supabaseカタログを確認しています。",
@@ -69,7 +159,17 @@
     "bundleMeta": "{{deckCount}}個のデッキ · {{priceText}}",
     "ownedBadge": "所有済み",
     "lockedBadge": "ロック中",
-    "viewBundle": "バンドルを見る"
+    "viewBundle": "バンドルを見る",
+    "emptyFilterBadge": "フィルター",
+    "emptyFilterTitle": "このカテゴリのバンドルはありません",
+    "emptyFilterMessage": "別のカテゴリを選択してください。",
+    "categories": {
+      "all": "すべて",
+      "toeic": "TOEIC",
+      "jlpt": "JLPT",
+      "business": "ビジネス",
+      "travel": "旅行"
+    }
   },
   "bundleDetail": {
     "title": "バンドル",
@@ -82,8 +182,22 @@
     "unlockedBadge": "解除済み",
     "paidBadge": "有料バンドル",
     "unlockedAction": "このアカウントで利用できます",
+    "purchaseAndUnlock": "購入してロック解除",
     "billingComingSoon": "決済連携は次の段階です",
     "includedDecks": "含まれるデッキ",
-    "cardCount": "{{count}}枚のカード"
+    "cardCount": "{{count}}枚",
+    "meta": "{{level}} · {{count}}枚",
+    "defaultLevel": "中級",
+    "totalCards": "総カード数",
+    "studyTime": "学習時間",
+    "studyTimeValue": "20時間+",
+    "difficulty": "難易度",
+    "benefitsTitle": "バンドル特典",
+    "benefits": {
+      "expert": "専門家が選定した公式単語帳",
+      "examples": "例文と一緒に効果的に暗記",
+      "updates": "継続的な更新と新規単語の追加",
+      "lifetime": "購入後は永続利用可能"
+    }
   }
 }

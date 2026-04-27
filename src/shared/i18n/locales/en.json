@@ -6,6 +6,13 @@
     "confirm": "Confirm",
     "close": "Close"
   },
+  "tabs": {
+    "home": "Home",
+    "decks": "Decks",
+    "study": "Study",
+    "store": "Store",
+    "profile": "Profile"
+  },
   "errors": {
     "deckSave": "Failed to save deck.",
     "deckDelete": "Failed to delete deck.",
@@ -50,10 +57,93 @@
       }
     }
   },
+  "home": {
+    "greeting": "🔥 Keep going today!",
+    "title": "Today's Study",
+    "summary": {
+      "progressLabel": "Daily goal",
+      "studiedCards": "Mastered cards",
+      "studyTime": "Study time",
+      "streak": "Study streak",
+      "minutesValue": "{{count}} min",
+      "daysValue": "{{count}} days"
+    },
+    "recommendedSection": "Recommended Deck",
+    "recommended": {
+      "title": "TOEIC Essential 600",
+      "meta": "Intermediate · 600 cards",
+      "bookTitle": "TOEIC",
+      "bookSub": "600",
+      "action": "Study"
+    },
+    "recentSection": "Recent Activity",
+    "recent": {
+      "empty": "Recent study activity will appear after you review cards."
+    },
+    "quickSection": "Quick Actions",
+    "quickActions": {
+      "myDecks": "My Decks",
+      "review": "Review ({{count}})",
+      "randomStudy": "Random Study",
+      "stats": "Stats"
+    }
+  },
+  "decks": {
+    "title": "My Decks",
+    "personalSection": "Decks I Made",
+    "freeEditHint": "Create and edit for free! ✨",
+    "cardCount": "{{count}} cards",
+    "createDeck": "Create new deck",
+    "emptyTitle": "No personal decks yet",
+    "emptyBody": "Create your first deck with the button below."
+  },
+  "study": {
+    "title": "Study",
+    "loadingBadge": "Loading",
+    "loadingBody": "Preparing your study session.",
+    "errorBadge": "Error",
+    "errorBody": "Could not load study data.",
+    "emptyBadge": "Empty",
+    "emptyBody": "No cards yet. Add cards and try again.",
+    "tapToReveal": "Tap to reveal meaning",
+    "listen": "Listen",
+    "swipeHint": "You can also rate with left and right swipes",
+    "ratings": {
+      "again": "Again",
+      "againSub": "Retry",
+      "good": "Good",
+      "goodSub": "Good",
+      "easy": "Easy",
+      "easySub": "Easy"
+    }
+  },
+  "studyHub": {
+    "eyebrow": "Today's study",
+    "title": "Study",
+    "subtitle": "Pick a deck and continue learning.",
+    "todayTitle": "Today's review",
+    "todayMeta": "{{due}} due · {{decks}} decks",
+    "start": "Start study",
+    "createDeck": "Create deck",
+    "continueTitle": "Continue learning",
+    "continueAction": "Continue",
+    "deckMeta": "{{cards}} cards · {{due}} due",
+    "emptyTitle": "No decks to study",
+    "emptyBody": "Create a personal deck to start studying here.",
+    "quickTitle": "Quick actions",
+    "quick": {
+      "review": "Start review",
+      "random": "Random study",
+      "decks": "My Decks",
+      "store": "Store"
+    }
+  },
   "store": {
     "title": "Store",
     "subtitle": "Official vocabulary bundle catalog and purchase entitlements are kept separate. The real billing implementation can be connected later.",
     "paidLayerBadge": "Paid Layer",
+    "officialSectionTitle": "Official Bundles",
+    "officialSectionSubtitle": "Premium vocabulary decks curated by experts.",
     "heroTitle": "Official bundle catalog",
     "heroBody": "Bundles are pulled from the Supabase public catalog, cached in SQLite, and kept separate from the entitlement layer.",
     "loading": "Checking the Supabase catalog.",
@@ -69,7 +159,17 @@
     "bundleMeta": "{{deckCount}} decks · {{priceText}}",
     "ownedBadge": "Owned",
     "lockedBadge": "Locked",
-    "viewBundle": "View Bundle"
+    "viewBundle": "View Bundle",
+    "emptyFilterBadge": "Filter",
+    "emptyFilterTitle": "No bundles in this category",
+    "emptyFilterMessage": "Choose another category.",
+    "categories": {
+      "all": "All",
+      "toeic": "TOEIC",
+      "jlpt": "JLPT",
+      "business": "Business",
+      "travel": "Travel"
+    }
   },
   "bundleDetail": {
     "title": "Bundle",
@@ -82,8 +182,22 @@
     "unlockedBadge": "Unlocked",
     "paidBadge": "Paid Bundle",
     "unlockedAction": "Unlocked for this account",
+    "purchaseAndUnlock": "Purchase and Unlock",
     "billingComingSoon": "Billing hook comes next",
     "includedDecks": "Included decks",
-    "cardCount": "{{count}} cards"
+    "cardCount": "{{count}} cards",
+    "meta": "{{level}} · {{count}} cards",
+    "defaultLevel": "Intermediate",
+    "totalCards": "Total cards",
+    "studyTime": "Study time",
+    "studyTimeValue": "20h+",
+    "difficulty": "Difficulty",
+    "benefitsTitle": "Bundle benefits",
+    "benefits": {
+      "expert": "Official decks curated by experts",
+      "examples": "Memorize effectively with examples",
+      "updates": "Ongoing updates and new words",
+      "lifetime": "Lifetime access after purchase"
+    }
   }
 }

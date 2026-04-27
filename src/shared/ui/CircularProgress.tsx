@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { memo, ReactNode } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Svg, { Circle } from "react-native-svg";
 
@@ -10,6 +10,7 @@ type CircularProgressProps = {
   progress: number;
   color?: string;
   trackColor?: string;
+  centerSlot?: ReactNode;
 };
 
 function CircularProgressComponent({
@@ -18,6 +19,7 @@ function CircularProgressComponent({
   progress,
   color,
   trackColor,
+  centerSlot,
 }: CircularProgressProps) {
   const { colors } = useTheme();
   const effectiveColor = color ?? colors.primary;
@@ -55,14 +57,16 @@ function CircularProgressComponent({
         />
       </Svg>
       <View style={styles.labelContainer}>
-        <Text
-          style={[
-            styles.label,
-            { color: effectiveColor, fontSize: size * 0.23 },
-          ]}
-        >
-          {percent}%
-        </Text>
+        {centerSlot ?? (
+          <Text
+            style={[
+              styles.label,
+              { color: effectiveColor, fontSize: size * 0.23 },
+            ]}
+          >
+            {percent}%
+          </Text>
+        )}
       </View>
     </View>
   );

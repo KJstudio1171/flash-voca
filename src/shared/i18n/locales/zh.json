@@ -6,6 +6,13 @@
     "confirm": "确认",
     "close": "关闭"
   },
+  "tabs": {
+    "home": "首页",
+    "decks": "卡组",
+    "study": "学习",
+    "store": "商店",
+    "profile": "个人"
+  },
   "errors": {
     "deckSave": "保存卡组失败。",
     "deckDelete": "删除卡组失败。",
@@ -50,10 +57,93 @@
       }
     }
   },
+  "home": {
+    "greeting": "🔥 今天也加油！",
+    "title": "今日学习",
+    "summary": {
+      "progressLabel": "每日目标",
+      "studiedCards": "已掌握卡片",
+      "studyTime": "学习时间",
+      "streak": "连续学习",
+      "minutesValue": "{{count}} 分钟",
+      "daysValue": "{{count}} 天"
+    },
+    "recommendedSection": "推荐卡组",
+    "recommended": {
+      "title": "TOEIC 必备词 600",
+      "meta": "中级 · 600 张卡片",
+      "bookTitle": "TOEIC",
+      "bookSub": "600",
+      "action": "开始学习"
+    },
+    "recentSection": "最近学习活动",
+    "recent": {
+      "empty": "复习卡片后，最近学习活动会显示在这里。"
+    },
+    "quickSection": "快速操作",
+    "quickActions": {
+      "myDecks": "我的卡组",
+      "review": "复习 ({{count}})",
+      "randomStudy": "随机学习",
+      "stats": "统计"
+    }
+  },
+  "decks": {
+    "title": "我的卡组",
+    "personalSection": "我创建的卡组",
+    "freeEditHint": "创建和编辑都是免费的！✨",
+    "cardCount": "{{count}} 张卡片",
+    "createDeck": "创建新卡组",
+    "emptyTitle": "还没有创建卡组",
+    "emptyBody": "点击下方按钮创建第一个卡组。"
+  },
+  "study": {
+    "title": "学习",
+    "loadingBadge": "准备中",
+    "loadingBody": "正在准备学习会话。",
+    "errorBadge": "错误",
+    "errorBody": "无法加载学习数据。",
+    "emptyBadge": "空",
+    "emptyBody": "还没有卡片。请先添加卡片后再试。",
+    "tapToReveal": "点击查看释义",
+    "listen": "听发音",
+    "swipeHint": "也可以左右滑动进行评分",
+    "ratings": {
+      "again": "Again",
+      "againSub": "再来",
+      "good": "Good",
+      "goodSub": "不错",
+      "easy": "Easy",
+      "easySub": "简单"
+    }
+  },
+  "studyHub": {
+    "eyebrow": "今日学习",
+    "title": "学习",
+    "subtitle": "选择卡组并继续学习。",
+    "todayTitle": "今日复习",
+    "todayMeta": "{{due}} 张待复习 · {{decks}} 个卡组",
+    "start": "开始学习",
+    "createDeck": "创建卡组",
+    "continueTitle": "继续学习",
+    "continueAction": "继续",
+    "deckMeta": "{{cards}} 张卡片 · {{due}} 张待复习",
+    "emptyTitle": "暂无可学习卡组",
+    "emptyBody": "创建个人卡组后即可在这里开始学习。",
+    "quickTitle": "快速操作",
+    "quick": {
+      "review": "开始复习",
+      "random": "随机学习",
+      "decks": "我的卡组",
+      "store": "商店"
+    }
+  },
   "store": {
     "title": "商店",
     "subtitle": "官方词汇套装目录与购买权限保持分离。实际支付实现可稍后接入。",
     "paidLayerBadge": "付费层",
+    "officialSectionTitle": "官方套装",
+    "officialSectionSubtitle": "由专家精选的高级词汇卡组。",
     "heroTitle": "官方套装目录",
     "heroBody": "套装列表从 Supabase public catalog 拉取并缓存到 SQLite，entitlement 作为独立权限层保留。",
     "loading": "正在检查 Supabase 目录。",
@@ -69,7 +159,17 @@
     "bundleMeta": "{{deckCount}} 个卡组 · {{priceText}}",
     "ownedBadge": "已拥有",
     "lockedBadge": "已锁定",
-    "viewBundle": "查看套装"
+    "viewBundle": "查看套装",
+    "emptyFilterBadge": "筛选",
+    "emptyFilterTitle": "该分类暂无套装",
+    "emptyFilterMessage": "请选择其他分类。",
+    "categories": {
+      "all": "全部",
+      "toeic": "TOEIC",
+      "jlpt": "JLPT",
+      "business": "商务",
+      "travel": "旅行"
+    }
   },
   "bundleDetail": {
     "title": "套装",
@@ -82,8 +182,22 @@
     "unlockedBadge": "已解锁",
     "paidBadge": "付费套装",
     "unlockedAction": "此账号已解锁",
+    "purchaseAndUnlock": "购买并解锁",
     "billingComingSoon": "支付接入将在下一步完成",
     "includedDecks": "包含的卡组",
-    "cardCount": "{{count}} 张卡片"
+    "cardCount": "{{count}} 张卡片",
+    "meta": "{{level}} · {{count}} 张卡片",
+    "defaultLevel": "中级",
+    "totalCards": "总卡片数",
+    "studyTime": "学习时间",
+    "studyTimeValue": "20小时+",
+    "difficulty": "难度",
+    "benefitsTitle": "套装权益",
+    "benefits": {
+      "expert": "专家精选官方卡组",
+      "examples": "结合例句高效记忆",
+      "updates": "持续更新并添加新词",
+      "lifetime": "购买后可永久使用"
+    }
   }
 }

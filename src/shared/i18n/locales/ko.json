@@ -6,6 +6,13 @@
     "confirm": "확인",
     "close": "닫기"
   },
+  "tabs": {
+    "home": "홈",
+    "decks": "단어장",
+    "study": "학습",
+    "store": "스토어",
+    "profile": "프로필"
+  },
   "errors": {
     "deckSave": "덱 저장에 실패했습니다.",
     "deckDelete": "덱 삭제에 실패했습니다.",
@@ -50,10 +57,93 @@
       }
     }
   },
+  "home": {
+    "greeting": "🔥 오늘도 화이팅!",
+    "title": "오늘의 학습",
+    "summary": {
+      "progressLabel": "일일 목표 달성",
+      "studiedCards": "마스터한 카드",
+      "studyTime": "학습 시간",
+      "streak": "연속 학습",
+      "minutesValue": "{{count}}분",
+      "daysValue": "{{count}}일"
+    },
+    "recommendedSection": "추천 단어장",
+    "recommended": {
+      "title": "TOEIC 필수 단어 600",
+      "meta": "중급 · 600 카드",
+      "bookTitle": "TOEIC",
+      "bookSub": "600",
+      "action": "학습하기"
+    },
+    "recentSection": "최근 학습 활동",
+    "recent": {
+      "empty": "카드를 복습하면 최근 학습 활동이 표시됩니다."
+    },
+    "quickSection": "빠른 실행",
+    "quickActions": {
+      "myDecks": "내 단어장",
+      "review": "복습 ({{count}})",
+      "randomStudy": "랜덤 학습",
+      "stats": "통계"
+    }
+  },
+  "decks": {
+    "title": "내 단어장",
+    "personalSection": "내가 만든 단어장",
+    "freeEditHint": "생성 및 편집은 무료입니다! ✨",
+    "cardCount": "{{count}} 카드",
+    "createDeck": "새 단어장 만들기",
+    "emptyTitle": "아직 만든 단어장이 없습니다",
+    "emptyBody": "아래 버튼으로 첫 단어장을 만들어보세요."
+  },
+  "study": {
+    "title": "학습",
+    "loadingBadge": "준비 중",
+    "loadingBody": "학습 세션을 준비하고 있습니다.",
+    "errorBadge": "오류",
+    "errorBody": "학습 데이터를 불러올 수 없습니다.",
+    "emptyBadge": "비어 있음",
+    "emptyBody": "카드가 없습니다. 먼저 카드를 추가한 후 다시 시도하세요.",
+    "tapToReveal": "탭하여 뜻 보기",
+    "listen": "발음 듣기",
+    "swipeHint": "좌우 스와이프로도 평가할 수 있어요",
+    "ratings": {
+      "again": "Again",
+      "againSub": "다시",
+      "good": "Good",
+      "goodSub": "좋음",
+      "easy": "Easy",
+      "easySub": "쉬움"
+    }
+  },
+  "studyHub": {
+    "eyebrow": "오늘의 학습",
+    "title": "학습",
+    "subtitle": "복습할 단어장을 고르고 바로 이어서 학습하세요.",
+    "todayTitle": "오늘 복습",
+    "todayMeta": "복습 {{due}}장 · 단어장 {{decks}}개",
+    "start": "학습 시작",
+    "createDeck": "단어장 만들기",
+    "continueTitle": "이어서 학습",
+    "continueAction": "계속 학습하기",
+    "deckMeta": "{{cards}} 카드 · {{due}}장 복습",
+    "emptyTitle": "학습할 단어장이 없습니다",
+    "emptyBody": "개인 단어장을 만들면 여기서 바로 학습을 시작할 수 있습니다.",
+    "quickTitle": "빠른 실행",
+    "quick": {
+      "review": "복습 시작",
+      "random": "랜덤 학습",
+      "decks": "내 단어장",
+      "store": "스토어"
+    }
+  },
   "store": {
     "title": "스토어",
     "subtitle": "공식 단어장 번들 카탈로그와 구매 권한을 분리해 두었습니다. 실제 결제 구현체는 나중에 연결하면 됩니다.",
     "paidLayerBadge": "유료 계층",
+    "officialSectionTitle": "공식 번들",
+    "officialSectionSubtitle": "전문가가 엄선한 프리미엄 단어장을 만나보세요.",
     "heroTitle": "공식 번들 카탈로그",
     "heroBody": "번들 목록은 Supabase public catalog에서 받아 SQLite에 캐시하고, entitlement는 별도 권한 계층으로 유지합니다.",
     "loading": "Supabase 카탈로그를 확인하는 중입니다.",
@@ -69,7 +159,17 @@
     "bundleMeta": "단어장 {{deckCount}}개 · {{priceText}}",
     "ownedBadge": "보유 중",
     "lockedBadge": "잠김",
-    "viewBundle": "번들 보기"
+    "viewBundle": "번들 보기",
+    "emptyFilterBadge": "필터",
+    "emptyFilterTitle": "해당 카테고리 번들이 없습니다",
+    "emptyFilterMessage": "다른 카테고리를 선택해 주세요.",
+    "categories": {
+      "all": "전체",
+      "toeic": "TOEIC",
+      "jlpt": "JLPT",
+      "business": "비즈니스",
+      "travel": "여행"
+    }
   },
   "bundleDetail": {
     "title": "번들",
@@ -82,8 +182,22 @@
     "unlockedBadge": "잠금 해제됨",
     "paidBadge": "유료 번들",
     "unlockedAction": "이 계정에서 사용할 수 있습니다",
+    "purchaseAndUnlock": "구매 및 잠금 해제",
     "billingComingSoon": "결제 연결은 다음 단계입니다",
     "includedDecks": "포함된 단어장",
-    "cardCount": "카드 {{count}}개"
+    "cardCount": "{{count}} 카드",
+    "meta": "{{level}} · {{count}} 카드",
+    "defaultLevel": "중급",
+    "totalCards": "총 카드 수",
+    "studyTime": "학습 시간",
+    "studyTimeValue": "20시간+",
+    "difficulty": "난이도",
+    "benefitsTitle": "번들 혜택",
+    "benefits": {
+      "expert": "전문가 선정 공식 단어장",
+      "examples": "예문과 함께 효과적으로 암기",
+      "updates": "지속적인 업데이트 및 신규 단어 추가",
+      "lifetime": "구매 후 평생 이용 가능"
+    }
   }
 }
