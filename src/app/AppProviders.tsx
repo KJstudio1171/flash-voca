@@ -8,6 +8,9 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { createErrorHandler } from "@/src/core/errors/handleError";
 import { getErrorReporter } from "@/src/core/observability";
 import { AppServices, createAppServices } from "@/src/core/services/createAppServices";
+import { AccountRequiredModal } from "@/src/features/store/components/AccountRequiredModal";
+import { AuthGatedActionProvider } from "@/src/features/store/hooks/useAuthGatedAction";
+import { StudyPreferencesProvider } from "@/src/features/study/preferences/StudyPreferencesProvider";
 import { i18next } from "@/src/shared/i18n";
 import { ThemeProvider } from "@/src/shared/theme/ThemeProvider";
 import { ToastProvider, useToast } from "@/src/shared/ui/toast";
@@ -36,9 +39,14 @@ export function AppProviders({ children }: PropsWithChildren) {
         <I18nextProvider i18n={i18next}>
           <ThemeProvider>
             <ToastProvider>
-              <AppServicesContext.Provider value={services}>
-                {children}
-              </AppServicesContext.Provider>
+              <StudyPreferencesProvider>
+                <AppServicesContext.Provider value={services}>
+                  <AuthGatedActionProvider>
+                    {children}
+                    <AccountRequiredModal />
+                  </AuthGatedActionProvider>
+                </AppServicesContext.Provider>
+              </StudyPreferencesProvider>
             </ToastProvider>
           </ThemeProvider>
         </I18nextProvider>
