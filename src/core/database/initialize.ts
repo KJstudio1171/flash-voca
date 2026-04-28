@@ -1,7 +1,7 @@
 import { getDatabaseAsync } from "@/src/core/database/client";
 import { LOCAL_DATABASE_SCHEMA_SQL } from "@/src/core/database/schema";
 
-export const LOCAL_DATABASE_SCHEMA_VERSION = 6;
+export const LOCAL_DATABASE_SCHEMA_VERSION = 7;
 
 const SQLITE_PRAGMA_SQL = `
 PRAGMA foreign_keys = ON;
@@ -111,6 +111,15 @@ async function migrateToVersion6Async(db: MigrationDatabase) {
   await addColumnIfMissingAsync(db, "bundles", "play_product_id", "play_product_id TEXT");
 }
 
+async function migrateToVersion7Async(db: MigrationDatabase): Promise<void> {
+  await addColumnIfMissingAsync(
+    db,
+    "local_user_card_states",
+    "algorithm_data",
+    "TEXT NOT NULL DEFAULT '{}'",
+  );
+}
+
 export async function initializeDatabaseAsync() {
   const db = await getDatabaseAsync();
 
@@ -140,6 +149,10 @@ export async function initializeDatabaseAsync() {
 
   if (currentVersion < 6) {
     await migrateToVersion6Async(db);
+  }
+
+  if (currentVersion < 7) {
+    await migrateToVersion7Async(db);
   }
 
   await db.runAsync(

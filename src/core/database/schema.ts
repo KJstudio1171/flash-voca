@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS local_user_card_states (
   next_review_at TEXT,
   last_reviewed_at TEXT,
   is_bookmarked INTEGER NOT NULL DEFAULT 0,
+  algorithm_data TEXT NOT NULL DEFAULT '{}',
   sync_state TEXT NOT NULL DEFAULT 'pending' CHECK (sync_state IN ('failed', 'pending', 'synced')),
   last_synced_at TEXT,
   created_at TEXT NOT NULL,
