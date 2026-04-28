@@ -77,6 +77,26 @@
     "toastSuccess": "同期が完了しました。",
     "toastNoChanges": "変更はありません。"
   },
+  "srs": {
+    "algorithm": {
+      "sectionTitle": "学習アルゴリズム",
+      "leitner": {
+        "title": "Simple (Leitner)",
+        "description": "5箱システム。直感的で速い。"
+      },
+      "sm2": {
+        "title": "Standard (SM-2)",
+        "description": "Anki風の標準。カードごとに難易度を自動調整。"
+      },
+      "changed": "{{name}}に変更しました。"
+    },
+    "rating": {
+      "again": "もう一度",
+      "hard": "難しい",
+      "good": "ちょうど良い",
+      "easy": "簡単"
+    }
+  },
   "settings": {
     "title": "設定",
     "subtitle": "アプリ設定を管理します",
@@ -193,6 +213,7 @@
     "ratings": {
       "again": "わからない",
       "againSub": "もう一度",
+      "hard": "難しい",
       "good": "普通",
       "goodSub": "良い",
       "easy": "わかった",

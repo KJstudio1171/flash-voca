@@ -77,6 +77,26 @@
     "toastSuccess": "同步完成。",
     "toastNoChanges": "没有要同步的更改。"
   },
+  "srs": {
+    "algorithm": {
+      "sectionTitle": "学习算法",
+      "leitner": {
+        "title": "Simple (Leitner)",
+        "description": "5箱系统。直观快速。"
+      },
+      "sm2": {
+        "title": "Standard (SM-2)",
+        "description": "类似 Anki 的标准。按卡片自动调整难度。"
+      },
+      "changed": "已切换为 {{name}}。"
+    },
+    "rating": {
+      "again": "再来",
+      "hard": "困难",
+      "good": "良好",
+      "easy": "简单"
+    }
+  },
   "settings": {
     "title": "设置",
     "subtitle": "管理应用设置",
@@ -193,6 +213,7 @@
     "ratings": {
       "again": "不知道",
       "againSub": "再来",
+      "hard": "困难",
       "good": "一般",
       "goodSub": "不错",
       "easy": "知道了",

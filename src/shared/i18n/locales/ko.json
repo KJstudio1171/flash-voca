@@ -77,6 +77,26 @@
     "toastSuccess": "동기화를 완료했어요.",
     "toastNoChanges": "변경된 내용이 없어요."
   },
+  "srs": {
+    "algorithm": {
+      "sectionTitle": "학습 알고리즘",
+      "leitner": {
+        "title": "Simple (Leitner)",
+        "description": "5상자 시스템으로 직관적이고 빠름."
+      },
+      "sm2": {
+        "title": "Standard (SM-2)",
+        "description": "Anki와 같은 표준. 카드별 난이도를 자동 조정."
+      },
+      "changed": "{{name}}로 변경했어요."
+    },
+    "rating": {
+      "again": "다시",
+      "hard": "어려움",
+      "good": "알맞음",
+      "easy": "쉬움"
+    }
+  },
   "settings": {
     "title": "설정",
     "subtitle": "앱 설정을 관리합니다",
@@ -193,6 +213,7 @@
     "ratings": {
       "again": "모름",
       "againSub": "다시",
+      "hard": "어려움",
       "good": "보통",
       "goodSub": "좋음",
       "easy": "알겠음",

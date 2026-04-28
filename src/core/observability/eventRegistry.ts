@@ -18,6 +18,8 @@ export const analyticsEventRegistry = {
   deck_sync_started: { allowedProps: ["trigger"] as const },
   deck_sync_completed: { allowedProps: ["pushed", "pulled", "durationMs"] as const },
   deck_sync_failed: { allowedProps: ["reason", "stage"] as const },
+  srs_algorithm_changed: { allowedProps: ["from", "to"] as const },
+  srs_review_recorded: { allowedProps: ["algorithmId", "rating"] as const },
 } satisfies Record<string, { allowedProps: readonly string[] }>;
 
 export type AnalyticsEventName = keyof typeof analyticsEventRegistry;
