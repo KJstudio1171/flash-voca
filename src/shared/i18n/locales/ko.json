@@ -29,6 +29,12 @@
       "googleLink": "Google 연결에 실패했어요. 잠시 후 다시 시도해 주세요.",
       "identityConflict": "이 Google 계정은 이미 다른 사용자와 연결되어 있어요.",
       "migration": "데이터 이전 중 문제가 생겼어요."
+    },
+    "billing": {
+      "init": "결제 시스템 초기화에 실패했어요.",
+      "productMissing": "이 번들은 아직 판매 중이 아니에요.",
+      "purchaseFailed": "결제에 실패했어요. 잠시 후 다시 시도해 주세요.",
+      "verificationFailed": "구매 확인에 실패했어요. 자동 환불될 수 있어요."
     }
   },
   "auth": {
@@ -40,6 +46,21 @@
       "linkedAs": "{{email}} 로 연결됨",
       "linkedAnonymous": "익명 계정에 연결됨"
     }
+  },
+  "billing": {
+    "accountRequired": {
+      "title": "계정 연결이 필요해요",
+      "description": "구매 보호와 환불을 위해 계정 연결이 필요합니다.",
+      "confirm": "연결하기",
+      "cancel": "취소"
+    },
+    "purchaseButton": "구매하기",
+    "purchasing": "구매 중...",
+    "owned": "보유 중",
+    "restoreButton": "구매 복원",
+    "restoring": "복원 중...",
+    "restoreEmpty": "복원할 구매가 없어요.",
+    "restoreCompleted": "{{count}}개 구매를 복원했어요."
   },
   "settings": {
     "title": "설정",

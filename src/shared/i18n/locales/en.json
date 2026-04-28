@@ -29,6 +29,12 @@
       "googleLink": "Google link failed. Please try again later.",
       "identityConflict": "This Google account is already linked to another user.",
       "migration": "We couldn't finish migrating your data."
+    },
+    "billing": {
+      "init": "Billing system failed to initialize.",
+      "productMissing": "This bundle is not on sale yet.",
+      "purchaseFailed": "Purchase failed. Please try again later.",
+      "verificationFailed": "Could not verify your purchase. It may be auto-refunded."
     }
   },
   "auth": {
@@ -40,6 +46,21 @@
       "linkedAs": "Linked as {{email}}",
       "linkedAnonymous": "Linked to anonymous account"
     }
+  },
+  "billing": {
+    "accountRequired": {
+      "title": "Account link required",
+      "description": "Linking your account protects purchases and enables refunds.",
+      "confirm": "Link account",
+      "cancel": "Cancel"
+    },
+    "purchaseButton": "Buy",
+    "purchasing": "Purchasing...",
+    "owned": "Owned",
+    "restoreButton": "Restore purchases",
+    "restoring": "Restoring...",
+    "restoreEmpty": "No purchases to restore.",
+    "restoreCompleted": "Restored {{count}} purchase(s)."
   },
   "settings": {
     "title": "Settings",

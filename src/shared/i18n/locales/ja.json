@@ -29,6 +29,12 @@
       "googleLink": "Google連携に失敗しました。しばらくしてからもう一度お試しください。",
       "identityConflict": "このGoogleアカウントは既に他のユーザーと連携されています。",
       "migration": "データの移行中に問題が発生しました。"
+    },
+    "billing": {
+      "init": "決済システムの初期化に失敗しました。",
+      "productMissing": "このバンドルはまだ販売されていません。",
+      "purchaseFailed": "決済に失敗しました。しばらくしてから再度お試しください。",
+      "verificationFailed": "購入の確認に失敗しました。自動返金される可能性があります。"
     }
   },
   "auth": {
@@ -40,6 +46,21 @@
       "linkedAs": "{{email}} として連携済み",
       "linkedAnonymous": "匿名アカウントに連携"
     }
+  },
+  "billing": {
+    "accountRequired": {
+      "title": "アカウント連携が必要です",
+      "description": "購入保護と返金のためアカウント連携が必要です。",
+      "confirm": "連携する",
+      "cancel": "キャンセル"
+    },
+    "purchaseButton": "購入する",
+    "purchasing": "購入中...",
+    "owned": "購入済み",
+    "restoreButton": "購入を復元",
+    "restoring": "復元中...",
+    "restoreEmpty": "復元する購入はありません。",
+    "restoreCompleted": "{{count}}件の購入を復元しました。"
   },
   "settings": {
     "title": "設定",

@@ -21,3 +21,12 @@ export {
   MigrationError,
 } from "@/src/core/errors/AuthError";
 export { normalizeError, createErrorHandler } from "@/src/core/errors/handleError";
+export {
+  BillingError,
+  BillingInitError,
+  BillingProductMissingError,
+  BillingPurchaseCancelledError,
+  BillingPurchaseFailedError,
+  BillingVerificationError,
+  AuthGateCancelledError,
+} from "@/src/core/errors/BillingError";

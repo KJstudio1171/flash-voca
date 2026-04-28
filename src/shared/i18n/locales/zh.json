@@ -29,6 +29,12 @@
       "googleLink": "Google 关联失败。请稍后再试。",
       "identityConflict": "此 Google 账户已与其他用户关联。",
       "migration": "数据迁移时出现问题。"
+    },
+    "billing": {
+      "init": "结算系统初始化失败。",
+      "productMissing": "此捆绑包尚未销售。",
+      "purchaseFailed": "购买失败。请稍后再试。",
+      "verificationFailed": "无法验证您的购买。可能会自动退款。"
     }
   },
   "auth": {
@@ -40,6 +46,21 @@
       "linkedAs": "已关联为 {{email}}",
       "linkedAnonymous": "已关联到匿名账户"
     }
+  },
+  "billing": {
+    "accountRequired": {
+      "title": "需要关联账户",
+      "description": "为了保护购买和退款，需要关联账户。",
+      "confirm": "关联账户",
+      "cancel": "取消"
+    },
+    "purchaseButton": "购买",
+    "purchasing": "购买中...",
+    "owned": "已拥有",
+    "restoreButton": "恢复购买",
+    "restoring": "恢复中...",
+    "restoreEmpty": "没有可恢复的购买。",
+    "restoreCompleted": "已恢复 {{count}} 个购买。"
   },
   "settings": {
     "title": "设置",
