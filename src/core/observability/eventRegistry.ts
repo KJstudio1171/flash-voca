@@ -1,15 +1,14 @@
 import type { AnalyticsValue } from "@/src/core/observability/types";
 
 export const analyticsEventRegistry = {
-  app_opened: {
-    allowedProps: [] as const,
-  },
-  deck_created: {
-    allowedProps: ["cardCount", "isCustom"] as const,
-  },
-  deck_deleted: {
-    allowedProps: ["cardCount"] as const,
-  },
+  app_opened: { allowedProps: [] as const },
+  deck_created: { allowedProps: ["cardCount", "isCustom"] as const },
+  deck_deleted: { allowedProps: ["cardCount"] as const },
+  auth_anonymous_created: { allowedProps: ["userId"] as const },
+  auth_rebind_completed: { allowedProps: ["fromUserId", "toUserId"] as const },
+  auth_google_link_started: { allowedProps: [] as const },
+  auth_google_linked: { allowedProps: ["userId"] as const },
+  auth_link_failed: { allowedProps: ["reason"] as const },
 } satisfies Record<string, { allowedProps: readonly string[] }>;
 
 export type AnalyticsEventName = keyof typeof analyticsEventRegistry;
