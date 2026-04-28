@@ -68,6 +68,7 @@ export interface LocalUserCardStateRecord {
   intervalDays: number;
   nextReviewAt: string | null;
   lastReviewedAt: string | null;
+  isBookmarked: number;
   syncState: LocalSyncState;
   lastSyncedAt: string | null;
   createdAt: string;
@@ -113,4 +114,17 @@ export interface CachedEntitlementRecord {
   syncedAt: string | null;
   cacheUpdatedAt: string;
   rawPayload: string | null;
+}
+
+export interface LocalBundleRecord {
+  id: string;
+  title: string;
+  description: string;
+  price_text: string;
+  currency_code: string;
+  play_product_id: string | null;
+  cover_color: string;
+  is_published: number;
+  created_at: string;
+  updated_at: string;
 }

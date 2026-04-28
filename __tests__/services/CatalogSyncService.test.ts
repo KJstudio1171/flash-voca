@@ -13,6 +13,7 @@ const snapshot: RemoteCatalogSnapshot = {
       description: "Official starter words.",
       priceText: "$4.99",
       currencyCode: "USD",
+      playProductId: null,
       coverColor: "#EA580C",
       isPublished: true,
       createdAt: "2026-04-24T00:00:00.000Z",

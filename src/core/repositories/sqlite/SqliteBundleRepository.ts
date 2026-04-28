@@ -8,6 +8,7 @@ type BundleRow = {
   description: string;
   priceText: string;
   currencyCode: string;
+  playProductId: string | null;
   coverColor: string;
   deckCount: number;
   createdAt: string;
@@ -30,6 +31,7 @@ function mapBundle(row: BundleRow): Bundle {
     description: row.description,
     priceText: row.priceText,
     currencyCode: row.currencyCode,
+    playProductId: row.playProductId ?? null,
     coverColor: row.coverColor,
     deckCount: Number(row.deckCount ?? 0),
     createdAt: row.createdAt,
@@ -49,6 +51,7 @@ export class SqliteBundleRepository {
             b.description as description,
             b.price_text as priceText,
             b.currency_code as currencyCode,
+            b.play_product_id as playProductId,
             b.cover_color as coverColor,
             b.created_at as createdAt,
             b.updated_at as updatedAt,
@@ -81,6 +84,7 @@ export class SqliteBundleRepository {
             b.description as description,
             b.price_text as priceText,
             b.currency_code as currencyCode,
+            b.play_product_id as playProductId,
             b.cover_color as coverColor,
             b.created_at as createdAt,
             b.updated_at as updatedAt,

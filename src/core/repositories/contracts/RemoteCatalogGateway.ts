@@ -4,6 +4,7 @@ export interface RemoteCatalogBundle {
   description: string;
   priceText: string;
   currencyCode: string;
+  playProductId: string | null;
   coverColor: string;
   isPublished: boolean;
   createdAt: string;

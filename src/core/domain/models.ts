@@ -59,6 +59,7 @@ export interface Bundle {
   description: string;
   priceText: string;
   currencyCode: string;
+  playProductId: string | null;
   coverColor: string;
   deckCount: number;
   createdAt: string;
@@ -108,12 +109,41 @@ export interface UserCardState {
   intervalDays: number;
   nextReviewAt: string | null;
   lastReviewedAt: string | null;
+  isBookmarked: boolean;
   updatedAt: string;
 }
 
 export interface DeckSummary extends Deck {
   dueCount: number;
   masteredCount: number;
+}
+
+export interface HomeRecentReviewActivity {
+  id: string;
+  deckId: string;
+  cardId: string;
+  term: string;
+  rating: number;
+  reviewedAt: string;
+}
+
+export interface HomeReviewStats {
+  studiedCards: number;
+  studyMinutes: number;
+  streakDays: number;
+  recentActivities: HomeRecentReviewActivity[];
+}
+
+export interface HomeStudyStats extends HomeReviewStats {
+  totalCards: number;
+  dueCount: number;
+  progress: number;
+}
+
+export interface HomeSummary {
+  decks: DeckSummary[];
+  stats: HomeStudyStats;
+  recentActivities: HomeRecentReviewActivity[];
 }
 
 export interface StudyCard {

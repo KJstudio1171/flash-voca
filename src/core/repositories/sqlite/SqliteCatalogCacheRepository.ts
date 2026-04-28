@@ -63,9 +63,9 @@ export class SqliteCatalogCacheRepository {
         await tx.runAsync(
           `
             INSERT INTO bundles (
-              id, title, description, price_text, currency_code, cover_color, is_published, created_at, updated_at
+              id, title, description, price_text, currency_code, play_product_id, cover_color, is_published, created_at, updated_at
             )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
           `,
           [
             bundle.id,
@@ -73,6 +73,7 @@ export class SqliteCatalogCacheRepository {
             bundle.description,
             bundle.priceText,
             bundle.currencyCode,
+            bundle.playProductId,
             bundle.coverColor,
             bundle.isPublished ? 1 : 0,
             bundle.createdAt,

@@ -13,6 +13,7 @@ type BundleRow = {
   description: string;
   price_text: string;
   currency_code: string;
+  play_product_id: string | null;
   cover_color: string;
   is_published: boolean;
   created_at: string;
@@ -44,6 +45,7 @@ function mapBundle(row: BundleRow): RemoteCatalogBundle {
     description: row.description,
     priceText: row.price_text,
     currencyCode: row.currency_code,
+    playProductId: row.play_product_id,
     coverColor: row.cover_color,
     isPublished: row.is_published,
     createdAt: row.created_at,
@@ -85,7 +87,7 @@ export class SupabaseCatalogGateway implements RemoteCatalogGateway {
       client
         .from("bundles")
         .select(
-          "id, title, description, price_text, currency_code, cover_color, is_published, created_at, updated_at",
+          "id, title, description, price_text, currency_code, play_product_id, cover_color, is_published, created_at, updated_at",
         )
         .eq("is_published", true)
         .order("updated_at", { ascending: false }),

@@ -21,6 +21,7 @@ const bundle: Bundle = {
   description: "Official starter words.",
   priceText: "$4.99",
   currencyCode: "USD",
+  playProductId: null,
   coverColor: "#EA580C",
   deckCount: 1,
   createdAt: "2026-04-24T00:00:00.000Z",
