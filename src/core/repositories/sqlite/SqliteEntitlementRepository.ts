@@ -109,4 +109,41 @@ export class SqliteEntitlementRepository {
       throw new EntitlementCacheError({ context: { userId }, cause: error });
     }
   }
+
+  async upsertCachedEntitlementAsync(entitlement: Entitlement): Promise<void> {
+    try {
+      const db = await getDatabaseAsync();
+      const now = new Date().toISOString();
+      await db.runAsync(
+        `INSERT INTO cached_entitlements (
+          id, user_id, bundle_id, provider, provider_ref, status,
+          granted_at, expires_at, synced_at, cache_updated_at, raw_payload
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL)
+        ON CONFLICT(id) DO UPDATE SET
+          status = excluded.status,
+          provider_ref = excluded.provider_ref,
+          granted_at = excluded.granted_at,
+          expires_at = excluded.expires_at,
+          synced_at = excluded.synced_at,
+          cache_updated_at = excluded.cache_updated_at;`,
+        [
+          entitlement.id,
+          entitlement.userId,
+          entitlement.bundleId,
+          entitlement.provider,
+          entitlement.providerRef,
+          entitlement.status,
+          entitlement.grantedAt,
+          entitlement.expiresAt,
+          entitlement.syncedAt,
+          now,
+        ],
+      );
+    } catch (error) {
+      if (error instanceof EntitlementCacheError) {
+        throw error;
+      }
+      throw new EntitlementCacheError({ context: { entitlementId: entitlement.id }, cause: error });
+    }
+  }
 }

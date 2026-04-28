@@ -8,7 +8,6 @@ import type { EntitlementRepository } from "@/src/core/repositories/contracts/En
 import type { RemoteEntitlementGateway } from "@/src/core/repositories/contracts/RemoteEntitlementGateway";
 import { EntitlementService } from "@/src/core/services/EntitlementService";
 import { StoreService } from "@/src/core/services/StoreService";
-import type { BillingGateway } from "@/src/core/services/billing/BillingGateway";
 import type { CatalogSyncService } from "@/src/core/services/CatalogSyncService";
 import {
   createMockAuthService,
@@ -67,16 +66,13 @@ function createEntitlementService() {
     hasBundleAccessAsync: jest.fn().mockResolvedValue(true),
     replaceCachedEntitlementsAsync: jest.fn().mockResolvedValue(undefined),
     clearCachedEntitlementsAsync: jest.fn().mockResolvedValue(undefined),
+    upsertCachedEntitlementAsync: jest.fn().mockResolvedValue(undefined),
   };
   const remoteGateway: RemoteEntitlementGateway = {
     pullEntitlementsAsync: jest.fn().mockResolvedValue([]),
   };
-  const billingGateway: BillingGateway = {
-    purchaseBundleAsync: jest.fn().mockResolvedValue(undefined),
-    restorePurchasesAsync: jest.fn().mockResolvedValue(undefined),
-  };
 
-  return new EntitlementService(repository, remoteGateway, billingGateway, createMockAuthService());
+  return new EntitlementService(repository, remoteGateway, createMockAuthService());
 }
 
 function createCatalogSyncService(): CatalogSyncService {

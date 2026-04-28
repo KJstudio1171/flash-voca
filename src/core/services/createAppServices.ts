@@ -11,7 +11,10 @@ import { DeckService } from "@/src/core/services/DeckService";
 import { EntitlementService } from "@/src/core/services/EntitlementService";
 import { StoreService } from "@/src/core/services/StoreService";
 import { StudySessionService } from "@/src/core/services/StudySessionService";
+import { ExpoIapBillingGateway } from "@/src/core/services/billing/ExpoIapBillingGateway";
 import { NoopBillingGateway } from "@/src/core/services/billing/NoopBillingGateway";
+import { PurchaseVerificationService } from "@/src/core/services/billing/PurchaseVerificationService";
+import { NoopPurchaseVerificationService } from "@/src/core/services/billing/NoopPurchaseVerificationService";
 import { getDatabaseAsync } from "@/src/core/database/client";
 import { getSupabaseClient } from "@/src/core/supabase/client";
 import type { AuthService } from "@/src/core/services/auth/AuthService";
@@ -27,6 +30,7 @@ import {
   ExpoLocaleDetector,
   LocaleService,
 } from "@/src/shared/i18n";
+import type { Entitlement } from "@/src/core/domain/models";
 
 function createAuthService(): AuthService {
   const storage = new AsyncStorageUserIdStorage();
@@ -72,13 +76,31 @@ export function createAppServices() {
   const entitlementService = new EntitlementService(
     entitlementRepository,
     new SupabaseEntitlementGateway(),
-    new NoopBillingGateway(),
     authService,
   );
   const localeService = new LocaleService(
     new AsyncStorageLocaleStorage(),
     new ExpoLocaleDetector(),
   );
+
+  const supabaseClient = getSupabaseClient();
+
+  const billingGateway = supabaseClient
+    ? new ExpoIapBillingGateway()
+    : new NoopBillingGateway();
+
+  const purchaseVerification = supabaseClient
+    ? new PurchaseVerificationService({
+        invokeFunctionAsync: async (name, opts) => {
+          const result = await supabaseClient.functions.invoke(name, {
+            body: opts.body as Record<string, unknown>,
+          });
+          return result as { data?: { entitlement: Entitlement }; error?: unknown };
+        },
+        upsertCachedEntitlementAsync: (entitlement) =>
+          entitlementRepository.upsertCachedEntitlementAsync(entitlement),
+      })
+    : new NoopPurchaseVerificationService();
 
   return {
     authService,
@@ -97,6 +119,8 @@ export function createAppServices() {
       studyRepository,
       authService,
     ),
+    billingGateway,
+    purchaseVerification,
   };
 }
 

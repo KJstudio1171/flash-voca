@@ -5,4 +5,5 @@ export interface EntitlementRepository {
   hasBundleAccessAsync(bundleId: string, userId: string): Promise<boolean>;
   replaceCachedEntitlementsAsync(userId: string, entitlements: Entitlement[]): Promise<void>;
   clearCachedEntitlementsAsync(userId: string): Promise<void>;
+  upsertCachedEntitlementAsync(entitlement: Entitlement): Promise<void>;
 }
