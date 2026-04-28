@@ -21,6 +21,7 @@ import { NoopBillingGateway } from "@/src/core/services/billing/NoopBillingGatew
 import { PurchaseVerificationService } from "@/src/core/services/billing/PurchaseVerificationService";
 import { NoopPurchaseVerificationService } from "@/src/core/services/billing/NoopPurchaseVerificationService";
 import { getDatabaseAsync } from "@/src/core/database/client";
+import { SrsPreferenceService } from "@/src/core/services/srs/SrsPreferenceService";
 import { getSupabaseClient } from "@/src/core/supabase/client";
 import type { AuthService } from "@/src/core/services/auth/AuthService";
 import { NoopAuthService } from "@/src/core/services/auth/NoopAuthService";
@@ -91,6 +92,7 @@ export function createAppServices() {
   const supabaseClient = getSupabaseClient();
 
   const appMeta = new SqliteAppMetaRepository();
+  const srsPreferenceService = new SrsPreferenceService(appMeta);
 
   const deckSyncService: DeckSyncService | null = supabaseClient
     ? (() => {
@@ -146,9 +148,11 @@ export function createAppServices() {
       deckRepository,
       studyRepository,
       authService,
+      srsPreferenceService,
     ),
     billingGateway,
     purchaseVerification,
+    srsPreferenceService,
   };
 }
 

@@ -11,13 +11,21 @@ import {
   createMockDeckRepository,
   createMockStudyRepository,
 } from "@/__tests__/helpers/mockRepositories";
+import type { SrsPreferenceService } from "@/src/core/services/srs/SrsPreferenceService";
+
+function createMockSrsPreferenceService(): SrsPreferenceService {
+  return {
+    getAlgorithmAsync: jest.fn().mockResolvedValue("leitner"),
+    setAlgorithmAsync: jest.fn().mockResolvedValue(undefined),
+  } as unknown as SrsPreferenceService;
+}
 
 describe("StudySessionService", () => {
   describe("listDeckSummariesAsync", () => {
     it("returns empty array when no decks exist", async () => {
       const deckRepo = createMockDeckRepository();
       const studyRepo = createMockStudyRepository();
-      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService(), createMockSrsPreferenceService());
 
       const result = await service.listDeckSummariesAsync();
 
@@ -32,7 +40,7 @@ describe("StudySessionService", () => {
       const studyRepo = createMockStudyRepository({
         listCardStatesAsync: jest.fn().mockResolvedValue([]),
       });
-      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService(), createMockSrsPreferenceService());
 
       const result = await service.listDeckSummariesAsync();
 
@@ -63,7 +71,7 @@ describe("StudySessionService", () => {
       const studyRepo = createMockStudyRepository({
         listCardStatesAsync: jest.fn().mockResolvedValue(states),
       });
-      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService(), createMockSrsPreferenceService());
 
       const result = await service.listDeckSummariesAsync();
 
@@ -84,7 +92,7 @@ describe("StudySessionService", () => {
       const studyRepo = createMockStudyRepository({
         listCardStatesAsync: jest.fn().mockResolvedValue(states),
       });
-      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService(), createMockSrsPreferenceService());
 
       const result = await service.listDeckSummariesAsync();
 
@@ -134,7 +142,7 @@ describe("StudySessionService", () => {
           Promise.resolve(statesByDeck[deckId] ?? []),
         ),
       });
-      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService(), createMockSrsPreferenceService());
 
       const result = await service.listDeckSummariesAsync();
 
@@ -191,7 +199,7 @@ describe("StudySessionService", () => {
           recentActivities,
         }),
       });
-      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService(), createMockSrsPreferenceService());
 
       const result = await service.getHomeSummaryAsync("test-user");
 
@@ -212,7 +220,7 @@ describe("StudySessionService", () => {
     it("returns empty home stats when no decks or reviews exist", async () => {
       const deckRepo = createMockDeckRepository();
       const studyRepo = createMockStudyRepository();
-      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService(), createMockSrsPreferenceService());
 
       const result = await service.getHomeSummaryAsync();
 
@@ -238,7 +246,7 @@ describe("StudySessionService", () => {
         getDeckByIdAsync: jest.fn().mockResolvedValue(null),
       });
       const studyRepo = createMockStudyRepository();
-      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService(), createMockSrsPreferenceService());
 
       const result = await service.getSnapshotAsync("nonexistent-deck");
 
@@ -260,7 +268,7 @@ describe("StudySessionService", () => {
       const studyRepo = createMockStudyRepository({
         listCardStatesAsync: jest.fn().mockResolvedValue([state1]),
       });
-      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService(), createMockSrsPreferenceService());
 
       const result = await service.getSnapshotAsync("deck-1");
 
@@ -299,7 +307,7 @@ describe("StudySessionService", () => {
       const studyRepo = createMockStudyRepository({
         listCardStatesAsync: jest.fn().mockResolvedValue(states),
       });
-      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService(), createMockSrsPreferenceService());
 
       const result = await service.getSnapshotAsync("deck-1");
 
@@ -335,7 +343,7 @@ describe("StudySessionService", () => {
       const studyRepo = createMockStudyRepository({
         listCardStatesAsync: jest.fn().mockResolvedValue(states),
       });
-      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService(), createMockSrsPreferenceService());
 
       const result = await service.getSnapshotAsync("deck-1");
 
@@ -348,13 +356,13 @@ describe("StudySessionService", () => {
     it("delegates to studyRepository.logReviewAsync with correct arguments", async () => {
       const deckRepo = createMockDeckRepository();
       const studyRepo = createMockStudyRepository();
-      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService(), createMockSrsPreferenceService());
       const input = createMockLogReviewInput();
 
       await service.recordReviewAsync(input, "test-user");
 
       expect(studyRepo.logReviewAsync).toHaveBeenCalledTimes(1);
-      expect(studyRepo.logReviewAsync).toHaveBeenCalledWith(input, "test-user");
+      expect(studyRepo.logReviewAsync).toHaveBeenCalledWith(input, "test-user", expect.anything());
     });
   });
 
@@ -362,7 +370,7 @@ describe("StudySessionService", () => {
     it("delegates to studyRepository.setBookmarkAsync with correct arguments", async () => {
       const deckRepo = createMockDeckRepository();
       const studyRepo = createMockStudyRepository();
-      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService(), createMockSrsPreferenceService());
       const input = {
         deckId: "deck-1",
         cardId: "card-1",
@@ -382,7 +390,7 @@ describe("StudySessionService", () => {
       const studyRepo = createMockStudyRepository({
         undoLastReviewAsync: jest.fn().mockResolvedValue(true),
       });
-      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService(), createMockSrsPreferenceService());
 
       const result = await service.undoLastReviewAsync("deck-1", "test-user");
 

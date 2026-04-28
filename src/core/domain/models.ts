@@ -191,6 +191,6 @@ export interface SaveDeckPayload {
 export interface LogReviewInput {
   deckId: string;
   cardId: string;
-  rating: number;
+  rating: ReviewRating;
   elapsedMs: number;
 }

@@ -95,7 +95,7 @@ export function createMockLogReviewInput(
   return {
     deckId: "deck-1",
     cardId: "card-1",
-    rating: 3,
+    rating: "good",
     elapsedMs: 2000,
     ...overrides,
   };

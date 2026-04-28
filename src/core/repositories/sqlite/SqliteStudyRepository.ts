@@ -1,7 +1,6 @@
 import { getDatabaseAsync } from "@/src/core/database/client";
 import { StudyRecordError } from "@/src/core/errors";
 import {
-  LocalReviewLogRecord,
   LocalUserCardStateRecord,
 } from "@/src/core/database/types";
 import {
@@ -12,8 +11,20 @@ import {
 } from "@/src/core/domain/models";
 import { enqueuePendingSyncOperationAsync } from "@/src/core/repositories/sqlite/shared/enqueuePendingSyncOperation";
 import { createId } from "@/src/shared/utils/createId";
+import { ratingToInt } from "@/src/core/services/srs/ratingCodec";
+import type { CardSrsState, SrsAlgorithm } from "@/src/core/services/srs/SrsAlgorithm";
 
-function mapState(row: LocalUserCardStateRecord): UserCardState {
+function parseAlgorithmData(raw: unknown): Record<string, unknown> {
+  if (typeof raw !== "string" || raw.length === 0) return {};
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function mapState(row: LocalUserCardStateRecord & { algorithmData?: string | null }): UserCardState {
   return {
     id: row.id,
     deckId: row.deckId,
@@ -25,27 +36,9 @@ function mapState(row: LocalUserCardStateRecord): UserCardState {
     nextReviewAt: row.nextReviewAt,
     lastReviewedAt: row.lastReviewedAt,
     isBookmarked: Number(row.isBookmarked ?? 0) === 1,
-    algorithmData: {},
+    algorithmData: parseAlgorithmData(row.algorithmData),
     updatedAt: row.updatedAt,
   };
-}
-
-function getNextReviewState(rating: number, currentMastery: number, reviewedAt: string) {
-  const nextMastery =
-    rating <= 1
-      ? 0
-      : rating === 2
-        ? Math.min(currentMastery + 1, 3)
-        : Math.min(currentMastery + 2, 4);
-  const intervalDays = rating <= 1 ? 0 : Math.max(1, nextMastery * 2);
-  const nextReviewAt =
-    rating <= 1
-      ? reviewedAt
-      : new Date(
-          new Date(reviewedAt).getTime() + intervalDays * 24 * 60 * 60 * 1000,
-        ).toISOString();
-
-  return { nextMastery, intervalDays, nextReviewAt };
 }
 
 function getLocalDayStart(date: Date) {
@@ -95,7 +88,7 @@ type RecentReviewActivityRow = {
 export class SqliteStudyRepository {
   async listCardStatesAsync(deckId: string, userId: string) {
     const db = await getDatabaseAsync();
-    const rows = await db.getAllAsync<LocalUserCardStateRecord>(
+    const rows = await db.getAllAsync<LocalUserCardStateRecord & { algorithmData?: string | null }>(
       `
         SELECT
           id,
@@ -108,6 +101,7 @@ export class SqliteStudyRepository {
           next_review_at as nextReviewAt,
           last_reviewed_at as lastReviewedAt,
           is_bookmarked as isBookmarked,
+          algorithm_data as algorithmData,
           sync_state as syncState,
           last_synced_at as lastSyncedAt,
           created_at as createdAt,
@@ -189,106 +183,95 @@ export class SqliteStudyRepository {
     };
   }
 
-  async logReviewAsync(input: LogReviewInput, userId: string) {
+  async logReviewAsync(input: LogReviewInput, userId: string, algorithm: SrsAlgorithm) {
     try {
       const db = await getDatabaseAsync();
-      const now = new Date().toISOString();
+      const reviewedAt = new Date().toISOString();
 
       await db.withExclusiveTransactionAsync(async (tx) => {
-        const priorState = await tx.getFirstAsync<LocalUserCardStateRecord>(
-          `
-            SELECT
-              id,
-              deck_id as deckId,
-              card_id as cardId,
-              user_id as userId,
-              mastery_level as masteryLevel,
-              ease_factor as easeFactor,
-              interval_days as intervalDays,
-              next_review_at as nextReviewAt,
-              last_reviewed_at as lastReviewedAt,
-              is_bookmarked as isBookmarked,
-              sync_state as syncState,
-              last_synced_at as lastSyncedAt,
-              created_at as createdAt,
-              updated_at as updatedAt
-            FROM local_user_card_states
-            WHERE card_id = ? AND user_id = ?
-            LIMIT 1;
-          `,
+        const priorRow = await tx.getFirstAsync<{
+          id: string | null;
+          mastery_level: number;
+          ease_factor: number;
+          interval_days: number;
+          next_review_at: string | null;
+          last_reviewed_at: string | null;
+          algorithm_data: string | null;
+          is_bookmarked: number;
+          created_at: string;
+        }>(
+          `SELECT id, mastery_level, ease_factor, interval_days, next_review_at, last_reviewed_at, algorithm_data, is_bookmarked, created_at
+           FROM local_user_card_states
+           WHERE card_id = ? AND user_id = ?;`,
           [input.cardId, userId],
         );
 
-        const currentMastery = Number(priorState?.masteryLevel ?? 0);
-        const { intervalDays, nextMastery, nextReviewAt } = getNextReviewState(
-          input.rating,
-          currentMastery,
-          now,
-        );
-        const stateId = priorState?.id ?? createId("state");
-        const createdAt = priorState?.createdAt ?? now;
-        const isBookmarked = Number(priorState?.isBookmarked ?? 0);
-        const reviewLog: LocalReviewLogRecord = {
-          id: createId("review"),
-          deckId: input.deckId,
-          cardId: input.cardId,
-          userId,
-          rating: input.rating,
-          elapsedMs: input.elapsedMs,
-          reviewedAt: now,
-          syncState: "pending",
-          syncedAt: null,
+        const prevState: CardSrsState = {
+          masteryLevel: Number(priorRow?.mastery_level ?? 0),
+          easeFactor: Number(priorRow?.ease_factor ?? 2.5),
+          intervalDays: Number(priorRow?.interval_days ?? 0),
+          nextReviewAt: priorRow?.next_review_at ?? null,
+          lastReviewedAt: priorRow?.last_reviewed_at ?? null,
+          algorithmData: parseAlgorithmData(priorRow?.algorithm_data),
         };
 
+        const next = algorithm.computeNextState(prevState, {
+          rating: input.rating,
+          reviewedAt,
+          elapsedMs: input.elapsedMs,
+        });
+
+        const now = reviewedAt;
+        const stateId = priorRow?.id ?? createId("ucs");
+        const createdAt = priorRow?.created_at ?? now;
+        const isBookmarked = Number(priorRow?.is_bookmarked ?? 0);
+
+        const reviewLogId = createId("rlog");
+
         await tx.runAsync(
-          `
-            INSERT INTO local_review_logs (
-              id, deck_id, card_id, user_id, rating, elapsed_ms, reviewed_at, sync_state, synced_at
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
-          `,
+          `INSERT INTO local_review_logs (
+            id, deck_id, card_id, user_id, rating, elapsed_ms, reviewed_at,
+            sync_state, synced_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pending', NULL);`,
           [
-            reviewLog.id,
-            reviewLog.deckId,
-            reviewLog.cardId,
-            reviewLog.userId,
-            reviewLog.rating,
-            reviewLog.elapsedMs,
-            reviewLog.reviewedAt,
-            reviewLog.syncState,
-            reviewLog.syncedAt,
+            reviewLogId,
+            input.deckId,
+            input.cardId,
+            userId,
+            ratingToInt[input.rating],
+            input.elapsedMs,
+            reviewedAt,
           ],
         );
 
         await tx.runAsync(
-          `
-            INSERT INTO local_user_card_states (
-              id, deck_id, card_id, user_id, mastery_level, ease_factor, interval_days, next_review_at, last_reviewed_at, is_bookmarked, sync_state, last_synced_at, created_at, updated_at
-            )
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NULL, ?, ?)
-            ON CONFLICT(card_id, user_id) DO UPDATE SET
-              deck_id = excluded.deck_id,
-              mastery_level = excluded.mastery_level,
-              ease_factor = excluded.ease_factor,
-              interval_days = excluded.interval_days,
-              next_review_at = excluded.next_review_at,
-              last_reviewed_at = excluded.last_reviewed_at,
-              is_bookmarked = excluded.is_bookmarked,
-              sync_state = excluded.sync_state,
-              last_synced_at = NULL,
-              updated_at = excluded.updated_at;
-          `,
+          `INSERT INTO local_user_card_states (
+            id, deck_id, card_id, user_id, mastery_level, ease_factor, interval_days,
+            next_review_at, last_reviewed_at, is_bookmarked, algorithm_data,
+            sync_state, last_synced_at, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', NULL, ?, ?)
+          ON CONFLICT(card_id, user_id) DO UPDATE SET
+            mastery_level = excluded.mastery_level,
+            ease_factor = excluded.ease_factor,
+            interval_days = excluded.interval_days,
+            next_review_at = excluded.next_review_at,
+            last_reviewed_at = excluded.last_reviewed_at,
+            algorithm_data = excluded.algorithm_data,
+            sync_state = 'pending',
+            last_synced_at = NULL,
+            updated_at = excluded.updated_at;`,
           [
             stateId,
             input.deckId,
             input.cardId,
             userId,
-            nextMastery,
-            2.5,
-            intervalDays,
-            nextReviewAt,
-            now,
+            next.masteryLevel,
+            next.easeFactor,
+            next.intervalDays,
+            next.nextReviewAt,
+            next.lastReviewedAt,
             isBookmarked,
+            JSON.stringify(next.algorithmData),
             createdAt,
             now,
           ],
@@ -296,9 +279,19 @@ export class SqliteStudyRepository {
 
         await enqueuePendingSyncOperationAsync(tx, {
           entityType: "review_log",
-          entityId: reviewLog.id,
+          entityId: reviewLogId,
           operationType: "upsert",
-          payload: reviewLog,
+          payload: {
+            id: reviewLogId,
+            deckId: input.deckId,
+            cardId: input.cardId,
+            userId,
+            rating: ratingToInt[input.rating],
+            elapsedMs: input.elapsedMs,
+            reviewedAt,
+            syncState: "pending",
+            syncedAt: null,
+          },
         });
 
         await enqueuePendingSyncOperationAsync(tx, {
@@ -310,13 +303,13 @@ export class SqliteStudyRepository {
             deckId: input.deckId,
             cardId: input.cardId,
             userId,
-            masteryLevel: nextMastery,
-            easeFactor: 2.5,
-            intervalDays,
-            nextReviewAt,
-            lastReviewedAt: now,
+            masteryLevel: next.masteryLevel,
+            easeFactor: next.easeFactor,
+            intervalDays: next.intervalDays,
+            nextReviewAt: next.nextReviewAt,
+            lastReviewedAt: next.lastReviewedAt,
             isBookmarked: isBookmarked === 1,
-            algorithmData: {},
+            algorithmData: next.algorithmData,
             createdAt,
             updatedAt: now,
           },
@@ -438,178 +431,52 @@ export class SqliteStudyRepository {
     }
   }
 
-  async undoLastReviewAsync(deckId: string, userId: string) {
+  async undoLastReviewAsync(deckId: string, userId: string): Promise<boolean> {
     try {
       const db = await getDatabaseAsync();
       let didUndo = false;
 
       await db.withExclusiveTransactionAsync(async (tx) => {
-        const latestReview = await tx.getFirstAsync<LocalReviewLogRecord>(
-          `
-            SELECT
-              id,
-              deck_id as deckId,
-              card_id as cardId,
-              user_id as userId,
-              rating,
-              elapsed_ms as elapsedMs,
-              reviewed_at as reviewedAt,
-              sync_state as syncState,
-              synced_at as syncedAt
-            FROM local_review_logs
-            WHERE deck_id = ? AND user_id = ?
-            ORDER BY reviewed_at DESC
-            LIMIT 1;
-          `,
+        const lastReview = await tx.getFirstAsync<{
+          id: string;
+          card_id: string;
+        }>(
+          `SELECT id, card_id FROM local_review_logs
+           WHERE deck_id = ? AND user_id = ?
+           ORDER BY reviewed_at DESC LIMIT 1;`,
           [deckId, userId],
         );
 
-        if (!latestReview) {
-          return;
-        }
+        if (!lastReview) return;
 
-        const priorState = await tx.getFirstAsync<LocalUserCardStateRecord>(
-          `
-            SELECT
-              id,
-              deck_id as deckId,
-              card_id as cardId,
-              user_id as userId,
-              mastery_level as masteryLevel,
-              ease_factor as easeFactor,
-              interval_days as intervalDays,
-              next_review_at as nextReviewAt,
-              last_reviewed_at as lastReviewedAt,
-              is_bookmarked as isBookmarked,
-              sync_state as syncState,
-              last_synced_at as lastSyncedAt,
-              created_at as createdAt,
-              updated_at as updatedAt
-            FROM local_user_card_states
-            WHERE card_id = ? AND user_id = ?
-            LIMIT 1;
-          `,
-          [latestReview.cardId, userId],
+        await tx.runAsync(
+          "DELETE FROM local_review_logs WHERE id = ?;",
+          [lastReview.id],
         );
 
-        await tx.runAsync("DELETE FROM local_review_logs WHERE id = ?;", [
-          latestReview.id,
-        ]);
         await enqueuePendingSyncOperationAsync(tx, {
           entityType: "review_log",
-          entityId: latestReview.id,
+          entityId: lastReview.id,
           operationType: "delete",
         });
 
-        const remainingReviews = await tx.getAllAsync<LocalReviewLogRecord>(
-          `
-            SELECT
-              id,
-              deck_id as deckId,
-              card_id as cardId,
-              user_id as userId,
-              rating,
-              elapsed_ms as elapsedMs,
-              reviewed_at as reviewedAt,
-              sync_state as syncState,
-              synced_at as syncedAt
-            FROM local_review_logs
-            WHERE card_id = ? AND user_id = ?
-            ORDER BY reviewed_at ASC;
-          `,
-          [latestReview.cardId, userId],
-        );
-
-        const stateId = priorState?.id ?? createId("state");
-        const isBookmarked = Number(priorState?.isBookmarked ?? 0);
         const now = new Date().toISOString();
 
-        if (remainingReviews.length === 0 && isBookmarked === 0) {
-          await tx.runAsync(
-            "DELETE FROM local_user_card_states WHERE card_id = ? AND user_id = ?;",
-            [latestReview.cardId, userId],
-          );
-          await enqueuePendingSyncOperationAsync(tx, {
-            entityType: "user_card_state",
-            entityId: stateId,
-            operationType: "delete",
-          });
-          didUndo = true;
-          return;
-        }
-
-        let masteryLevel = 0;
-        let intervalDays = 0;
-        let nextReviewAt: string | null = null;
-        let lastReviewedAt: string | null = null;
-
-        for (const review of remainingReviews) {
-          const nextState = getNextReviewState(
-            review.rating,
-            masteryLevel,
-            review.reviewedAt,
-          );
-          masteryLevel = nextState.nextMastery;
-          intervalDays = nextState.intervalDays;
-          nextReviewAt = nextState.nextReviewAt;
-          lastReviewedAt = review.reviewedAt;
-        }
-
-        const createdAt =
-          priorState?.createdAt ?? remainingReviews[0]?.reviewedAt ?? now;
         await tx.runAsync(
-          `
-            INSERT INTO local_user_card_states (
-              id, deck_id, card_id, user_id, mastery_level, ease_factor, interval_days, next_review_at, last_reviewed_at, is_bookmarked, sync_state, last_synced_at, created_at, updated_at
-            )
-            VALUES (?, ?, ?, ?, ?, 2.5, ?, ?, ?, ?, 'pending', NULL, ?, ?)
-            ON CONFLICT(card_id, user_id) DO UPDATE SET
-              deck_id = excluded.deck_id,
-              mastery_level = excluded.mastery_level,
-              ease_factor = excluded.ease_factor,
-              interval_days = excluded.interval_days,
-              next_review_at = excluded.next_review_at,
-              last_reviewed_at = excluded.last_reviewed_at,
-              is_bookmarked = excluded.is_bookmarked,
-              sync_state = excluded.sync_state,
-              last_synced_at = NULL,
-              updated_at = excluded.updated_at;
-          `,
-          [
-            stateId,
-            latestReview.deckId,
-            latestReview.cardId,
-            userId,
-            masteryLevel,
-            intervalDays,
-            nextReviewAt,
-            lastReviewedAt,
-            isBookmarked,
-            createdAt,
-            now,
-          ],
+          `UPDATE local_user_card_states
+           SET mastery_level = 0,
+               ease_factor = 2.5,
+               interval_days = 0,
+               next_review_at = NULL,
+               last_reviewed_at = NULL,
+               algorithm_data = '{}',
+               sync_state = 'pending',
+               last_synced_at = NULL,
+               updated_at = ?
+           WHERE card_id = ? AND user_id = ?;`,
+          [now, lastReview.card_id, userId],
         );
 
-        await enqueuePendingSyncOperationAsync(tx, {
-          entityType: "user_card_state",
-          entityId: stateId,
-          operationType: "upsert",
-          payload: {
-            id: stateId,
-            deckId: latestReview.deckId,
-            cardId: latestReview.cardId,
-            userId,
-            masteryLevel,
-            easeFactor: 2.5,
-            intervalDays,
-            nextReviewAt,
-            lastReviewedAt,
-            isBookmarked: isBookmarked === 1,
-            algorithmData: {},
-            createdAt,
-            updatedAt: now,
-          },
-        });
         didUndo = true;
       });
 

@@ -7,12 +7,15 @@ import {
 import { DeckRepository } from "@/src/core/repositories/contracts/DeckRepository";
 import { StudyRepository } from "@/src/core/repositories/contracts/StudyRepository";
 import type { AuthService } from "@/src/core/services/auth/AuthService";
+import type { SrsPreferenceService } from "@/src/core/services/srs/SrsPreferenceService";
+import { getSrsAlgorithm } from "@/src/core/services/srs/srsAlgorithmRegistry";
 
 export class StudySessionService {
   constructor(
     private readonly deckRepository: DeckRepository,
     private readonly studyRepository: StudyRepository,
     private readonly auth: AuthService,
+    private readonly srsPreferenceService: SrsPreferenceService,
   ) {}
 
   async listDeckSummariesAsync(userId?: string): Promise<DeckSummary[]> {
@@ -89,9 +92,11 @@ export class StudySessionService {
     } satisfies StudyDeckSnapshot;
   }
 
-  recordReviewAsync(input: LogReviewInput, userId?: string) {
+  async recordReviewAsync(input: LogReviewInput, userId?: string) {
     const id = userId ?? this.auth.getCurrentUserId();
-    return this.studyRepository.logReviewAsync(input, id);
+    const algorithmId = await this.srsPreferenceService.getAlgorithmAsync();
+    const algorithm = getSrsAlgorithm(algorithmId);
+    return this.studyRepository.logReviewAsync(input, id, algorithm);
   }
 
   setBookmarkAsync(
