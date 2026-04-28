@@ -20,7 +20,7 @@ import { tokens } from "@/src/shared/theme/tokens";
 type BootstrapState = "idle" | "loading" | "ready" | "error";
 
 export function AppBootstrapGate({ children }: PropsWithChildren) {
-  const { bootstrapService, authService } = useAppServices();
+  const { bootstrapService, authService, deckSyncService } = useAppServices();
   const { colors } = useTheme();
   const [state, setState] = useState<BootstrapState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -64,6 +64,14 @@ export function AppBootstrapGate({ children }: PropsWithChildren) {
       isMounted = false;
     };
   }, [bootstrapService, authService]);
+
+  useEffect(() => {
+    if (state !== "ready") return;
+    if (!deckSyncService) return;
+    void deckSyncService.syncAsync({ trigger: "bootstrap" }).catch(() => {
+      // silent — user will see status on Profile screen
+    });
+  }, [state, deckSyncService]);
 
   if (state === "ready") {
     return (
