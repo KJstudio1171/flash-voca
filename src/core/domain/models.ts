@@ -2,6 +2,7 @@ export type DeckSourceType = "official" | "user";
 export type DeckVisibility = "private" | "public";
 export type CardDifficulty = "easy" | "medium" | "hard";
 export type EntitlementStatus = "active" | "expired" | "pending" | "revoked";
+export type ReviewRating = "again" | "hard" | "good" | "easy";
 
 export interface Deck {
   id: string;
@@ -110,6 +111,7 @@ export interface UserCardState {
   nextReviewAt: string | null;
   lastReviewedAt: string | null;
   isBookmarked: boolean;
+  algorithmData: Record<string, unknown>;
   updatedAt: string;
 }
 
