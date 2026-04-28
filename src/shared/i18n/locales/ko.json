@@ -35,6 +35,10 @@
       "productMissing": "이 번들은 아직 판매 중이 아니에요.",
       "purchaseFailed": "결제에 실패했어요. 잠시 후 다시 시도해 주세요.",
       "verificationFailed": "구매 확인에 실패했어요. 자동 환불될 수 있어요."
+    },
+    "deckSync": {
+      "push": "변경 사항을 보내지 못했어요.",
+      "pull": "최신 데이터를 가져오지 못했어요."
     }
   },
   "auth": {
@@ -61,6 +65,17 @@
     "restoring": "복원 중...",
     "restoreEmpty": "복원할 구매가 없어요.",
     "restoreCompleted": "{{count}}개 구매를 복원했어요."
+  },
+  "deckSync": {
+    "title": "콘텐츠 동기화",
+    "lastSyncedAt": "마지막 동기화: {{time}}",
+    "never": "동기화한 적 없음",
+    "button": "지금 동기화",
+    "syncing": "동기화 중...",
+    "failedItems": "동기화 실패 항목: {{count}}개",
+    "retry": "재시도",
+    "toastSuccess": "동기화를 완료했어요.",
+    "toastNoChanges": "변경된 내용이 없어요."
   },
   "settings": {
     "title": "설정",

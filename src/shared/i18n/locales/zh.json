@@ -35,6 +35,10 @@
       "productMissing": "此捆绑包尚未销售。",
       "purchaseFailed": "购买失败。请稍后再试。",
       "verificationFailed": "无法验证您的购买。可能会自动退款。"
+    },
+    "deckSync": {
+      "push": "无法发送您的更改。",
+      "pull": "无法获取最新数据。"
     }
   },
   "auth": {
@@ -61,6 +65,17 @@
     "restoring": "恢复中...",
     "restoreEmpty": "没有可恢复的购买。",
     "restoreCompleted": "已恢复 {{count}} 个购买。"
+  },
+  "deckSync": {
+    "title": "内容同步",
+    "lastSyncedAt": "上次同步: {{time}}",
+    "never": "尚未同步",
+    "button": "立即同步",
+    "syncing": "同步中...",
+    "failedItems": "同步失败项: {{count}}",
+    "retry": "重试",
+    "toastSuccess": "同步完成。",
+    "toastNoChanges": "没有要同步的更改。"
   },
   "settings": {
     "title": "设置",

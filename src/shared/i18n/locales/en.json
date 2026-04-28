@@ -35,6 +35,10 @@
       "productMissing": "This bundle is not on sale yet.",
       "purchaseFailed": "Purchase failed. Please try again later.",
       "verificationFailed": "Could not verify your purchase. It may be auto-refunded."
+    },
+    "deckSync": {
+      "push": "Could not send your changes.",
+      "pull": "Could not fetch the latest data."
     }
   },
   "auth": {
@@ -61,6 +65,17 @@
     "restoring": "Restoring...",
     "restoreEmpty": "No purchases to restore.",
     "restoreCompleted": "Restored {{count}} purchase(s)."
+  },
+  "deckSync": {
+    "title": "Content sync",
+    "lastSyncedAt": "Last synced: {{time}}",
+    "never": "Never synced",
+    "button": "Sync now",
+    "syncing": "Syncing...",
+    "failedItems": "Failed items: {{count}}",
+    "retry": "Retry",
+    "toastSuccess": "Sync complete.",
+    "toastNoChanges": "No changes to sync."
   },
   "settings": {
     "title": "Settings",

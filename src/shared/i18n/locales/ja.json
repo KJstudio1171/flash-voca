@@ -35,6 +35,10 @@
       "productMissing": "このバンドルはまだ販売されていません。",
       "purchaseFailed": "決済に失敗しました。しばらくしてから再度お試しください。",
       "verificationFailed": "購入の確認に失敗しました。自動返金される可能性があります。"
+    },
+    "deckSync": {
+      "push": "変更を送信できませんでした。",
+      "pull": "最新データを取得できませんでした。"
     }
   },
   "auth": {
@@ -61,6 +65,17 @@
     "restoring": "復元中...",
     "restoreEmpty": "復元する購入はありません。",
     "restoreCompleted": "{{count}}件の購入を復元しました。"
+  },
+  "deckSync": {
+    "title": "コンテンツ同期",
+    "lastSyncedAt": "最終同期: {{time}}",
+    "never": "未同期",
+    "button": "今すぐ同期",
+    "syncing": "同期中...",
+    "failedItems": "同期失敗項目: {{count}}件",
+    "retry": "再試行",
+    "toastSuccess": "同期が完了しました。",
+    "toastNoChanges": "変更はありません。"
   },
   "settings": {
     "title": "設定",

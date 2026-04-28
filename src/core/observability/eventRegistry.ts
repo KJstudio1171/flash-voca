@@ -15,6 +15,9 @@ export const analyticsEventRegistry = {
   billing_restore_started: { allowedProps: [] as const },
   billing_restore_completed: { allowedProps: ["restoredCount"] as const },
   billing_auth_gate_blocked: { allowedProps: ["bundleId"] as const },
+  deck_sync_started: { allowedProps: ["trigger"] as const },
+  deck_sync_completed: { allowedProps: ["pushed", "pulled", "durationMs"] as const },
+  deck_sync_failed: { allowedProps: ["reason", "stage"] as const },
 } satisfies Record<string, { allowedProps: readonly string[] }>;
 
 export type AnalyticsEventName = keyof typeof analyticsEventRegistry;
