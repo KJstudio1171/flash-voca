@@ -3,7 +3,7 @@ import { ComponentProps, memo, useEffect, useState } from "react";
 import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated from "react-native-reanimated";
 
-import { StudyCard } from "@/src/core/domain/models";
+import { ReviewRating, StudyCard } from "@/src/core/domain/models";
 import { AnimatedFlipCard } from "@/src/shared/animation/AnimatedFlipCard";
 import { cardStackEnter } from "@/src/shared/animation/motionPresets";
 import { SwipeStudyCard } from "@/src/shared/animation/SwipeStudyCard";
@@ -13,67 +13,127 @@ import { tokens } from "@/src/shared/theme/tokens";
 type StudyFlashcardProps = {
   card: StudyCard;
   disabled?: boolean;
-  onRate: (rating: 1 | 2 | 3) => void;
+  enableSwipe: boolean;
+  allowFrontSwipe: boolean;
+  isBookmarked: boolean;
+  showRatingButtons: boolean;
+  onToggleBookmark: () => void;
+  onRate: (rating: ReviewRating) => void;
   labels: {
     tapToReveal: string;
     again: string;
-    againSub: string;
     good: string;
-    goodSub: string;
     easy: string;
-    easySub: string;
     swipeHint: string;
     listen: string;
+    example: string;
+    extraInfo: string;
+    synonyms: string;
+    relatedExpressions: string;
+    memo: string;
   };
 };
 
 function StudyFlashcardComponent({
   card,
   disabled = false,
+  enableSwipe,
+  allowFrontSwipe,
+  isBookmarked,
+  showRatingButtons,
+  onToggleBookmark,
   onRate,
   labels,
 }: StudyFlashcardProps) {
   const { colors, flashcardTextStyle } = useTheme();
   const [flipped, setFlipped] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
-  const exampleParts = splitExample(card.card.example, card.card.term);
+  const cardDetail = card.card;
+  const exampleParts = splitExample(cardDetail.example, cardDetail.term);
+  const canSwipe = !disabled && enableSwipe && (allowFrontSwipe || flipped);
 
   useEffect(() => {
+    setFlipped(false);
     setImageFailed(false);
-  }, [card.card.id, card.card.imageUri]);
+  }, [cardDetail.id, cardDetail.imageUri]);
 
   return (
-    <Animated.View key={card.card.id} entering={cardStackEnter()} style={styles.root}>
+    <Animated.View key={cardDetail.id} entering={cardStackEnter()} style={styles.root}>
       <SwipeStudyCard
-        disabled={disabled}
+        disabled={!canSwipe}
         leftActionLabel={labels.again}
-        upActionLabel={labels.good}
         rightActionLabel={labels.easy}
+        upActionLabel={labels.good}
         onSwipeComplete={(direction) => {
-          const ratingMap = { left: 1, up: 2, right: 3 } as const;
+          const ratingMap = { left: "again", up: "good", right: "easy" } as const;
           onRate(ratingMap[direction]);
         }}
       >
         <AnimatedFlipCard
           back={
-            <View
-              style={[
-                styles.card,
-                tokens.elevation.card,
-                { backgroundColor: colors.surface, borderColor: colors.line },
-              ]}
-            >
-              <View style={styles.cardCenter}>
-                <Text style={[styles.meaningText, flashcardTextStyle, { color: colors.ink }]}>
-                  {card.card.meaning}
+            <StudyCardFace>
+              <View style={styles.cardHeader}>
+                <Text
+                  numberOfLines={2}
+                  style={[styles.answerTerm, flashcardTextStyle, { color: colors.ink }]}
+                >
+                  {cardDetail.term}
                 </Text>
-                {card.card.note ? (
-                  <Text style={[styles.noteText, { color: colors.muted }]}>
-                    {card.card.note}
+                <VolumeIcon accessibilityLabel={labels.listen} />
+                {cardDetail.pronunciation ? (
+                  <Text style={[styles.pronunciation, { color: colors.muted }]}>
+                    {cardDetail.pronunciation}
                   </Text>
                 ) : null}
+                {cardDetail.partOfSpeech ? (
+                  <View style={[styles.partBadge, { backgroundColor: colors.primarySoft }]}>
+                    <Text style={[styles.partBadgeText, { color: colors.primary }]}>
+                      {cardDetail.partOfSpeech}
+                    </Text>
+                  </View>
+                ) : null}
               </View>
-            </View>
+
+              {cardDetail.imageUri && !imageFailed ? (
+                <Image
+                  onError={() => setImageFailed(true)}
+                  resizeMode="cover"
+                  source={{ uri: cardDetail.imageUri }}
+                  style={styles.studyImage}
+                />
+              ) : null}
+
+              <Text style={[styles.meaningText, { color: colors.ink }]}>
+                {cardDetail.meaning}
+              </Text>
+
+              {cardDetail.example ? (
+                <View style={[styles.dividedBlock, { borderTopColor: colors.line }]}>
+                  <Text style={[styles.blockLabel, { color: colors.primary }]}>
+                    {labels.example}
+                  </Text>
+                  <Text style={[styles.exampleText, { color: colors.ink }]}>
+                    {exampleParts.before}
+                    {exampleParts.match ? (
+                      <Text style={{ color: colors.primary }}>{exampleParts.match}</Text>
+                    ) : null}
+                    {exampleParts.after}
+                  </Text>
+                  {cardDetail.exampleTranslation ? (
+                    <Text style={[styles.exampleText, { color: colors.ink }]}>
+                      {cardDetail.exampleTranslation}
+                    </Text>
+                  ) : null}
+                </View>
+              ) : null}
+
+              <ExtraInfoRows
+                labels={labels}
+                note={cardDetail.note}
+                relatedExpressions={cardDetail.relatedExpressions}
+                synonyms={cardDetail.synonyms}
+              />
+            </StudyCardFace>
           }
           flipped={flipped}
           onPress={() => {
@@ -82,195 +142,255 @@ function StudyFlashcardComponent({
             }
           }}
         >
-          <View
-            style={[
-              styles.card,
-              tokens.elevation.card,
-              { backgroundColor: colors.surface, borderColor: colors.line },
-            ]}
-          >
-            <View style={styles.cardCenter}>
-              {card.card.imageUri && !imageFailed ? (
-                <Image
-                  onError={() => setImageFailed(true)}
-                  resizeMode="cover"
-                  source={{ uri: card.card.imageUri }}
-                  style={styles.studyImage}
-                />
-              ) : null}
-              <Text style={[styles.termText, flashcardTextStyle, { color: colors.ink }]}>
-                {card.card.term}
-              </Text>
-              <View
-                accessibilityLabel={labels.listen}
-                accessibilityRole="image"
-                style={styles.soundButton}
-              >
-                <MaterialCommunityIcons color={colors.muted} name="volume-high" size={42} />
-              </View>
-              <Text style={[styles.hint, { color: colors.muted }]}>{labels.tapToReveal}</Text>
-            </View>
-          </View>
+          <StudyCardFace centered>
+            <Pressable
+              accessibilityRole="button"
+              onPress={onToggleBookmark}
+              style={styles.bookmarkButton}
+            >
+              <MaterialCommunityIcons
+                color={isBookmarked ? colors.primary : colors.muted}
+                name={isBookmarked ? "star" : "star-outline"}
+                size={28}
+              />
+            </Pressable>
+            <Text
+              numberOfLines={2}
+              style={[styles.termText, flashcardTextStyle, { color: colors.ink }]}
+            >
+              {cardDetail.term}
+            </Text>
+            <VolumeIcon accessibilityLabel={labels.listen} />
+            <Text style={[styles.hint, { color: colors.muted }]}>{labels.tapToReveal}</Text>
+          </StudyCardFace>
         </AnimatedFlipCard>
       </SwipeStudyCard>
 
-      {flipped ? (
-        <View style={[styles.answerBox, { backgroundColor: colors.surface, borderColor: colors.line }]}>
-          <Text style={[styles.answerText, { color: colors.ink }]}>
-            {card.card.meaning}
-          </Text>
+      {showRatingButtons ? (
+        <View style={styles.ratingRow}>
+          <RatingButton
+            disabled={disabled}
+            iconName="help-circle-outline"
+            label={labels.again}
+            onPress={() => onRate("again")}
+            tone="again"
+          />
+          <RatingButton
+            disabled={disabled}
+            iconName="check"
+            label={labels.easy}
+            onPress={() => onRate("easy")}
+            tone="easy"
+          />
         </View>
       ) : null}
 
-      {card.card.example ? (
-        <View style={[styles.exampleBox, { backgroundColor: colors.surface, borderColor: colors.line }]}>
-          <View style={[styles.exampleAccent, { backgroundColor: colors.primary }]} />
-          <Text style={[styles.exampleText, { color: colors.ink }]}>
-            {exampleParts.before}
-            {exampleParts.match ? (
-              <Text style={{ color: colors.primary }}>{exampleParts.match}</Text>
-            ) : null}
-            {exampleParts.after}
-          </Text>
-        </View>
+      {enableSwipe ? (
+        <Text style={[styles.swipeHint, { color: colors.muted }]}>{labels.swipeHint}</Text>
       ) : null}
-
-      <View style={styles.ratingRow}>
-        <RatingButton
-          disabled={disabled}
-          iconName="reload"
-          label={labels.again}
-          onPress={() => onRate(1)}
-          sublabel={labels.againSub}
-          tone="again"
-        />
-        <RatingButton
-          disabled={disabled}
-          iconName="star-outline"
-          label={labels.good}
-          onPress={() => onRate(2)}
-          sublabel={labels.goodSub}
-          tone="good"
-        />
-        <RatingButton
-          disabled={disabled}
-          iconName="check"
-          label={labels.easy}
-          onPress={() => onRate(3)}
-          sublabel={labels.easySub}
-          tone="easy"
-        />
-      </View>
-
-      <Text style={[styles.swipeHint, { color: colors.muted }]}>{labels.swipeHint}</Text>
     </Animated.View>
   );
 }
 
 export const StudyFlashcard = memo(StudyFlashcardComponent);
 
+function StudyCardFace({
+  centered = false,
+  children,
+}: {
+  centered?: boolean;
+  children: React.ReactNode;
+}) {
+  const { colors } = useTheme();
+
+  return (
+    <View
+      style={[
+        styles.card,
+        centered ? styles.centeredCard : null,
+        tokens.elevation.card,
+        { backgroundColor: colors.surface, borderColor: colors.line },
+      ]}
+    >
+      {children}
+    </View>
+  );
+}
+
+function VolumeIcon({ accessibilityLabel }: { accessibilityLabel: string }) {
+  const { colors } = useTheme();
+
+  return (
+    <View
+      accessibilityLabel={accessibilityLabel}
+      accessibilityRole="image"
+      style={styles.soundButton}
+    >
+      <MaterialCommunityIcons color={colors.muted} name="volume-high" size={24} />
+    </View>
+  );
+}
+
+function ExtraInfoRows({
+  labels,
+  note,
+  relatedExpressions,
+  synonyms,
+}: {
+  labels: Pick<
+    StudyFlashcardProps["labels"],
+    "extraInfo" | "memo" | "relatedExpressions" | "synonyms"
+  >;
+  note: string | null;
+  relatedExpressions: string | null;
+  synonyms: string | null;
+}) {
+  const { colors } = useTheme();
+  const rows = [
+    { id: "synonyms", label: labels.synonyms, value: synonyms },
+    { id: "related", label: labels.relatedExpressions, value: relatedExpressions },
+    { id: "memo", label: labels.memo, value: note },
+  ].filter((row) => row.value);
+
+  if (rows.length === 0) {
+    return null;
+  }
+
+  return (
+    <View style={[styles.extraInfo, { borderTopColor: colors.line }]}>
+      <Text style={[styles.blockLabel, { color: colors.primary }]}>
+        {labels.extraInfo}
+      </Text>
+      {rows.map((row) => (
+        <View key={row.id} style={[styles.extraRow, { borderBottomColor: colors.line }]}>
+          <Text style={[styles.extraLabel, { color: colors.ink }]}>{row.label}</Text>
+          <Text numberOfLines={2} style={[styles.extraValue, { color: colors.muted }]}>
+            {row.value}
+          </Text>
+          <MaterialCommunityIcons color={colors.muted} name="chevron-down" size={20} />
+        </View>
+      ))}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   root: {
     gap: tokens.spacing.m,
   },
   card: {
-    alignItems: "center",
-    aspectRatio: 0.9,
     borderRadius: tokens.radius.l,
-    borderWidth: 1,
-    justifyContent: "center",
-    maxHeight: 430,
-    minHeight: 360,
-    padding: tokens.spacing.xl,
-  },
-  cardCenter: {
-    alignItems: "center",
+    borderWidth: tokens.borderWidth.hairline,
     gap: tokens.spacing.m,
+    minHeight: 420,
+    padding: tokens.spacing.l,
   },
-  studyImage: {
-    aspectRatio: 1.45,
-    borderRadius: tokens.radius.m,
-    maxHeight: 150,
-    width: "76%",
+  centeredCard: {
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 420,
+  },
+  bookmarkButton: {
+    position: "absolute",
+    right: tokens.spacing.l,
+    top: tokens.spacing.l,
+  },
+  cardHeader: {
+    alignItems: "center",
+    gap: tokens.spacing.xs,
   },
   termText: {
     ...tokens.typography.flashcardTerm,
     textAlign: "center",
   },
-  meaningText: {
-    ...tokens.typography.flashcardMeaning,
+  answerTerm: {
+    ...tokens.typography.hero,
     textAlign: "center",
   },
-  noteText: {
-    ...tokens.typography.body,
+  meaningText: {
+    ...tokens.typography.heading,
     textAlign: "center",
+  },
+  pronunciation: {
+    ...tokens.typography.caption,
+  },
+  partBadge: {
+    borderRadius: tokens.radius.pill,
+    paddingHorizontal: tokens.spacing.s,
+    paddingVertical: 4,
+  },
+  partBadgeText: {
+    ...tokens.typography.micro,
   },
   soundButton: {
     alignItems: "center",
-    height: 52,
+    height: 32,
     justifyContent: "center",
-    width: 52,
+    width: 32,
   },
   hint: {
     ...tokens.typography.body,
     marginTop: tokens.spacing.xl,
   },
-  answerBox: {
-    alignItems: "center",
+  studyImage: {
+    aspectRatio: 1.9,
     borderRadius: tokens.radius.s,
-    borderWidth: 1,
-    minHeight: 64,
-    justifyContent: "center",
-    padding: tokens.spacing.s,
+    width: "100%",
   },
-  answerText: {
-    ...tokens.typography.heading,
-  },
-  exampleBox: {
-    borderRadius: tokens.radius.s,
-    borderWidth: 1,
+  dividedBlock: {
+    borderTopWidth: 1,
     gap: tokens.spacing.xs,
-    padding: tokens.spacing.m,
-    paddingLeft: tokens.spacing.l,
+    paddingTop: tokens.spacing.m,
   },
-  exampleAccent: {
-    bottom: tokens.spacing.s,
-    borderRadius: tokens.radius.pill,
-    left: tokens.spacing.s,
-    position: "absolute",
-    top: tokens.spacing.s,
-    width: 3,
+  blockLabel: {
+    ...tokens.typography.captionBold,
   },
   exampleText: {
     ...tokens.typography.body,
   },
-  ratingRow: {
+  extraInfo: {
+    borderTopWidth: 1,
+    gap: tokens.spacing.xs,
+    paddingTop: tokens.spacing.m,
+  },
+  extraRow: {
+    alignItems: "center",
+    borderBottomWidth: 1,
     flexDirection: "row",
     gap: tokens.spacing.s,
+    minHeight: 40,
+  },
+  extraLabel: {
+    ...tokens.typography.captionBold,
+    width: 86,
+  },
+  extraValue: {
+    ...tokens.typography.caption,
+    flex: 1,
+  },
+  ratingRow: {
+    flexDirection: "row",
+    gap: tokens.spacing.m,
   },
   ratingButton: {
     alignItems: "center",
     borderRadius: tokens.radius.s,
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
     flex: 1,
-    gap: 2,
-    minHeight: 82,
+    minHeight: 64,
     justifyContent: "center",
     padding: tokens.spacing.s,
   },
   ratingLabelRow: {
     alignItems: "center",
     flexDirection: "row",
-    gap: 6,
+    gap: 8,
   },
   ratingLabel: {
     ...tokens.typography.bodyBold,
   },
-  ratingSublabel: {
-    ...tokens.typography.caption,
-  },
   swipeHint: {
-    ...tokens.typography.body,
+    ...tokens.typography.caption,
     textAlign: "center",
   },
 });
@@ -280,32 +400,25 @@ function RatingButton({
   iconName,
   label,
   onPress,
-  sublabel,
   tone,
 }: {
   disabled: boolean;
   iconName: ComponentProps<typeof MaterialCommunityIcons>["name"];
   label: string;
   onPress: () => void;
-  sublabel: string;
-  tone: "again" | "good" | "easy";
+  tone: "again" | "easy";
 }) {
   const { colors } = useTheme();
   const toneStyle = {
     again: {
-      backgroundColor: colors.chipAgainBg,
-      borderColor: colors.chipAgainBorder,
-      color: colors.accent,
-    },
-    good: {
-      backgroundColor: colors.accentSoft,
-      borderColor: colors.chipAgainBorder,
-      color: colors.accent,
+      backgroundColor: colors.surface,
+      borderColor: colors.danger,
+      color: colors.danger,
     },
     easy: {
-      backgroundColor: colors.infoSoft,
-      borderColor: colors.chipEasyBorder,
-      color: colors.info,
+      backgroundColor: colors.surface,
+      borderColor: colors.success,
+      color: colors.success,
     },
   }[tone];
 
@@ -324,10 +437,9 @@ function RatingButton({
       ]}
     >
       <View style={styles.ratingLabelRow}>
-        <MaterialCommunityIcons color={toneStyle.color} name={iconName} size={26} />
+        <MaterialCommunityIcons color={toneStyle.color} name={iconName} size={24} />
         <Text style={[styles.ratingLabel, { color: toneStyle.color }]}>{label}</Text>
       </View>
-      <Text style={[styles.ratingSublabel, { color: colors.muted }]}>{sublabel}</Text>
     </Pressable>
   );
 }
