@@ -1,19 +1,26 @@
-import { LOCAL_USER_ID } from "@/src/core/config/constants";
-import { DeckSummary, LogReviewInput, StudyDeckSnapshot } from "@/src/core/domain/models";
+import {
+  DeckSummary,
+  HomeSummary,
+  LogReviewInput,
+  StudyDeckSnapshot,
+} from "@/src/core/domain/models";
 import { DeckRepository } from "@/src/core/repositories/contracts/DeckRepository";
 import { StudyRepository } from "@/src/core/repositories/contracts/StudyRepository";
+import type { AuthService } from "@/src/core/services/auth/AuthService";
 
 export class StudySessionService {
   constructor(
     private readonly deckRepository: DeckRepository,
     private readonly studyRepository: StudyRepository,
+    private readonly auth: AuthService,
   ) {}
 
-  async listDeckSummariesAsync(userId = LOCAL_USER_ID): Promise<DeckSummary[]> {
+  async listDeckSummariesAsync(userId?: string): Promise<DeckSummary[]> {
+    const id = userId ?? this.auth.getCurrentUserId();
     const decks = await this.deckRepository.listDecksAsync();
     const summaries = await Promise.all(
       decks.map(async (deck) => {
-        const states = await this.studyRepository.listCardStatesAsync(deck.id, userId);
+        const states = await this.studyRepository.listCardStatesAsync(deck.id, id);
         const now = Date.now();
         const notDueCount = states.filter(
           (s) => s.nextReviewAt && new Date(s.nextReviewAt).getTime() > now,
@@ -26,10 +33,33 @@ export class StudySessionService {
     return summaries;
   }
 
-  async getSnapshotAsync(deckId: string, userId = LOCAL_USER_ID) {
+  async getHomeSummaryAsync(userId?: string): Promise<HomeSummary> {
+    const id = userId ?? this.auth.getCurrentUserId();
+    const [decks, reviewStats] = await Promise.all([
+      this.listDeckSummariesAsync(id),
+      this.studyRepository.getHomeReviewStatsAsync(id),
+    ]);
+    const totalCards = decks.reduce((sum, deck) => sum + deck.cardCount, 0);
+    const masteredCards = decks.reduce((sum, deck) => sum + deck.masteredCount, 0);
+    const dueCount = decks.reduce((sum, deck) => sum + deck.dueCount, 0);
+
+    return {
+      decks,
+      stats: {
+        ...reviewStats,
+        totalCards,
+        dueCount,
+        progress: totalCards > 0 ? masteredCards / totalCards : 0,
+      },
+      recentActivities: reviewStats.recentActivities,
+    };
+  }
+
+  async getSnapshotAsync(deckId: string, userId?: string) {
+    const id = userId ?? this.auth.getCurrentUserId();
     const [deck, states] = await Promise.all([
       this.deckRepository.getDeckByIdAsync(deckId),
-      this.studyRepository.listCardStatesAsync(deckId, userId),
+      this.studyRepository.listCardStatesAsync(deckId, id),
     ]);
 
     if (!deck) {
@@ -59,7 +89,21 @@ export class StudySessionService {
     } satisfies StudyDeckSnapshot;
   }
 
-  recordReviewAsync(input: LogReviewInput, userId = LOCAL_USER_ID) {
-    return this.studyRepository.logReviewAsync(input, userId);
+  recordReviewAsync(input: LogReviewInput, userId?: string) {
+    const id = userId ?? this.auth.getCurrentUserId();
+    return this.studyRepository.logReviewAsync(input, id);
+  }
+
+  setBookmarkAsync(
+    input: { deckId: string; cardId: string; isBookmarked: boolean },
+    userId?: string,
+  ) {
+    const id = userId ?? this.auth.getCurrentUserId();
+    return this.studyRepository.setBookmarkAsync(input, id);
+  }
+
+  undoLastReviewAsync(deckId: string, userId?: string) {
+    const id = userId ?? this.auth.getCurrentUserId();
+    return this.studyRepository.undoLastReviewAsync(deckId, id);
   }
 }

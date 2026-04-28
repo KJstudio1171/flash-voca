@@ -2,6 +2,7 @@ import { PropsWithChildren, useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 
 import { QueryLayer, useAppServices } from "@/src/app/AppProviders";
+import { SupabaseAuthService } from "@/src/core/services/auth/SupabaseAuthService";
 import { ObservabilityErrorBoundary } from "@/src/app/ObservabilityErrorBoundary";
 import { AppError } from "@/src/core/errors";
 import {
@@ -19,7 +20,7 @@ import { tokens } from "@/src/shared/theme/tokens";
 type BootstrapState = "idle" | "loading" | "ready" | "error";
 
 export function AppBootstrapGate({ children }: PropsWithChildren) {
-  const { bootstrapService } = useAppServices();
+  const { bootstrapService, authService } = useAppServices();
   const { colors } = useTheme();
   const [state, setState] = useState<BootstrapState>("idle");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -30,7 +31,11 @@ export function AppBootstrapGate({ children }: PropsWithChildren) {
     async function prepare() {
       try {
         setState("loading");
-        await bootstrapService.prepareAppAsync();
+        await authService.bootstrapAsync();
+        await bootstrapService.prepareAppAsync(authService.getCurrentUserId());
+        if (authService instanceof SupabaseAuthService) {
+          void authService.rebindAnonymousAsync();
+        }
         await initializeObservability({
           errorSink: new ConsoleErrorSink(),
           analyticsSink: new ConsoleAnalyticsSink(),
@@ -58,7 +63,7 @@ export function AppBootstrapGate({ children }: PropsWithChildren) {
     return () => {
       isMounted = false;
     };
-  }, [bootstrapService]);
+  }, [bootstrapService, authService]);
 
   if (state === "ready") {
     return (
@@ -100,7 +105,7 @@ const styles = StyleSheet.create({
     maxWidth: 420,
     borderRadius: tokens.radius.l,
     padding: tokens.spacing.xl,
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
     gap: tokens.spacing.s,
   },
   eyebrow: {

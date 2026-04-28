@@ -7,14 +7,14 @@ import { LocaleService } from "@/src/shared/i18n/LocaleService";
 export class BootstrapService {
   constructor(private readonly localeService: LocaleService) {}
 
-  async prepareAppAsync() {
+  async prepareAppAsync(ownerId: string) {
     try {
       const initialLocale = await this.localeService.resolveInitialLocale();
       await Promise.all([
         initI18next(initialLocale),
         (async () => {
           await initializeDatabaseAsync();
-          await seedMvpDataAsync();
+          await seedMvpDataAsync(ownerId);
         })(),
       ]);
     } catch (error) {

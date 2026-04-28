@@ -1,4 +1,4 @@
-import { LOCAL_USER_ID } from "@/src/core/config/constants";
+import type { AuthService } from "@/src/core/services/auth/AuthService";
 import { getDatabaseAsync } from "@/src/core/database/client";
 import { DeckSaveError, DeckDeleteError } from "@/src/core/errors";
 import {
@@ -135,6 +135,8 @@ function getCardChangeSignature(card: DeckCard | PersistedCardInput) {
 }
 
 export class SqliteDeckRepository {
+  constructor(private readonly auth: AuthService) {}
+
   async listDecksAsync() {
     const db = await getDatabaseAsync();
     const rows = await db.getAllAsync<DeckSummaryRow>(
@@ -354,7 +356,7 @@ export class SqliteDeckRepository {
           `,
           [
             deckId,
-            LOCAL_USER_ID,
+            this.auth.getCurrentUserId(),
             normalizedTitle,
             normalizedDescription,
             accentColor,
@@ -472,7 +474,7 @@ export class SqliteDeckRepository {
           operationType: "upsert",
           payload: {
             id: deckId,
-            ownerId: LOCAL_USER_ID,
+            ownerId: this.auth.getCurrentUserId(),
             title: normalizedTitle,
             description: normalizedDescription,
             sourceType: "user",

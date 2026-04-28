@@ -1,10 +1,8 @@
-import { LOCAL_USER_ID } from "@/src/core/config/constants";
 import { getDatabaseAsync } from "@/src/core/database/client";
 
-const sampleDecks = [
+const sampleDeckTemplates = [
   {
     id: "deck_travel_basics",
-    ownerId: LOCAL_USER_ID,
     title: "Travel Basics",
     description: "Useful airport, hotel, and transit vocabulary for a first trip.",
     sourceType: "user",
@@ -12,7 +10,6 @@ const sampleDecks = [
   },
   {
     id: "deck_business_calls",
-    ownerId: LOCAL_USER_ID,
     title: "Business Calls",
     description: "Common expressions for scheduling calls and following up with clients.",
     sourceType: "user",
@@ -59,7 +56,7 @@ const sampleCards = [
   },
 ] as const;
 
-export async function seedMvpDataAsync() {
+export async function seedMvpDataAsync(ownerId: string) {
   const db = await getDatabaseAsync();
   const now = new Date().toISOString();
 
@@ -72,7 +69,7 @@ export async function seedMvpDataAsync() {
       return;
     }
 
-    for (const deck of sampleDecks) {
+    for (const deck of sampleDeckTemplates) {
       await tx.runAsync(
         `
           INSERT INTO local_decks (
@@ -82,7 +79,7 @@ export async function seedMvpDataAsync() {
         `,
         [
           deck.id,
-          deck.ownerId,
+          ownerId,
           deck.title,
           deck.description,
           deck.sourceType,

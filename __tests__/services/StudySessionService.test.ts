@@ -1,4 +1,5 @@
 import { StudySessionService } from "@/src/core/services/StudySessionService";
+import type { AuthService } from "@/src/core/services/auth/AuthService";
 import {
   createMockCardState,
   createMockDeck,
@@ -11,12 +12,22 @@ import {
   createMockStudyRepository,
 } from "@/__tests__/helpers/mockRepositories";
 
+function createMockAuthService(userId = "test-user"): AuthService {
+  return {
+    bootstrapAsync: jest.fn(),
+    getCurrentUserId: jest.fn().mockReturnValue(userId),
+    getState: jest.fn().mockReturnValue({ kind: "local-temp" as const, userId }),
+    linkGoogleAsync: jest.fn(),
+    subscribe: jest.fn().mockReturnValue(() => {}),
+  };
+}
+
 describe("StudySessionService", () => {
   describe("listDeckSummariesAsync", () => {
     it("returns empty array when no decks exist", async () => {
       const deckRepo = createMockDeckRepository();
       const studyRepo = createMockStudyRepository();
-      const service = new StudySessionService(deckRepo, studyRepo);
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
 
       const result = await service.listDeckSummariesAsync();
 
@@ -31,7 +42,7 @@ describe("StudySessionService", () => {
       const studyRepo = createMockStudyRepository({
         listCardStatesAsync: jest.fn().mockResolvedValue([]),
       });
-      const service = new StudySessionService(deckRepo, studyRepo);
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
 
       const result = await service.listDeckSummariesAsync();
 
@@ -62,7 +73,7 @@ describe("StudySessionService", () => {
       const studyRepo = createMockStudyRepository({
         listCardStatesAsync: jest.fn().mockResolvedValue(states),
       });
-      const service = new StudySessionService(deckRepo, studyRepo);
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
 
       const result = await service.listDeckSummariesAsync();
 
@@ -83,7 +94,7 @@ describe("StudySessionService", () => {
       const studyRepo = createMockStudyRepository({
         listCardStatesAsync: jest.fn().mockResolvedValue(states),
       });
-      const service = new StudySessionService(deckRepo, studyRepo);
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
 
       const result = await service.listDeckSummariesAsync();
 
@@ -133,7 +144,7 @@ describe("StudySessionService", () => {
           Promise.resolve(statesByDeck[deckId] ?? []),
         ),
       });
-      const service = new StudySessionService(deckRepo, studyRepo);
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
 
       const result = await service.listDeckSummariesAsync();
 
@@ -151,13 +162,93 @@ describe("StudySessionService", () => {
     });
   });
 
+  describe("getHomeSummaryAsync", () => {
+    it("combines deck progress with today's review stats", async () => {
+      const deck = createMockDeck({ id: "deck-1", cardCount: 4 });
+      const states = [
+        createMockCardState({
+          deckId: "deck-1",
+          cardId: "card-1",
+          masteryLevel: 3,
+          nextReviewAt: new Date(Date.now() + 86_400_000).toISOString(),
+        }),
+        createMockCardState({
+          deckId: "deck-1",
+          cardId: "card-2",
+          masteryLevel: 1,
+          nextReviewAt: null,
+        }),
+      ];
+      const recentActivities = [
+        {
+          id: "review-1",
+          deckId: "deck-1",
+          cardId: "card-2",
+          term: "follow up",
+          rating: 2,
+          reviewedAt: "2026-04-28T01:00:00.000Z",
+        },
+      ];
+      const deckRepo = createMockDeckRepository({
+        listDecksAsync: jest.fn().mockResolvedValue([deck]),
+      });
+      const studyRepo = createMockStudyRepository({
+        listCardStatesAsync: jest.fn().mockResolvedValue(states),
+        getHomeReviewStatsAsync: jest.fn().mockResolvedValue({
+          studiedCards: 2,
+          studyMinutes: 7,
+          streakDays: 3,
+          recentActivities,
+        }),
+      });
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
+
+      const result = await service.getHomeSummaryAsync("test-user");
+
+      expect(result.decks).toHaveLength(1);
+      expect(result.stats).toEqual({
+        studiedCards: 2,
+        studyMinutes: 7,
+        streakDays: 3,
+        recentActivities,
+        totalCards: 4,
+        dueCount: 3,
+        progress: 0.25,
+      });
+      expect(result.recentActivities).toEqual(recentActivities);
+      expect(studyRepo.getHomeReviewStatsAsync).toHaveBeenCalledWith("test-user");
+    });
+
+    it("returns empty home stats when no decks or reviews exist", async () => {
+      const deckRepo = createMockDeckRepository();
+      const studyRepo = createMockStudyRepository();
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
+
+      const result = await service.getHomeSummaryAsync();
+
+      expect(result).toEqual({
+        decks: [],
+        stats: {
+          studiedCards: 0,
+          studyMinutes: 0,
+          streakDays: 0,
+          recentActivities: [],
+          totalCards: 0,
+          dueCount: 0,
+          progress: 0,
+        },
+        recentActivities: [],
+      });
+    });
+  });
+
   describe("getSnapshotAsync", () => {
     it("returns null when deck does not exist", async () => {
       const deckRepo = createMockDeckRepository({
         getDeckByIdAsync: jest.fn().mockResolvedValue(null),
       });
       const studyRepo = createMockStudyRepository();
-      const service = new StudySessionService(deckRepo, studyRepo);
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
 
       const result = await service.getSnapshotAsync("nonexistent-deck");
 
@@ -179,7 +270,7 @@ describe("StudySessionService", () => {
       const studyRepo = createMockStudyRepository({
         listCardStatesAsync: jest.fn().mockResolvedValue([state1]),
       });
-      const service = new StudySessionService(deckRepo, studyRepo);
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
 
       const result = await service.getSnapshotAsync("deck-1");
 
@@ -218,7 +309,7 @@ describe("StudySessionService", () => {
       const studyRepo = createMockStudyRepository({
         listCardStatesAsync: jest.fn().mockResolvedValue(states),
       });
-      const service = new StudySessionService(deckRepo, studyRepo);
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
 
       const result = await service.getSnapshotAsync("deck-1");
 
@@ -254,7 +345,7 @@ describe("StudySessionService", () => {
       const studyRepo = createMockStudyRepository({
         listCardStatesAsync: jest.fn().mockResolvedValue(states),
       });
-      const service = new StudySessionService(deckRepo, studyRepo);
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
 
       const result = await service.getSnapshotAsync("deck-1");
 
@@ -267,13 +358,50 @@ describe("StudySessionService", () => {
     it("delegates to studyRepository.logReviewAsync with correct arguments", async () => {
       const deckRepo = createMockDeckRepository();
       const studyRepo = createMockStudyRepository();
-      const service = new StudySessionService(deckRepo, studyRepo);
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
       const input = createMockLogReviewInput();
 
       await service.recordReviewAsync(input, "test-user");
 
       expect(studyRepo.logReviewAsync).toHaveBeenCalledTimes(1);
       expect(studyRepo.logReviewAsync).toHaveBeenCalledWith(input, "test-user");
+    });
+  });
+
+  describe("setBookmarkAsync", () => {
+    it("delegates to studyRepository.setBookmarkAsync with correct arguments", async () => {
+      const deckRepo = createMockDeckRepository();
+      const studyRepo = createMockStudyRepository();
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
+      const input = {
+        deckId: "deck-1",
+        cardId: "card-1",
+        isBookmarked: true,
+      };
+
+      await service.setBookmarkAsync(input, "test-user");
+
+      expect(studyRepo.setBookmarkAsync).toHaveBeenCalledTimes(1);
+      expect(studyRepo.setBookmarkAsync).toHaveBeenCalledWith(input, "test-user");
+    });
+  });
+
+  describe("undoLastReviewAsync", () => {
+    it("delegates to studyRepository.undoLastReviewAsync with correct arguments", async () => {
+      const deckRepo = createMockDeckRepository();
+      const studyRepo = createMockStudyRepository({
+        undoLastReviewAsync: jest.fn().mockResolvedValue(true),
+      });
+      const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService());
+
+      const result = await service.undoLastReviewAsync("deck-1", "test-user");
+
+      expect(result).toBe(true);
+      expect(studyRepo.undoLastReviewAsync).toHaveBeenCalledTimes(1);
+      expect(studyRepo.undoLastReviewAsync).toHaveBeenCalledWith(
+        "deck-1",
+        "test-user",
+      );
     });
   });
 });

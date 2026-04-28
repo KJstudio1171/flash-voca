@@ -10,6 +10,7 @@ import { EntitlementService } from "@/src/core/services/EntitlementService";
 import { StoreService } from "@/src/core/services/StoreService";
 import type { BillingGateway } from "@/src/core/services/billing/BillingGateway";
 import type { CatalogSyncService } from "@/src/core/services/CatalogSyncService";
+import type { AuthService } from "@/src/core/services/auth/AuthService";
 
 const bundle: Bundle = {
   id: "bundle-1",
@@ -71,7 +72,14 @@ function createEntitlementService() {
     restorePurchasesAsync: jest.fn().mockResolvedValue(undefined),
   };
 
-  return new EntitlementService(repository, remoteGateway, billingGateway);
+  const authService: AuthService = {
+    bootstrapAsync: jest.fn(),
+    getCurrentUserId: jest.fn().mockReturnValue("test-user"),
+    getState: jest.fn().mockReturnValue({ kind: "local-temp", userId: "test-user" }),
+    linkGoogleAsync: jest.fn(),
+    subscribe: jest.fn().mockReturnValue(() => {}),
+  };
+  return new EntitlementService(repository, remoteGateway, billingGateway, authService);
 }
 
 function createCatalogSyncService(): CatalogSyncService {
