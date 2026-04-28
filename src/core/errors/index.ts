@@ -13,4 +13,11 @@ export {
 export { NetworkError, SyncError, EntitlementFetchError } from "@/src/core/errors/NetworkError";
 export { UnknownError } from "@/src/core/errors/UnknownError";
 export { logger } from "@/src/core/errors/logger";
+export {
+  AuthError,
+  AuthBootstrapError,
+  GoogleLinkError,
+  IdentityConflictError,
+  MigrationError,
+} from "@/src/core/errors/AuthError";
 export { normalizeError, createErrorHandler } from "@/src/core/errors/handleError";
