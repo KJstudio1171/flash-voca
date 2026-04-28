@@ -6,6 +6,7 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from "react-nati
 
 import { StoreBundleDetail } from "@/src/core/domain/models";
 import { useBundleDetailQuery } from "@/src/features/store/hooks/useStoreQueries";
+import { usePurchaseBundle } from "@/src/features/store/hooks/usePurchaseBundle";
 import { AnimatedScreen } from "@/src/shared/animation/AnimatedScreen";
 import { useT } from "@/src/shared/i18n";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
@@ -73,7 +74,15 @@ export default function BundleDetailScreen() {
 function BundleDetailContent({ bundle }: { bundle: StoreBundleDetail }) {
   const { t } = useT();
   const { colors } = useTheme();
+  const purchase = usePurchaseBundle();
   const totalCards = bundle.items.reduce((sum, item) => sum + item.cardCount, 0);
+
+  const buttonDisabled = bundle.owned || purchase.isPending || !bundle.playProductId;
+  const buttonLabel = bundle.owned
+    ? t("billing.owned")
+    : purchase.isPending
+      ? t("billing.purchasing")
+      : t("billing.purchaseButton");
 
   return (
     <AnimatedScreen style={styles.content}>
@@ -146,6 +155,19 @@ function BundleDetailContent({ bundle }: { bundle: StoreBundleDetail }) {
           ))}
         </View>
       </ScreenSection>
+
+      <View style={styles.purchaseAction}>
+        <AppButton
+          disabled={buttonDisabled}
+          onPress={() => {
+            void purchase.mutateAsync(bundle).catch(() => {
+              // error handled by global error handler / mutation error boundary
+            });
+          }}
+        >
+          {buttonLabel}
+        </AppButton>
+      </View>
     </AnimatedScreen>
   );
 }
@@ -382,5 +404,8 @@ const styles = StyleSheet.create({
   },
   body: {
     ...tokens.typography.body,
+  },
+  purchaseAction: {
+    marginTop: tokens.spacing.l,
   },
 });
