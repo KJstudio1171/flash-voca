@@ -1,6 +1,7 @@
 import type { AuthService } from "@/src/core/services/auth/AuthService";
 import { getDatabaseAsync } from "@/src/core/database/client";
 import { DeckSaveError, DeckDeleteError } from "@/src/core/errors";
+import type { RemoteDeckPayload } from "@/src/core/repositories/contracts/RemoteDeckGateway";
 import {
   LocalDeckActivityRecord,
   LocalDeckCardRecord,
@@ -473,17 +474,18 @@ export class SqliteDeckRepository {
           entityId: deckId,
           operationType: "upsert",
           payload: {
-            id: deckId,
-            ownerId: this.auth.getCurrentUserId(),
-            title: normalizedTitle,
-            description: normalizedDescription,
-            sourceType: "user",
-            accentColor,
-            visibility,
-            sourceLanguage,
-            targetLanguage,
-            createdAt,
-            updatedAt: now,
+            deck: {
+              id: deckId,
+              title: normalizedTitle,
+              description: normalizedDescription,
+              accentColor,
+              visibility,
+              sourceLanguage,
+              targetLanguage,
+              deletedAt: null,
+              createdAt,
+              updatedAt: now,
+            },
             cards: persistedCards.map((card) => ({
               id: card.id,
               deckId,
@@ -500,8 +502,8 @@ export class SqliteDeckRepository {
               antonyms: card.antonyms,
               relatedExpressions: card.relatedExpressions,
               source: card.source,
-              imageUri: card.imageUri,
               position: card.position,
+              deletedAt: null,
               createdAt: card.createdAt,
               updatedAt: card.updatedAt,
             })),
@@ -558,5 +560,186 @@ export class SqliteDeckRepository {
       }
       throw new DeckDeleteError({ context: { deckId }, cause: error });
     }
+  }
+
+  async listPendingDeckOpsAsync() {
+    const db = await getDatabaseAsync();
+    const rows = await db.getAllAsync<{
+      id: string;
+      entity_id: string;
+      operation_type: "upsert" | "delete";
+      payload: string | null;
+      attempt_count: number;
+      available_at: string;
+    }>(
+      `SELECT id, entity_id, operation_type, payload, attempt_count, available_at
+       FROM pending_sync_operations
+       WHERE entity_type = 'deck' AND status = 'pending'
+         AND available_at <= ?
+       ORDER BY created_at ASC;`,
+      [new Date().toISOString()],
+    );
+    return rows.map((r) => ({
+      id: r.id,
+      entityId: r.entity_id,
+      operationType: r.operation_type,
+      payload: r.payload ? JSON.parse(r.payload) : null,
+      attemptCount: r.attempt_count,
+      availableAt: r.available_at,
+    }));
+  }
+
+  async markOpProcessingAsync(opId: string) {
+    const db = await getDatabaseAsync();
+    await db.runAsync(
+      `UPDATE pending_sync_operations
+       SET status = 'processing', updated_at = ?
+       WHERE id = ?;`,
+      [new Date().toISOString(), opId],
+    );
+  }
+
+  async deleteOpAsync(opId: string) {
+    const db = await getDatabaseAsync();
+    await db.runAsync("DELETE FROM pending_sync_operations WHERE id = ?;", [opId]);
+  }
+
+  async markOpFailedAsync(
+    opId: string,
+    error: { message: string; permanent: boolean },
+    nextAvailableAt: string,
+  ) {
+    const db = await getDatabaseAsync();
+    const now = new Date().toISOString();
+    await db.runAsync(
+      `UPDATE pending_sync_operations
+       SET status = ?, attempt_count = attempt_count + 1,
+           available_at = ?, last_error = ?, updated_at = ?
+       WHERE id = ?;`,
+      [
+        error.permanent ? "failed" : "pending",
+        nextAvailableAt,
+        error.message,
+        now,
+        opId,
+      ],
+    );
+  }
+
+  async countFailedDeckOpsAsync() {
+    const db = await getDatabaseAsync();
+    const row = await db.getFirstAsync<{ count: number }>(
+      `SELECT COUNT(*) as count FROM pending_sync_operations
+       WHERE entity_type = 'deck' AND status = 'failed';`,
+    );
+    return row?.count ?? 0;
+  }
+
+  async markDeckSyncedAsync(deckId: string) {
+    const db = await getDatabaseAsync();
+    const now = new Date().toISOString();
+    await db.runAsync(
+      `UPDATE local_decks
+       SET sync_state = 'synced', last_synced_at = ?
+       WHERE id = ?;`,
+      [now, deckId],
+    );
+  }
+
+  async applyRemoteDeckAsync(payload: RemoteDeckPayload): Promise<void> {
+    const db = await getDatabaseAsync();
+    const ownerId = this.auth.getCurrentUserId();
+    await db.withExclusiveTransactionAsync(async (tx) => {
+      await mergeRemoteDeckIntoTx(
+        {
+          // cast needed to bridge MergeRemoteDeckTx (unknown[]) with expo-sqlite SQLiteBindParams
+          runAsync: (sql, params) => tx.runAsync(sql, params as any) as Promise<unknown>,
+        },
+        ownerId,
+        payload,
+      );
+    });
+  }
+}
+
+export interface MergeRemoteDeckTx {
+  runAsync(sql: string, params: unknown[]): Promise<unknown>;
+}
+
+export async function mergeRemoteDeckIntoTx(
+  tx: MergeRemoteDeckTx,
+  ownerId: string,
+  payload: RemoteDeckPayload,
+): Promise<void> {
+  const isDeleted = payload.deck.deletedAt ? 1 : 0;
+  const now = new Date().toISOString();
+
+  await tx.runAsync(
+    `INSERT INTO local_decks (
+      id, owner_id, title, description, source_type, accent_color,
+      visibility, source_language, target_language, is_deleted,
+      sync_state, last_synced_at, created_at, updated_at
+    ) VALUES (?, ?, ?, ?, 'user', ?, ?, ?, ?, ?, 'synced', ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      title = excluded.title,
+      description = excluded.description,
+      accent_color = excluded.accent_color,
+      visibility = excluded.visibility,
+      source_language = excluded.source_language,
+      target_language = excluded.target_language,
+      is_deleted = excluded.is_deleted,
+      sync_state = 'synced',
+      last_synced_at = excluded.last_synced_at,
+      updated_at = excluded.updated_at;`,
+    [
+      payload.deck.id,
+      ownerId,
+      payload.deck.title,
+      payload.deck.description,
+      payload.deck.accentColor,
+      payload.deck.visibility,
+      payload.deck.sourceLanguage,
+      payload.deck.targetLanguage,
+      isDeleted,
+      now,
+      payload.deck.createdAt,
+      payload.deck.updatedAt,
+    ],
+  );
+
+  await tx.runAsync(
+    "DELETE FROM local_deck_cards WHERE deck_id = ?;",
+    [payload.deck.id],
+  );
+
+  for (const card of payload.cards) {
+    if (card.deletedAt) continue;
+    await tx.runAsync(
+      `INSERT INTO local_deck_cards (
+        id, deck_id, term, meaning, pronunciation, part_of_speech, difficulty,
+        example, example_translation, note, tags, synonyms, antonyms,
+        related_expressions, source, image_uri, position, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?, ?, ?);`,
+      [
+        card.id,
+        card.deckId,
+        card.term,
+        card.meaning,
+        card.pronunciation,
+        card.partOfSpeech,
+        card.difficulty,
+        card.example,
+        card.exampleTranslation,
+        card.note,
+        JSON.stringify(card.tags),
+        card.synonyms,
+        card.antonyms,
+        card.relatedExpressions,
+        card.source,
+        card.position,
+        card.createdAt,
+        card.updatedAt,
+      ],
+    );
   }
 }
