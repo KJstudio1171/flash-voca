@@ -3,6 +3,7 @@ import { useRouter } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 
 import { useAppServices } from "@/src/app/AppProviders";
+import { AccountLinkCard } from "@/src/features/profile/components/AccountLinkCard";
 import { hasSupabaseConfig } from "@/src/core/supabase/config";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { AppButton } from "@/src/shared/ui/AppButton";
@@ -29,6 +30,8 @@ export default function ProfileScreen() {
         </AppButton>
       }
     >
+      <AccountLinkCard />
+
       <Panel>
         <Badge tone={hasSupabaseConfig ? "primary" : "info"}>
           {hasSupabaseConfig ? "Supabase Ready" : "Local Mode"}
@@ -54,7 +57,6 @@ export default function ProfileScreen() {
         <View style={styles.list}>
           <Text style={[styles.listItem, { color: colors.muted }]}>SQLite study state to Supabase user scope mapping</Text>
           <Text style={[styles.listItem, { color: colors.muted }]}>Billing provider to entitlement upsert bridge</Text>
-          <Text style={[styles.listItem, { color: colors.muted }]}>Auth session to local user id replacement</Text>
         </View>
       </Panel>
     </Screen>
