@@ -23,7 +23,23 @@
     "entitlementCache": "Failed to process entitlement cache.",
     "sync": "Sync failed.",
     "entitlementFetch": "Failed to load entitlements.",
-    "unknown": "An unknown error occurred."
+    "unknown": "An unknown error occurred.",
+    "auth": {
+      "bootstrap": "App initialization failed. Please restart.",
+      "googleLink": "Google link failed. Please try again later.",
+      "identityConflict": "This Google account is already linked to another user.",
+      "migration": "We couldn't finish migrating your data."
+    }
+  },
+  "auth": {
+    "linkCard": {
+      "title": "Link your Google account",
+      "description": "Connect a Google account to back up your data and protect purchases.",
+      "button": "Continue with Google",
+      "linking": "Linking...",
+      "linkedAs": "Linked as {{email}}",
+      "linkedAnonymous": "Linked to anonymous account"
+    }
   },
   "settings": {
     "title": "Settings",
@@ -34,6 +50,28 @@
     "flashcardFont": "Flashcard font",
     "saveFlashcardFont": "Save flashcard font",
     "flashcardFontSaved": "Flashcard font saved.",
+    "studySettings": "Study settings",
+    "studyMethod": "Study method",
+    "savePreferences": "Save",
+    "preferencesSaved": "Settings saved.",
+    "studyMode": {
+      "buttonSwipe": {
+        "title": "Buttons + swipes",
+        "description": "Use buttons and swipes together"
+      },
+      "swipeOnly": {
+        "title": "Swipes only",
+        "description": "Answer by swiping cards left or right"
+      },
+      "buttonOnly": {
+        "title": "Buttons only",
+        "description": "Answer only with buttons"
+      }
+    },
+    "allowFrontSwipe": {
+      "title": "Allow swipes on front",
+      "description": "Answer with left and right swipes before revealing the meaning."
+    },
     "flashcardFonts": {
       "balanced": {
         "name": "Balanced",
@@ -62,7 +100,7 @@
     "title": "Today's Study",
     "summary": {
       "progressLabel": "Daily goal",
-      "studiedCards": "Mastered cards",
+      "studiedCards": "Studied today",
       "studyTime": "Study time",
       "streak": "Study streak",
       "minutesValue": "{{count}} min",
@@ -105,16 +143,35 @@
     "errorBody": "Could not load study data.",
     "emptyBadge": "Empty",
     "emptyBody": "No cards yet. Add cards and try again.",
+    "emptyBookmarkedBody": "No bookmarked cards yet. Tap the star while studying to save cards.",
     "tapToReveal": "Tap to reveal meaning",
     "listen": "Listen",
-    "swipeHint": "You can also rate with left and right swipes",
+    "swipeHint": "Press a button or swipe to move to the next card.",
+    "example": "Example",
+    "extraInfo": "Extra info",
+    "extra": {
+      "synonyms": "Synonyms",
+      "relatedExpressions": "Related",
+      "memo": "Memo"
+    },
     "ratings": {
-      "again": "Again",
+      "again": "Don't know",
       "againSub": "Retry",
       "good": "Good",
       "goodSub": "Good",
-      "easy": "Easy",
+      "easy": "Got it",
       "easySub": "Easy"
+    },
+    "menu": {
+      "undo": "Undo last rating",
+      "skip": "Skip card",
+      "bookmark": "Bookmark",
+      "removeBookmark": "Remove bookmark",
+      "settings": "Settings",
+      "bookmarkSaved": "Bookmark added.",
+      "bookmarkRemoved": "Bookmark removed.",
+      "undoComplete": "Last rating undone.",
+      "undoUnavailable": "No rating to undo."
     }
   },
   "studyHub": {
@@ -165,11 +222,13 @@
     "private": "Private",
     "public": "Public",
     "study": "Study",
+    "studyBookmarks": "Study bookmarks",
     "manageCards": "Manage cards",
     "settings": "Settings",
     "learnedCards": "Studied cards",
     "pendingReview": "Pending review",
     "hardCards": "Hard cards",
+    "bookmarkedCards": "Bookmarks",
     "deckInfo": "Deck info",
     "lastUpdated": "Last updated",
     "createdAt": "Created",
@@ -188,6 +247,7 @@
     "title": "Manage cards",
     "searchPlaceholder": "Search words, meanings, examples",
     "allFilter": "All {{count}}",
+    "bookmarkedFilter": "Bookmarks {{count}}",
     "missingExampleFilter": "No example {{count}}",
     "duplicateFilter": "Duplicate {{count}}",
     "hardFilter": "Hard {{count}}",

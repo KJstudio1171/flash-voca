@@ -23,7 +23,23 @@
     "entitlementCache": "購入キャッシュの処理に失敗しました。",
     "sync": "同期に失敗しました。",
     "entitlementFetch": "購入情報を読み込めませんでした。",
-    "unknown": "不明なエラーが発生しました。"
+    "unknown": "不明なエラーが発生しました。",
+    "auth": {
+      "bootstrap": "アプリの初期化に失敗しました。再起動してください。",
+      "googleLink": "Google連携に失敗しました。しばらくしてからもう一度お試しください。",
+      "identityConflict": "このGoogleアカウントは既に他のユーザーと連携されています。",
+      "migration": "データの移行中に問題が発生しました。"
+    }
+  },
+  "auth": {
+    "linkCard": {
+      "title": "Googleアカウントを連携",
+      "description": "データのバックアップと購入の保護のため、Googleアカウントを連携してください。",
+      "button": "Googleで続行",
+      "linking": "連携中...",
+      "linkedAs": "{{email}} として連携済み",
+      "linkedAnonymous": "匿名アカウントに連携"
+    }
   },
   "settings": {
     "title": "設定",
@@ -34,6 +50,28 @@
     "flashcardFont": "フラッシュカードのフォント",
     "saveFlashcardFont": "フォントを保存",
     "flashcardFontSaved": "フラッシュカードのフォントを保存しました。",
+    "studySettings": "学習設定",
+    "studyMethod": "学習方法",
+    "savePreferences": "保存",
+    "preferencesSaved": "設定を保存しました。",
+    "studyMode": {
+      "buttonSwipe": {
+        "title": "ボタン + スワイプ",
+        "description": "ボタンとスワイプを一緒に使う"
+      },
+      "swipeOnly": {
+        "title": "スワイプのみ",
+        "description": "カードを左右にスワイプして回答"
+      },
+      "buttonOnly": {
+        "title": "ボタンのみ",
+        "description": "ボタンだけで回答"
+      }
+    },
+    "allowFrontSwipe": {
+      "title": "表面でスワイプを許可",
+      "description": "意味を見る前でも左右スワイプで回答できます。"
+    },
     "flashcardFonts": {
       "balanced": {
         "name": "バランス",
@@ -62,7 +100,7 @@
     "title": "今日の学習",
     "summary": {
       "progressLabel": "一日の目標",
-      "studiedCards": "習得済みカード",
+      "studiedCards": "今日学習したカード",
       "studyTime": "学習時間",
       "streak": "連続学習",
       "minutesValue": "{{count}}分",
@@ -105,16 +143,35 @@
     "errorBody": "学習データを読み込めませんでした。",
     "emptyBadge": "空",
     "emptyBody": "カードがありません。カードを追加してからもう一度お試しください。",
+    "emptyBookmarkedBody": "ブックマークしたカードはまだありません。学習中に星を押して保存してください。",
     "tapToReveal": "タップして意味を見る",
     "listen": "発音を聞く",
-    "swipeHint": "左右スワイプでも評価できます",
+    "swipeHint": "ボタンまたはスワイプで回答すると次のカードへ進みます。",
+    "example": "例文",
+    "extraInfo": "追加情報",
+    "extra": {
+      "synonyms": "類義語",
+      "relatedExpressions": "関連表現",
+      "memo": "メモ"
+    },
     "ratings": {
-      "again": "Again",
+      "again": "わからない",
       "againSub": "もう一度",
-      "good": "Good",
+      "good": "普通",
       "goodSub": "良い",
-      "easy": "Easy",
+      "easy": "わかった",
       "easySub": "簡単"
+    },
+    "menu": {
+      "undo": "最後の評価を戻す",
+      "skip": "カードをスキップ",
+      "bookmark": "ブックマーク",
+      "removeBookmark": "ブックマークを解除",
+      "settings": "設定",
+      "bookmarkSaved": "ブックマークに追加しました。",
+      "bookmarkRemoved": "ブックマークを解除しました。",
+      "undoComplete": "最後の評価を戻しました。",
+      "undoUnavailable": "戻せる評価がありません。"
     }
   },
   "studyHub": {
@@ -165,11 +222,13 @@
     "private": "非公開",
     "public": "公開",
     "study": "学習する",
+    "studyBookmarks": "ブックマーク学習",
     "manageCards": "カード管理",
     "settings": "設定",
     "learnedCards": "学習済みカード",
     "pendingReview": "復習待ち",
     "hardCards": "難しいカード",
+    "bookmarkedCards": "ブックマーク",
     "deckInfo": "単語帳情報",
     "lastUpdated": "最終更新",
     "createdAt": "作成日",
@@ -188,6 +247,7 @@
     "title": "カード管理",
     "searchPlaceholder": "単語、意味、例文を検索",
     "allFilter": "すべて {{count}}",
+    "bookmarkedFilter": "ブックマーク {{count}}",
     "missingExampleFilter": "例文なし {{count}}",
     "duplicateFilter": "重複 {{count}}",
     "hardFilter": "難しい {{count}}",

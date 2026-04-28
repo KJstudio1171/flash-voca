@@ -23,7 +23,23 @@
     "entitlementCache": "处理购买缓存失败。",
     "sync": "同步失败。",
     "entitlementFetch": "无法加载购买信息。",
-    "unknown": "发生未知错误。"
+    "unknown": "发生未知错误。",
+    "auth": {
+      "bootstrap": "应用初始化失败。请重新启动。",
+      "googleLink": "Google 关联失败。请稍后再试。",
+      "identityConflict": "此 Google 账户已与其他用户关联。",
+      "migration": "数据迁移时出现问题。"
+    }
+  },
+  "auth": {
+    "linkCard": {
+      "title": "关联 Google 账户",
+      "description": "关联 Google 账户以备份数据并保护您的购买。",
+      "button": "使用 Google 登录",
+      "linking": "连接中...",
+      "linkedAs": "已关联为 {{email}}",
+      "linkedAnonymous": "已关联到匿名账户"
+    }
   },
   "settings": {
     "title": "设置",
@@ -34,6 +50,28 @@
     "flashcardFont": "闪卡字体",
     "saveFlashcardFont": "保存闪卡字体",
     "flashcardFontSaved": "已保存闪卡字体。",
+    "studySettings": "学习设置",
+    "studyMethod": "学习方式",
+    "savePreferences": "保存",
+    "preferencesSaved": "设置已保存。",
+    "studyMode": {
+      "buttonSwipe": {
+        "title": "按钮 + 滑动",
+        "description": "同时使用按钮和滑动"
+      },
+      "swipeOnly": {
+        "title": "仅滑动",
+        "description": "左右滑动卡片作答"
+      },
+      "buttonOnly": {
+        "title": "仅按钮",
+        "description": "只用按钮作答"
+      }
+    },
+    "allowFrontSwipe": {
+      "title": "正面允许滑动",
+      "description": "查看释义前也可以左右滑动作答。"
+    },
     "flashcardFonts": {
       "balanced": {
         "name": "均衡",
@@ -62,7 +100,7 @@
     "title": "今日学习",
     "summary": {
       "progressLabel": "每日目标",
-      "studiedCards": "已掌握卡片",
+      "studiedCards": "今日已学卡片",
       "studyTime": "学习时间",
       "streak": "连续学习",
       "minutesValue": "{{count}} 分钟",
@@ -105,16 +143,35 @@
     "errorBody": "无法加载学习数据。",
     "emptyBadge": "空",
     "emptyBody": "还没有卡片。请先添加卡片后再试。",
+    "emptyBookmarkedBody": "还没有加书签的卡片。学习时点击星标即可保存。",
     "tapToReveal": "点击查看释义",
     "listen": "听发音",
-    "swipeHint": "也可以左右滑动进行评分",
+    "swipeHint": "点击按钮或滑动作答后会进入下一张卡片。",
+    "example": "例句",
+    "extraInfo": "更多信息",
+    "extra": {
+      "synonyms": "同义词",
+      "relatedExpressions": "相关表达",
+      "memo": "备注"
+    },
     "ratings": {
-      "again": "Again",
+      "again": "不知道",
       "againSub": "再来",
-      "good": "Good",
+      "good": "一般",
       "goodSub": "不错",
-      "easy": "Easy",
+      "easy": "知道了",
       "easySub": "简单"
+    },
+    "menu": {
+      "undo": "撤销上次评分",
+      "skip": "跳过卡片",
+      "bookmark": "书签",
+      "removeBookmark": "取消书签",
+      "settings": "设置",
+      "bookmarkSaved": "已添加书签。",
+      "bookmarkRemoved": "已取消书签。",
+      "undoComplete": "已撤销上次评分。",
+      "undoUnavailable": "没有可撤销的评分。"
     }
   },
   "studyHub": {
@@ -165,11 +222,13 @@
     "private": "私密",
     "public": "公开",
     "study": "学习",
+    "studyBookmarks": "学习书签",
     "manageCards": "管理卡片",
     "settings": "设置",
     "learnedCards": "已学习卡片",
     "pendingReview": "待复习",
     "hardCards": "困难卡片",
+    "bookmarkedCards": "书签",
     "deckInfo": "卡组信息",
     "lastUpdated": "最后更新",
     "createdAt": "创建日期",
@@ -188,6 +247,7 @@
     "title": "卡片管理",
     "searchPlaceholder": "搜索单词、释义、例句",
     "allFilter": "全部 {{count}}",
+    "bookmarkedFilter": "书签 {{count}}",
     "missingExampleFilter": "无例句 {{count}}",
     "duplicateFilter": "重复 {{count}}",
     "hardFilter": "困难 {{count}}",
