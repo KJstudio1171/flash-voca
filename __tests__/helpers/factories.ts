@@ -5,6 +5,7 @@ import type {
   LogReviewInput,
   UserCardState,
 } from "@/src/core/domain/models";
+import { TEST_USER_ID } from "./MockAuthService";
 
 let counter = 0;
 function nextId(): string {
@@ -19,7 +20,7 @@ export function createMockDeck(overrides?: Partial<Deck>): Deck {
     title: `Deck ${id}`,
     description: null,
     sourceType: "user",
-    ownerId: "local-user",
+    ownerId: TEST_USER_ID,
     accentColor: "#6366F1",
     visibility: "private",
     sourceLanguage: "en",
@@ -75,12 +76,13 @@ export function createMockCardState(
     id,
     deckId: "deck-1",
     cardId: "card-1",
-    userId: "local-user",
+    userId: TEST_USER_ID,
     masteryLevel: 0,
     easeFactor: 2.5,
     intervalDays: 0,
     nextReviewAt: null,
     lastReviewedAt: null,
+    isBookmarked: false,
     updatedAt: "2026-01-01T00:00:00Z",
     ...overrides,
   };

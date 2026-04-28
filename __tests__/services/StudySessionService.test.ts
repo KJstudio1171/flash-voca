@@ -1,5 +1,4 @@
 import { StudySessionService } from "@/src/core/services/StudySessionService";
-import type { AuthService } from "@/src/core/services/auth/AuthService";
 import {
   createMockCardState,
   createMockDeck,
@@ -7,20 +6,11 @@ import {
   createMockDeckDetail,
   createMockLogReviewInput,
 } from "@/__tests__/helpers/factories";
+import { createMockAuthService } from "@/__tests__/helpers/MockAuthService";
 import {
   createMockDeckRepository,
   createMockStudyRepository,
 } from "@/__tests__/helpers/mockRepositories";
-
-function createMockAuthService(userId = "test-user"): AuthService {
-  return {
-    bootstrapAsync: jest.fn(),
-    getCurrentUserId: jest.fn().mockReturnValue(userId),
-    getState: jest.fn().mockReturnValue({ kind: "local-temp" as const, userId }),
-    linkGoogleAsync: jest.fn(),
-    subscribe: jest.fn().mockReturnValue(() => {}),
-  };
-}
 
 describe("StudySessionService", () => {
   describe("listDeckSummariesAsync", () => {
