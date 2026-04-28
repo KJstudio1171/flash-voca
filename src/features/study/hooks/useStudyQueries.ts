@@ -6,6 +6,7 @@ import {
 
 import { useAppServices } from "@/src/app/AppProviders";
 import { LogReviewInput } from "@/src/core/domain/models";
+import { homeQueryKeys } from "@/src/features/home/hooks/useHomeSummaryQuery";
 
 export const studyQueryKeys = {
   snapshot: (deckId: string) => ["study", deckId] as const,
@@ -28,7 +29,44 @@ export function useRecordReviewMutation(deckId: string) {
   return useMutation({
     mutationFn: (input: LogReviewInput) => studySessionService.recordReviewAsync(input),
     onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: studyQueryKeys.snapshot(deckId) }),
+        queryClient.invalidateQueries({ queryKey: homeQueryKeys.deckSummaries }),
+        queryClient.invalidateQueries({ queryKey: homeQueryKeys.summary }),
+      ]);
+    },
+  });
+}
+
+export function useToggleBookmarkMutation(deckId: string) {
+  const { studySessionService } = useAppServices();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (input: { cardId: string; isBookmarked: boolean }) =>
+      studySessionService.setBookmarkAsync({
+        deckId,
+        cardId: input.cardId,
+        isBookmarked: input.isBookmarked,
+      }),
+    onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: studyQueryKeys.snapshot(deckId) });
+    },
+  });
+}
+
+export function useUndoLastReviewMutation(deckId: string) {
+  const { studySessionService } = useAppServices();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => studySessionService.undoLastReviewAsync(deckId),
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: studyQueryKeys.snapshot(deckId) }),
+        queryClient.invalidateQueries({ queryKey: homeQueryKeys.deckSummaries }),
+        queryClient.invalidateQueries({ queryKey: homeQueryKeys.summary }),
+      ]);
     },
   });
 }

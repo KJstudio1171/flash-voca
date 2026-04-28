@@ -4,14 +4,17 @@ import { Image, Pressable, StyleSheet, Text, View } from "react-native";
 import Animated from "react-native-reanimated";
 
 import { ReviewRating, StudyCard } from "@/src/core/domain/models";
+import { ReviewRatingButtons } from "@/src/features/study/components/ReviewRatingButtons";
 import { AnimatedFlipCard } from "@/src/shared/animation/AnimatedFlipCard";
 import { cardStackEnter } from "@/src/shared/animation/motionPresets";
 import { SwipeStudyCard } from "@/src/shared/animation/SwipeStudyCard";
+import type { CardSrsState } from "@/src/core/services/srs/SrsAlgorithm";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { tokens } from "@/src/shared/theme/tokens";
 
 type StudyFlashcardProps = {
   card: StudyCard;
+  cardState: CardSrsState;
   disabled?: boolean;
   enableSwipe: boolean;
   allowFrontSwipe: boolean;
@@ -36,6 +39,7 @@ type StudyFlashcardProps = {
 
 function StudyFlashcardComponent({
   card,
+  cardState,
   disabled = false,
   enableSwipe,
   allowFrontSwipe,
@@ -167,22 +171,7 @@ function StudyFlashcardComponent({
       </SwipeStudyCard>
 
       {showRatingButtons ? (
-        <View style={styles.ratingRow}>
-          <RatingButton
-            disabled={disabled}
-            iconName="help-circle-outline"
-            label={labels.again}
-            onPress={() => onRate("again")}
-            tone="again"
-          />
-          <RatingButton
-            disabled={disabled}
-            iconName="check"
-            label={labels.easy}
-            onPress={() => onRate("easy")}
-            tone="easy"
-          />
-        </View>
+        <ReviewRatingButtons cardState={cardState} onRate={onRate} disabled={disabled} />
       ) : null}
 
       {enableSwipe ? (
@@ -368,81 +357,11 @@ const styles = StyleSheet.create({
     ...tokens.typography.caption,
     flex: 1,
   },
-  ratingRow: {
-    flexDirection: "row",
-    gap: tokens.spacing.m,
-  },
-  ratingButton: {
-    alignItems: "center",
-    borderRadius: tokens.radius.s,
-    borderWidth: tokens.borderWidth.hairline,
-    flex: 1,
-    minHeight: 64,
-    justifyContent: "center",
-    padding: tokens.spacing.s,
-  },
-  ratingLabelRow: {
-    alignItems: "center",
-    flexDirection: "row",
-    gap: 8,
-  },
-  ratingLabel: {
-    ...tokens.typography.bodyBold,
-  },
   swipeHint: {
     ...tokens.typography.caption,
     textAlign: "center",
   },
 });
-
-function RatingButton({
-  disabled,
-  iconName,
-  label,
-  onPress,
-  tone,
-}: {
-  disabled: boolean;
-  iconName: ComponentProps<typeof MaterialCommunityIcons>["name"];
-  label: string;
-  onPress: () => void;
-  tone: "again" | "easy";
-}) {
-  const { colors } = useTheme();
-  const toneStyle = {
-    again: {
-      backgroundColor: colors.surface,
-      borderColor: colors.danger,
-      color: colors.danger,
-    },
-    easy: {
-      backgroundColor: colors.surface,
-      borderColor: colors.success,
-      color: colors.success,
-    },
-  }[tone];
-
-  return (
-    <Pressable
-      accessibilityRole="button"
-      disabled={disabled}
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.ratingButton,
-        {
-          backgroundColor: toneStyle.backgroundColor,
-          borderColor: toneStyle.borderColor,
-          opacity: disabled ? 0.5 : pressed ? 0.72 : 1,
-        },
-      ]}
-    >
-      <View style={styles.ratingLabelRow}>
-        <MaterialCommunityIcons color={toneStyle.color} name={iconName} size={24} />
-        <Text style={[styles.ratingLabel, { color: toneStyle.color }]}>{label}</Text>
-      </View>
-    </Pressable>
-  );
-}
 
 function splitExample(example: string | null, term: string) {
   if (!example) {
