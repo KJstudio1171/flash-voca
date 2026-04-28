@@ -23,7 +23,8 @@
         {
           "photosPermission": "Allow Flash Voca to access your photos so you can add images to vocabulary cards."
         }
-      ]
+      ],
+      "expo-iap"
     ],
     "experiments": {
       "typedRoutes": true
