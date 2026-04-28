@@ -1,10 +1,15 @@
+import { SqliteAppMetaRepository } from "@/src/core/repositories/sqlite/SqliteAppMetaRepository";
 import { SqliteBundleRepository } from "@/src/core/repositories/sqlite/SqliteBundleRepository";
 import { SqliteCatalogCacheRepository } from "@/src/core/repositories/sqlite/SqliteCatalogCacheRepository";
 import { SqliteDeckRepository } from "@/src/core/repositories/sqlite/SqliteDeckRepository";
 import { SqliteEntitlementRepository } from "@/src/core/repositories/sqlite/SqliteEntitlementRepository";
 import { SqliteStudyRepository } from "@/src/core/repositories/sqlite/SqliteStudyRepository";
 import { SupabaseCatalogGateway } from "@/src/core/repositories/supabase/SupabaseCatalogGateway";
+import { SupabaseDeckGateway } from "@/src/core/repositories/supabase/SupabaseDeckGateway";
 import { SupabaseEntitlementGateway } from "@/src/core/repositories/supabase/SupabaseEntitlementGateway";
+import { DeckSyncMerger } from "@/src/core/services/DeckSyncMerger";
+import { DeckSyncService } from "@/src/core/services/DeckSyncService";
+import { PendingSyncWorker } from "@/src/core/services/PendingSyncWorker";
 import { BootstrapService } from "@/src/core/services/BootstrapService";
 import { CatalogSyncService } from "@/src/core/services/CatalogSyncService";
 import { DeckService } from "@/src/core/services/DeckService";
@@ -85,6 +90,27 @@ export function createAppServices() {
 
   const supabaseClient = getSupabaseClient();
 
+  const appMeta = new SqliteAppMetaRepository();
+
+  const deckSyncService: DeckSyncService | null = supabaseClient
+    ? (() => {
+        const remoteDeckGateway = new SupabaseDeckGateway(supabaseClient);
+        const worker = new PendingSyncWorker(
+          deckRepository,
+          remoteDeckGateway,
+          authService,
+        );
+        const merger = new DeckSyncMerger(deckRepository);
+        return new DeckSyncService({
+          worker,
+          merger,
+          remote: remoteDeckGateway,
+          auth: authService,
+          appMeta,
+        });
+      })()
+    : null;
+
   const billingGateway = supabaseClient
     ? new ExpoIapBillingGateway()
     : new NoopBillingGateway();
@@ -107,7 +133,9 @@ export function createAppServices() {
     bootstrapService: new BootstrapService(localeService),
     catalogSyncService,
     localeService,
+    deckRepository,
     deckService: new DeckService(deckRepository),
+    deckSyncService,
     storeService: new StoreService(
       bundleRepository,
       entitlementService,
