@@ -9,6 +9,12 @@ export const analyticsEventRegistry = {
   auth_google_link_started: { allowedProps: [] as const },
   auth_google_linked: { allowedProps: ["userId"] as const },
   auth_link_failed: { allowedProps: ["reason"] as const },
+  billing_purchase_started: { allowedProps: ["bundleId", "productId"] as const },
+  billing_purchase_succeeded: { allowedProps: ["bundleId", "productId"] as const },
+  billing_purchase_failed: { allowedProps: ["bundleId", "reason"] as const },
+  billing_restore_started: { allowedProps: [] as const },
+  billing_restore_completed: { allowedProps: ["restoredCount"] as const },
+  billing_auth_gate_blocked: { allowedProps: ["bundleId"] as const },
 } satisfies Record<string, { allowedProps: readonly string[] }>;
 
 export type AnalyticsEventName = keyof typeof analyticsEventRegistry;
