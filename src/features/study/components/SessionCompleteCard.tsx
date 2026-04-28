@@ -5,6 +5,7 @@ import Animated, { useAnimatedProps } from "react-native-reanimated";
 import { bounceIn, fadeInUp } from "@/src/shared/animation/motionPresets";
 import { motion } from "@/src/shared/animation/motionTokens";
 import { useCountUp } from "@/src/shared/animation/useCountUp";
+import { useT } from "@/src/shared/i18n";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { tokens } from "@/src/shared/theme/tokens";
 import { AppButton } from "@/src/shared/ui/AppButton";
@@ -13,6 +14,7 @@ const AnimatedTextInput = Animated.createAnimatedComponent(TextInput);
 
 type RatingCounts = {
   again: number;
+  hard: number;
   good: number;
   easy: number;
 };
@@ -55,6 +57,7 @@ function SessionCompleteCardComponent({
   onRestart,
 }: SessionCompleteCardProps) {
   const { colors } = useTheme();
+  const { t } = useT();
   const masteryPercent =
     totalCards > 0 ? Math.round((masteredCount / totalCards) * 100) : 0;
 
@@ -73,21 +76,36 @@ function SessionCompleteCardComponent({
           style={[styles.statCard, { backgroundColor: colors.accentSoft }]}
         >
           <AnimatedCountText target={ratingCounts.again} color={colors.accent} />
-          <Text style={[styles.statLabel, { color: colors.accent }]}>AGAIN</Text>
+          <Text style={[styles.statLabel, { color: colors.accent }]}>
+            {t("study.ratings.again").toUpperCase()}
+          </Text>
         </Animated.View>
         <Animated.View
           entering={fadeInUp(1 * motion.delay.stagger)}
-          style={[styles.statCard, { backgroundColor: colors.surface }]}
+          style={[styles.statCard, { backgroundColor: colors.warningSoft }]}
         >
-          <AnimatedCountText target={ratingCounts.good} color={colors.ink} />
-          <Text style={[styles.statLabel, { color: colors.muted }]}>GOOD</Text>
+          <AnimatedCountText target={ratingCounts.hard} color={colors.warning} />
+          <Text style={[styles.statLabel, { color: colors.warning }]}>
+            {t("study.ratings.hard").toUpperCase()}
+          </Text>
         </Animated.View>
         <Animated.View
           entering={fadeInUp(2 * motion.delay.stagger)}
+          style={[styles.statCard, { backgroundColor: colors.surface }]}
+        >
+          <AnimatedCountText target={ratingCounts.good} color={colors.ink} />
+          <Text style={[styles.statLabel, { color: colors.muted }]}>
+            {t("study.ratings.good").toUpperCase()}
+          </Text>
+        </Animated.View>
+        <Animated.View
+          entering={fadeInUp(3 * motion.delay.stagger)}
           style={[styles.statCard, { backgroundColor: colors.primarySoft }]}
         >
           <AnimatedCountText target={ratingCounts.easy} color={colors.primary} />
-          <Text style={[styles.statLabel, { color: colors.primary }]}>EASY</Text>
+          <Text style={[styles.statLabel, { color: colors.primary }]}>
+            {t("study.ratings.easy").toUpperCase()}
+          </Text>
         </Animated.View>
       </View>
 
