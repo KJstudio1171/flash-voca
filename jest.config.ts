@@ -9,7 +9,7 @@ const config: Config = {
     "^@react-native-async-storage/async-storage$":
       "@react-native-async-storage/async-storage/jest/async-storage-mock.js",
   },
-  testMatch: ["**/__tests__/**/*.test.ts"],
+  testMatch: ["**/__tests__/**/*.test.ts", "**/__tests__/**/*.test.tsx"],
   testPathIgnorePatterns: ["/node_modules/", "/.worktrees/", "/supabase/functions/"],
 };
 
