@@ -51,6 +51,8 @@ const entitlement: Entitlement = {
   grantedAt: "2026-04-24T00:00:00.000Z",
   expiresAt: null,
   syncedAt: "2026-04-24T00:00:00.000Z",
+  kind: "one_time",
+  autoRenewing: false,
 };
 
 function createBundleRepository(): BundleRepository {

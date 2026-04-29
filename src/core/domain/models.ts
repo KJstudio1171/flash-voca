@@ -1,7 +1,15 @@
 export type DeckSourceType = "official" | "user";
 export type DeckVisibility = "private" | "public";
 export type CardDifficulty = "easy" | "medium" | "hard";
-export type EntitlementStatus = "active" | "expired" | "pending" | "revoked";
+export type EntitlementStatus =
+  | "active"
+  | "in_grace"
+  | "on_hold"
+  | "paused"
+  | "cancelled"
+  | "expired"
+  | "revoked"
+  | "pending"; // legacy, retained for old rows
 export type ReviewRating = "again" | "hard" | "good" | "easy";
 
 export interface Deck {
@@ -98,6 +106,8 @@ export interface Entitlement {
   grantedAt: string;
   expiresAt: string | null;
   syncedAt: string | null;
+  kind: "one_time" | "subscription";
+  autoRenewing: boolean;
 }
 
 export interface UserCardState {

@@ -1,7 +1,7 @@
 import { getDatabaseAsync } from "@/src/core/database/client";
 import { LOCAL_DATABASE_SCHEMA_SQL } from "@/src/core/database/schema";
 
-export const LOCAL_DATABASE_SCHEMA_VERSION = 7;
+export const LOCAL_DATABASE_SCHEMA_VERSION = 8;
 
 const SQLITE_PRAGMA_SQL = `
 PRAGMA foreign_keys = ON;
@@ -120,6 +120,21 @@ async function migrateToVersion7Async(db: MigrationDatabase): Promise<void> {
   );
 }
 
+async function migrateToVersion8Async(db: MigrationDatabase): Promise<void> {
+  await addColumnIfMissingAsync(
+    db,
+    "cached_entitlements",
+    "kind",
+    "TEXT NOT NULL DEFAULT 'one_time'",
+  );
+  await addColumnIfMissingAsync(
+    db,
+    "cached_entitlements",
+    "auto_renewing",
+    "INTEGER NOT NULL DEFAULT 0",
+  );
+}
+
 export async function initializeDatabaseAsync() {
   const db = await getDatabaseAsync();
 
@@ -153,6 +168,10 @@ export async function initializeDatabaseAsync() {
 
   if (currentVersion < 7) {
     await migrateToVersion7Async(db);
+  }
+
+  if (currentVersion < 8) {
+    await migrateToVersion8Async(db);
   }
 
   await db.runAsync(

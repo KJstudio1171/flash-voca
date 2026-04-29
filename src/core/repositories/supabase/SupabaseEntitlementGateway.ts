@@ -13,7 +13,7 @@ export class SupabaseEntitlementGateway implements RemoteEntitlementGateway {
     const { data, error } = await client
       .from("entitlements")
       .select(
-        "id, user_id, bundle_id, provider, provider_ref, status, granted_at, expires_at, synced_at",
+        "id, user_id, bundle_id, provider, provider_ref, status, granted_at, expires_at, synced_at, kind, auto_renewing",
       )
       .eq("user_id", userId);
 
@@ -31,6 +31,8 @@ export class SupabaseEntitlementGateway implements RemoteEntitlementGateway {
       grantedAt: row.granted_at,
       expiresAt: row.expires_at,
       syncedAt: row.synced_at,
+      kind: (row.kind === "subscription" ? "subscription" : "one_time") as "one_time" | "subscription",
+      autoRenewing: Boolean(row.auto_renewing),
     }));
   }
 }

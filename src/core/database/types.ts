@@ -112,6 +112,8 @@ export interface CachedEntitlementRecord {
   grantedAt: string;
   expiresAt: string | null;
   syncedAt: string | null;
+  kind: string;
+  auto_renewing: number;
   cacheUpdatedAt: string;
   rawPayload: string | null;
 }

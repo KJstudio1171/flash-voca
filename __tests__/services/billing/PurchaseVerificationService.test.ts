@@ -20,6 +20,8 @@ function createDeps(overrides: Partial<PurchaseVerificationDeps> = {}): Purchase
           grantedAt: "2026-04-28T00:00:00Z",
           expiresAt: null,
           syncedAt: null,
+          kind: "one_time",
+          autoRenewing: false,
         } as Entitlement,
       },
     })),
