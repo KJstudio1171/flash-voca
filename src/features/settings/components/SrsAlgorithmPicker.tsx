@@ -9,14 +9,16 @@ import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { tokens } from "@/src/shared/theme/tokens";
 import { useToast } from "@/src/shared/ui/toast";
 
-const OPTIONS: SrsAlgorithmId[] = ["leitner", "sm2"];
+const OPTIONS: SrsAlgorithmId[] = ["leitner", "sm2", "fsrs"];
 const TITLE_KEYS: Record<SrsAlgorithmId, TranslationKey> = {
   leitner: "srs.algorithm.leitner.title",
   sm2: "srs.algorithm.sm2.title",
+  fsrs: "srs.algorithm.fsrs.title",
 };
 const DESC_KEYS: Record<SrsAlgorithmId, TranslationKey> = {
   leitner: "srs.algorithm.leitner.description",
   sm2: "srs.algorithm.sm2.description",
+  fsrs: "srs.algorithm.fsrs.description",
 };
 
 export function SrsAlgorithmPicker() {
