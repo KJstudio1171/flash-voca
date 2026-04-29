@@ -14,6 +14,8 @@ export interface EntitlementRow {
   granted_at: string;
   expires_at: string | null;
   synced_at: string | null;
+  kind: string;
+  auto_renewing: boolean;
 }
 
 export interface VerifyPurchaseResponse {
@@ -27,5 +29,7 @@ export interface VerifyPurchaseResponse {
     grantedAt: string;
     expiresAt: string | null;
     syncedAt: string | null;
+    kind: "one_time" | "subscription";
+    autoRenewing: boolean;
   };
 }

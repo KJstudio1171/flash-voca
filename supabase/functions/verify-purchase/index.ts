@@ -1,13 +1,21 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.0";
 import { verifyPurchase, VerifyError, VerifyDeps } from "./verifier.ts";
-import { getProductPurchaseAsync } from "./googlePlayClient.ts";
+import {
+  getProductPurchaseAsync,
+  getSubscriptionPurchaseAsync,
+} from "./googlePlayClient.ts";
 import type { VerifyPurchaseRequest } from "./types.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
 const PACKAGE_NAME = Deno.env.get("GOOGLE_PLAY_PACKAGE_NAME") ?? "";
+const PRO_PRODUCT_IDS = {
+  monthly: Deno.env.get("PRO_PRODUCT_MONTHLY") ?? "",
+  yearly: Deno.env.get("PRO_PRODUCT_YEARLY") ?? "",
+  lifetime: Deno.env.get("PRO_PRODUCT_LIFETIME") ?? "",
+};
 
 const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { autoRefreshToken: false, persistSession: false },
@@ -85,10 +93,15 @@ serve(async (req) => {
         .from("entitlements")
         .upsert(
           {
-            ...row,
+            user_id: row.user_id,
+            bundle_id: row.bundle_id,
+            provider: row.provider,
+            provider_ref: row.provider_ref,
+            kind: row.kind,
+            expires_at: row.expires_at,
+            auto_renewing: row.auto_renewing,
             status: "active",
             granted_at: new Date().toISOString(),
-            expires_at: null,
           },
           { onConflict: "user_id,bundle_id,provider" },
         )
@@ -98,10 +111,11 @@ serve(async (req) => {
       return data;
     },
     getPlayPurchaseStatus: getProductPurchaseAsync,
+    getSubscriptionStatus: getSubscriptionPurchaseAsync,
   };
 
   try {
-    const result = await verifyPurchase(body, userId, deps, PACKAGE_NAME);
+    const result = await verifyPurchase(body, userId, deps, PACKAGE_NAME, PRO_PRODUCT_IDS);
     return new Response(JSON.stringify(result), {
       status: 200,
       headers: { "Content-Type": "application/json" },

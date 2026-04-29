@@ -80,3 +80,30 @@ export async function getProductPurchaseAsync(
   const raw = await res.json();
   return { purchaseState: (raw as { purchaseState: number }).purchaseState ?? -1, raw };
 }
+
+export async function getSubscriptionPurchaseAsync(
+  packageName: string,
+  purchaseToken: string,
+): Promise<{
+  subscriptionState: string;
+  lineItems?: { expiryTime?: string }[];
+  raw: unknown;
+}> {
+  const token = await getAccessTokenAsync();
+  const url = `https://androidpublisher.googleapis.com/androidpublisher/v3/applications/${packageName}/purchases/subscriptionsv2/tokens/${purchaseToken}`;
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    throw new Error(`Play subscriptions API ${res.status}: ${await res.text()}`);
+  }
+  const raw = (await res.json()) as {
+    subscriptionState: string;
+    lineItems?: { expiryTime?: string }[];
+  };
+  return {
+    subscriptionState: raw.subscriptionState,
+    lineItems: raw.lineItems,
+    raw,
+  };
+}

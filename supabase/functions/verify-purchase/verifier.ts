@@ -23,12 +23,29 @@ export interface VerifyDeps {
     bundle_id: string;
     provider: string;
     provider_ref: string;
+    kind: "one_time" | "subscription";
+    expires_at: string | null;
+    auto_renewing: boolean;
   }): Promise<EntitlementRow>;
   getPlayPurchaseStatus(
     packageName: string,
     productId: string,
     purchaseToken: string,
   ): Promise<{ purchaseState: number; raw?: unknown }>;
+  getSubscriptionStatus(
+    packageName: string,
+    purchaseToken: string,
+  ): Promise<{
+    subscriptionState: string;
+    lineItems?: { expiryTime?: string }[];
+    raw?: unknown;
+  }>;
+}
+
+export interface ProProductIds {
+  monthly: string;
+  yearly: string;
+  lifetime: string;
 }
 
 export class VerifyError extends Error {
@@ -47,26 +64,38 @@ export async function verifyPurchase(
   userId: string,
   deps: VerifyDeps,
   packageName = "",
+  proProductIds: ProProductIds = { monthly: "", yearly: "", lifetime: "" },
 ): Promise<VerifyPurchaseResponse> {
   if (!req.productId || !req.purchaseToken) {
     throw new VerifyError(400, "invalid_request");
   }
 
+  const proIds = [
+    proProductIds.monthly,
+    proProductIds.yearly,
+    proProductIds.lifetime,
+  ].filter(Boolean);
+  const isPro = proIds.includes(req.productId);
+  const isSubs =
+    req.productId === proProductIds.monthly ||
+    req.productId === proProductIds.yearly;
+
   let bundleId: string;
-  if (req.bundleId) {
-    const bundle = await deps.findBundleById(req.bundleId);
-    if (!bundle) {
-      throw new VerifyError(404, "bundle_not_found");
+  if (isPro) {
+    if (req.bundleId && req.bundleId !== "pro") {
+      throw new VerifyError(403, "bundle_product_mismatch");
     }
+    bundleId = "pro";
+  } else if (req.bundleId) {
+    const bundle = await deps.findBundleById(req.bundleId);
+    if (!bundle) throw new VerifyError(404, "bundle_not_found");
     if (bundle.play_product_id !== req.productId) {
       throw new VerifyError(403, "bundle_product_mismatch");
     }
     bundleId = req.bundleId;
   } else {
     const bundle = await deps.findBundleByProductId(req.productId);
-    if (!bundle) {
-      throw new VerifyError(404, "bundle_not_found");
-    }
+    if (!bundle) throw new VerifyError(404, "bundle_not_found");
     bundleId = bundle.id;
   }
 
@@ -75,13 +104,33 @@ export async function verifyPurchase(
     throw new VerifyError(409, "receipt_already_used");
   }
 
-  const status = await deps.getPlayPurchaseStatus(
-    packageName,
-    req.productId,
-    req.purchaseToken,
-  );
-  if (status.purchaseState !== 0) {
-    throw new VerifyError(422, "receipt_invalid");
+  let kind: "one_time" | "subscription" = "one_time";
+  let expiresAt: string | null = null;
+  let autoRenewing = false;
+  let raw: unknown;
+
+  if (isSubs) {
+    kind = "subscription";
+    const sub = await deps.getSubscriptionStatus(packageName, req.purchaseToken);
+    raw = sub.raw ?? sub;
+    if (
+      sub.subscriptionState !== "SUBSCRIPTION_STATE_ACTIVE" &&
+      sub.subscriptionState !== "SUBSCRIPTION_STATE_IN_GRACE_PERIOD"
+    ) {
+      throw new VerifyError(422, "receipt_invalid");
+    }
+    expiresAt = sub.lineItems?.[0]?.expiryTime ?? null;
+    autoRenewing = sub.subscriptionState === "SUBSCRIPTION_STATE_ACTIVE";
+  } else {
+    const status = await deps.getPlayPurchaseStatus(
+      packageName,
+      req.productId,
+      req.purchaseToken,
+    );
+    raw = status.raw ?? status;
+    if (status.purchaseState !== 0) {
+      throw new VerifyError(422, "receipt_invalid");
+    }
   }
 
   await deps.upsertReceipt({
@@ -89,7 +138,7 @@ export async function verifyPurchase(
     provider: "google_play",
     product_id: req.productId,
     purchase_token: req.purchaseToken,
-    raw_response: status.raw ?? status,
+    raw_response: raw,
     status: "valid",
   });
 
@@ -98,6 +147,9 @@ export async function verifyPurchase(
     bundle_id: bundleId,
     provider: "google_play",
     provider_ref: req.purchaseToken,
+    kind,
+    expires_at: expiresAt,
+    auto_renewing: autoRenewing,
   });
 
   return {
@@ -111,6 +163,8 @@ export async function verifyPurchase(
       grantedAt: row.granted_at,
       expiresAt: row.expires_at,
       syncedAt: row.synced_at,
+      kind: (row.kind === "subscription" ? "subscription" : "one_time"),
+      autoRenewing: Boolean(row.auto_renewing),
     },
   };
 }
