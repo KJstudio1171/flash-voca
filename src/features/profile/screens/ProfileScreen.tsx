@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 
 import { useAppServices } from "@/src/app/AppProviders";
 import { AccountLinkCard } from "@/src/features/profile/components/AccountLinkCard";
+import { ProMembershipCard } from "@/src/features/profile/components/ProMembershipCard";
 import { SyncStatusCard } from "@/src/features/profile/components/SyncStatusCard";
 import { useRestorePurchases } from "@/src/features/store/hooks/useRestorePurchases";
 import { hasSupabaseConfig } from "@/src/core/supabase/config";
@@ -50,6 +51,7 @@ export default function ProfileScreen() {
         </AppButton>
       }
     >
+      <ProMembershipCard />
       <AccountLinkCard />
       <SyncStatusCard />
 
