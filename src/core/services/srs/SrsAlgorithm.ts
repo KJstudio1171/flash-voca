@@ -1,6 +1,6 @@
 import type { ReviewRating } from "@/src/core/domain/models";
 
-export type SrsAlgorithmId = "leitner" | "sm2";
+export type SrsAlgorithmId = "leitner" | "sm2" | "fsrs";
 
 export interface ReviewInput {
   rating: ReviewRating;

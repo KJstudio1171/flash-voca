@@ -17,8 +17,14 @@ describe("SrsPreferenceService", () => {
   });
 
   it("falls back to leitner when stored value is unknown", async () => {
-    const meta = createMockAppMetaStore({ "srs.algorithm": "fsrs" });
+    const meta = createMockAppMetaStore({ "srs.algorithm": "unknown_algo" });
     const svc = new SrsPreferenceService(meta);
     expect(await svc.getAlgorithmAsync()).toBe("leitner");
+  });
+
+  it("returns fsrs when stored value is fsrs", async () => {
+    const meta = createMockAppMetaStore({ "srs.algorithm": "fsrs" });
+    const svc = new SrsPreferenceService(meta);
+    expect(await svc.getAlgorithmAsync()).toBe("fsrs");
   });
 });

@@ -9,7 +9,7 @@ export class SrsPreferenceService {
 
   async getAlgorithmAsync(): Promise<SrsAlgorithmId> {
     const raw = await this.appMeta.getValueAsync(KEY);
-    if (raw === "leitner" || raw === "sm2") return raw;
+    if (raw === "leitner" || raw === "sm2" || raw === "fsrs") return raw;
     return DEFAULT_ALGORITHM;
   }
 
