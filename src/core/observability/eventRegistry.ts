@@ -20,6 +20,12 @@ export const analyticsEventRegistry = {
   deck_sync_failed: { allowedProps: ["reason", "stage"] as const },
   srs_algorithm_changed: { allowedProps: ["from", "to"] as const },
   srs_review_recorded: { allowedProps: ["algorithmId", "rating"] as const },
+  pro_upgrade_screen_viewed: { allowedProps: ["source"] as const },
+  pro_purchase_started: { allowedProps: ["productId", "kind"] as const },
+  pro_purchase_succeeded: { allowedProps: ["productId", "kind"] as const },
+  pro_purchase_failed: { allowedProps: ["productId", "reason"] as const },
+  rtdn_subscription_received: { allowedProps: ["notificationType", "status"] as const },
+  rtdn_voided_received: { allowedProps: ["productType"] as const },
 } satisfies Record<string, { allowedProps: readonly string[] }>;
 
 export type AnalyticsEventName = keyof typeof analyticsEventRegistry;

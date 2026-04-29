@@ -39,6 +39,9 @@
     "deckSync": {
       "push": "无法发送您的更改。",
       "pull": "无法获取最新数据。"
+    },
+    "subscription": {
+      "invalidState": "订阅状态异常。请稍后再试。"
     }
   },
   "auth": {
@@ -65,6 +68,31 @@
     "restoring": "恢复中...",
     "restoreEmpty": "没有可恢复的购买。",
     "restoreCompleted": "已恢复 {{count}} 个购买。"
+  },
+  "pro": {
+    "title": "Flash Voca Pro",
+    "heroDescription": "解锁所有功能。",
+    "benefits": {
+      "adFree": "无广告",
+      "future": "新增功能自动可用"
+    },
+    "plan": {
+      "monthly": "月度",
+      "yearly": "年度",
+      "yearlyDiscount": "{{percent}}% 折扣",
+      "lifetime": "终身",
+      "priceMonthly": "{{price}} / 月",
+      "priceYearly": "{{price}} / 年",
+      "priceLifetime": "{{price}} 一次"
+    },
+    "subscribeButton": "订阅",
+    "buyButton": "购买",
+    "activeStatus": "Pro 已激活",
+    "nextRenewal": "下次续费: {{date}}",
+    "expiresOn": "{{date}} 到期",
+    "lifetimeBadge": "终身授权",
+    "managePlay": "在 Play 商店管理",
+    "upgradeButton": "查看升级选项"
   },
   "deckSync": {
     "title": "内容同步",

@@ -39,6 +39,9 @@
     "deckSync": {
       "push": "変更を送信できませんでした。",
       "pull": "最新データを取得できませんでした。"
+    },
+    "subscription": {
+      "invalidState": "サブスクリプションの状態が正常ではありません。しばらくしてからもう一度お試しください。"
     }
   },
   "auth": {
@@ -65,6 +68,31 @@
     "restoring": "復元中...",
     "restoreEmpty": "復元する購入はありません。",
     "restoreCompleted": "{{count}}件の購入を復元しました。"
+  },
+  "pro": {
+    "title": "Flash Voca Pro",
+    "heroDescription": "すべての機能を解放しましょう。",
+    "benefits": {
+      "adFree": "広告なし",
+      "future": "今後追加される機能を自動で利用可能"
+    },
+    "plan": {
+      "monthly": "月額",
+      "yearly": "年額",
+      "yearlyDiscount": "{{percent}}%割引",
+      "lifetime": "永久",
+      "priceMonthly": "{{price}} / 月",
+      "priceYearly": "{{price}} / 年",
+      "priceLifetime": "{{price}} / 一括"
+    },
+    "subscribeButton": "登録する",
+    "buyButton": "購入する",
+    "activeStatus": "Pro 有効",
+    "nextRenewal": "次回更新: {{date}}",
+    "expiresOn": "{{date}}に期限切れ",
+    "lifetimeBadge": "永久ライセンス",
+    "managePlay": "Play ストアで管理",
+    "upgradeButton": "アップグレード詳細"
   },
   "deckSync": {
     "title": "コンテンツ同期",

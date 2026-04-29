@@ -39,6 +39,9 @@
     "deckSync": {
       "push": "Could not send your changes.",
       "pull": "Could not fetch the latest data."
+    },
+    "subscription": {
+      "invalidState": "Subscription state is not valid. Please try again later."
     }
   },
   "auth": {
@@ -65,6 +68,31 @@
     "restoring": "Restoring...",
     "restoreEmpty": "No purchases to restore.",
     "restoreCompleted": "Restored {{count}} purchase(s)."
+  },
+  "pro": {
+    "title": "Flash Voca Pro",
+    "heroDescription": "Unlock every feature.",
+    "benefits": {
+      "adFree": "No ads",
+      "future": "Automatic access to upcoming features"
+    },
+    "plan": {
+      "monthly": "Monthly",
+      "yearly": "Yearly",
+      "yearlyDiscount": "{{percent}}% off",
+      "lifetime": "Lifetime",
+      "priceMonthly": "{{price}} / mo",
+      "priceYearly": "{{price}} / yr",
+      "priceLifetime": "{{price}} once"
+    },
+    "subscribeButton": "Subscribe",
+    "buyButton": "Buy",
+    "activeStatus": "Pro active",
+    "nextRenewal": "Next renewal: {{date}}",
+    "expiresOn": "Expires on {{date}}",
+    "lifetimeBadge": "Lifetime",
+    "managePlay": "Manage on Play Store",
+    "upgradeButton": "View upgrade options"
   },
   "deckSync": {
     "title": "Content sync",
