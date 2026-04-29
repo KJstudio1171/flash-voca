@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   },
   chip: {
     borderRadius: tokens.radius.pill,
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
     minHeight: 42,
     minWidth: 74,
     paddingHorizontal: tokens.spacing.m,

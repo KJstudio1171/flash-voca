@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
   root: {
     alignItems: "center",
     borderRadius: tokens.radius.m,
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
     flexDirection: "row",
     gap: tokens.spacing.m,
     minHeight: 84,
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   coverGlow: {
     borderRadius: tokens.radius.pill,
     height: 38,
-    opacity: 0.18,
+    opacity: tokens.opacity.glow,
     position: "absolute",
     right: -10,
     top: -8,

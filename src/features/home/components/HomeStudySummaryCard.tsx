@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
   root: {
     alignItems: "center",
     borderRadius: tokens.radius.l,
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
     flexDirection: "row",
     gap: tokens.spacing.l,
     padding: tokens.spacing.m,

@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 
 import { AppError } from "@/src/core/errors";
 import { useDeckDetailQuery } from "@/src/features/decks/hooks/useDeckQueries";
+import { useStudyDeckQuery } from "@/src/features/study/hooks/useStudyQueries";
 import { useFormat, useT } from "@/src/shared/i18n";
 import type { TranslationKey } from "@/src/shared/i18n/types";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
@@ -26,7 +27,10 @@ export default function DeckOverviewScreen() {
   const params = useLocalSearchParams<{ deckId: string | string[] }>();
   const deckId = getParamValue(params.deckId);
   const deckQuery = useDeckDetailQuery(deckId);
+  const studyQuery = useStudyDeckQuery(deckId);
   const deck = deckQuery.data;
+  const bookmarkedCount =
+    studyQuery.data?.cards.filter((item) => item.state?.isBookmarked).length ?? 0;
   const learnedCount = deck?.cards.filter((card) => card.difficulty === "easy").length ?? 0;
   const hardCount = deck?.cards.filter((card) => card.difficulty === "hard").length ?? 0;
   const pendingCount = Math.max((deck?.cardCount ?? 0) - learnedCount, 0);
@@ -100,6 +104,19 @@ export default function DeckOverviewScreen() {
                 {t("deckOverview.study")}
               </AppButton>
               <AppButton
+                disabled={bookmarkedCount === 0}
+                onPress={() =>
+                  router.push({
+                    pathname: "/study/[deckId]",
+                    params: { deckId: deck.id, mode: "bookmarked" },
+                  })
+                }
+                style={styles.secondaryAction}
+                variant="secondary"
+              >
+                {t("deckOverview.studyBookmarks")}
+              </AppButton>
+              <AppButton
                 onPress={() => router.push(`/decks/${deck.id}/cards` as never)}
                 style={styles.secondaryAction}
                 variant="secondary"
@@ -121,6 +138,7 @@ export default function DeckOverviewScreen() {
           <View style={styles.statsRow}>
             <StatCard iconName="card-text-outline" label={t("deckOverview.learnedCards")} value={learnedCount} />
             <StatCard iconName="clock-outline" label={t("deckOverview.pendingReview")} value={pendingCount} />
+            <StatCard iconName="bookmark-outline" label={t("deckOverview.bookmarkedCards")} value={bookmarkedCount} />
             <StatCard iconName="alert-outline" label={t("deckOverview.hardCards")} value={hardCount} />
           </View>
 
@@ -304,24 +322,29 @@ const styles = StyleSheet.create({
   },
   actionRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: tokens.spacing.s,
   },
   primaryAction: {
     flex: 1.1,
+    minWidth: "47%",
     paddingHorizontal: tokens.spacing.s,
   },
   secondaryAction: {
     flex: 1,
+    minWidth: "47%",
     paddingHorizontal: tokens.spacing.s,
   },
   statsRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
     gap: tokens.spacing.s,
   },
   statCard: {
     alignItems: "center",
-    flex: 1,
     gap: tokens.spacing.xs,
+    minWidth: "47%",
+    flex: 1,
   },
   statIcon: {
     alignItems: "center",

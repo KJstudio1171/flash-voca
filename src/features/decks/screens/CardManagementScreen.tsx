@@ -10,6 +10,7 @@ import {
   useSaveDeckMutation,
 } from "@/src/features/decks/hooks/useDeckQueries";
 import { toEditableCards } from "@/src/features/decks/utils/deckEditing";
+import { useStudyDeckQuery } from "@/src/features/study/hooks/useStudyQueries";
 import { useT } from "@/src/shared/i18n";
 import type { TranslationKey } from "@/src/shared/i18n/types";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
@@ -20,7 +21,7 @@ import { CardSurface } from "@/src/shared/ui/CardSurface";
 import { FloatingActionButton } from "@/src/shared/ui/FloatingActionButton";
 import { TextField } from "@/src/shared/ui/TextField";
 
-type FilterId = "all" | "missingExample" | "duplicate" | "hard";
+type FilterId = "all" | "bookmarked" | "missingExample" | "duplicate" | "hard";
 type ListMode = "edit" | "sort";
 
 function getParamValue(value: string | string[] | undefined) {
@@ -34,6 +35,7 @@ export default function CardManagementScreen() {
   const params = useLocalSearchParams<{ deckId: string | string[] }>();
   const deckId = getParamValue(params.deckId);
   const deckQuery = useDeckDetailQuery(deckId);
+  const studyQuery = useStudyDeckQuery(deckId);
   const saveDeckMutation = useSaveDeckMutation();
   const deck = deckQuery.data;
   const [query, setQuery] = useState("");
@@ -52,12 +54,23 @@ export default function CardManagementScreen() {
     return new Set([...counts.entries()].filter(([, count]) => count > 1).map(([term]) => term));
   }, [deck?.cards]);
 
+  const bookmarkedCardIds = useMemo(
+    () =>
+      new Set(
+        (studyQuery.data?.cards ?? [])
+          .filter((item) => item.state?.isBookmarked)
+          .map((item) => item.card.id),
+      ),
+    [studyQuery.data?.cards],
+  );
+
   const filteredCards = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
     const cards = deck?.cards ?? [];
     return cards
       .filter((card) => {
         if (filter === "missingExample" && card.example) return false;
+        if (filter === "bookmarked" && !bookmarkedCardIds.has(card.id)) return false;
         if (filter === "duplicate" && !duplicateTermSet.has(card.term.trim().toLowerCase())) {
           return false;
         }
@@ -70,7 +83,7 @@ export default function CardManagementScreen() {
       .sort((left, right) =>
         mode === "sort" ? left.term.localeCompare(right.term) : left.position - right.position,
       );
-  }, [deck?.cards, duplicateTermSet, filter, mode, query]);
+  }, [bookmarkedCardIds, deck?.cards, duplicateTermSet, filter, mode, query]);
 
   async function deleteSelectedCards() {
     if (!deck || selectedIds.size === 0) {
@@ -153,6 +166,13 @@ export default function CardManagementScreen() {
           onPress={() => setFilter("all")}
         />
         <FilterChip
+          active={filter === "bookmarked"}
+          label={t("cardManagement.bookmarkedFilter", {
+            count: bookmarkedCardIds.size,
+          })}
+          onPress={() => setFilter("bookmarked")}
+        />
+        <FilterChip
           active={filter === "missingExample"}
           label={t("cardManagement.missingExampleFilter", {
             count: deck?.cards.filter((card) => !card.example).length ?? 0,
@@ -218,6 +238,7 @@ export default function CardManagementScreen() {
               }
               onToggle={() => toggleCard(card.id)}
               selected={selectedIds.has(card.id)}
+              isBookmarked={bookmarkedCardIds.has(card.id)}
               difficultyLabel={t(`cardManagement.difficulty.${card.difficulty}`)}
               partOfSpeechLabel={
                 getPartOfSpeechLabel(card.partOfSpeech, (key) => t(key))
@@ -345,6 +366,7 @@ function CardRow({
   onOpen,
   onToggle,
   selected,
+  isBookmarked,
   difficultyLabel,
   partOfSpeechLabel,
 }: {
@@ -353,6 +375,7 @@ function CardRow({
   onOpen: () => void;
   onToggle: () => void;
   selected: boolean;
+  isBookmarked: boolean;
   difficultyLabel: string;
   partOfSpeechLabel: string | null;
 }) {
@@ -378,6 +401,9 @@ function CardRow({
         {selected ? <MaterialCommunityIcons color={colors.onPrimary} name="check" size={16} /> : null}
       </Pressable>
       <Text style={[styles.rowIndex, { color: colors.muted }]}>{index + 1}</Text>
+      {isBookmarked ? (
+        <MaterialCommunityIcons color={colors.primary} name="bookmark" size={20} />
+      ) : null}
       {card.imageUri ? <CardThumbnail uri={card.imageUri} /> : null}
       <View style={styles.cardCopy}>
         <Text numberOfLines={1} style={[styles.term, { color: colors.ink }]}>
@@ -497,7 +523,7 @@ const styles = StyleSheet.create({
   },
   filterChip: {
     borderRadius: tokens.radius.pill,
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
     paddingHorizontal: tokens.spacing.m,
     paddingVertical: tokens.spacing.xs,
   },
@@ -527,7 +553,7 @@ const styles = StyleSheet.create({
   segmentButton: {
     alignItems: "center",
     borderRadius: tokens.radius.m - 3,
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
     borderColor: "transparent",
     flex: 1,
     minHeight: 42,
@@ -555,7 +581,7 @@ const styles = StyleSheet.create({
   checkbox: {
     alignItems: "center",
     borderRadius: 5,
-    borderWidth: 1.5,
+    borderWidth: tokens.borderWidth.thick,
     height: 22,
     justifyContent: "center",
     width: 22,
@@ -572,7 +598,7 @@ const styles = StyleSheet.create({
   thumbnailFallback: {
     alignItems: "center",
     borderRadius: tokens.radius.s,
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
     height: 44,
     justifyContent: "center",
     width: 44,
@@ -604,7 +630,7 @@ const styles = StyleSheet.create({
   selectionBar: {
     alignItems: "center",
     borderRadius: tokens.radius.m,
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
     flexDirection: "row",
     justifyContent: "space-between",
     padding: tokens.spacing.s,

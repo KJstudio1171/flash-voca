@@ -20,7 +20,7 @@ export function TextField(props: TextInputProps) {
 const styles = StyleSheet.create({
   frame: {
     borderRadius: tokens.radius.m,
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
     paddingHorizontal: tokens.spacing.m,
     paddingVertical: tokens.spacing.s,
   },

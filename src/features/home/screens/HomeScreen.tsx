@@ -6,10 +6,10 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { HomeRecentActivityCard } from "@/src/features/home/components/HomeRecentActivityCard";
 import { HomeRecommendedBundleCard } from "@/src/features/home/components/HomeRecommendedBundleCard";
 import { HomeStudySummaryCard } from "@/src/features/home/components/HomeStudySummaryCard";
-import { useDeckSummaryListQuery } from "@/src/features/home/hooks/useHomeSummaryQuery";
+import { useHomeSummaryQuery } from "@/src/features/home/hooks/useHomeSummaryQuery";
 import { DeckSummary } from "@/src/core/domain/models";
 import { AnimatedScreen } from "@/src/shared/animation/AnimatedScreen";
-import { useT } from "@/src/shared/i18n";
+import { useFormat, useT } from "@/src/shared/i18n";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
 import { tokens } from "@/src/shared/theme/tokens";
 import { AppScreenFrame } from "@/src/shared/ui/AppScreenFrame";
@@ -20,10 +20,21 @@ export default function HomeScreen() {
   const router = useRouter();
   const { colors } = useTheme();
   const { t } = useT();
-  const summaryQuery = useDeckSummaryListQuery();
-  const decks = summaryQuery.data ?? [];
+  const format = useFormat();
+  const summaryQuery = useHomeSummaryQuery();
+  const homeSummary = summaryQuery.data;
+  const decks = homeSummary?.decks ?? [];
   const featuredDeck = findFeaturedDeck(decks);
-  const stats = buildStudyStats(decks);
+  const stats = homeSummary?.stats ?? createEmptyHomeStats();
+  const recentActivities =
+    homeSummary?.recentActivities.map((activity) => ({
+      id: activity.id,
+      title: activity.term,
+      timeLabel: format.relative(activity.reviewedAt),
+      resultLabel: getRatingLabel(activity.rating, t),
+      resultTone: activity.rating <= 1 ? "again" as const : "good" as const,
+      iconName: getRatingIconName(activity.rating),
+    })) ?? [];
 
   const startStudy = () => {
     if (!featuredDeck) {
@@ -120,7 +131,10 @@ export default function HomeScreen() {
         </ScreenSection>
 
         <ScreenSection title={t("home.recentSection")}>
-          <HomeRecentActivityCard emptyLabel={t("home.recent.empty")} items={[]} />
+          <HomeRecentActivityCard
+            emptyLabel={t("home.recent.empty")}
+            items={recentActivities}
+          />
         </ScreenSection>
 
         <ScreenSection title={t("home.quickSection")}>
@@ -163,19 +177,30 @@ function findFeaturedDeck(decks: DeckSummary[]): DeckSummary | null {
   return [...decks].sort((a, b) => b.dueCount - a.dueCount)[0] ?? null;
 }
 
-function buildStudyStats(decks: DeckSummary[]) {
-  const totalCards = decks.reduce((sum, deck) => sum + deck.cardCount, 0);
-  const masteredCards = decks.reduce((sum, deck) => sum + deck.masteredCount, 0);
-  const dueCount = decks.reduce((sum, deck) => sum + deck.dueCount, 0);
-
+function createEmptyHomeStats() {
   return {
-    totalCards,
-    studiedCards: masteredCards,
-    progress: totalCards > 0 ? masteredCards / totalCards : 0,
+    totalCards: 0,
+    studiedCards: 0,
+    progress: 0,
     studyMinutes: 0,
     streakDays: 0,
-    dueCount,
+    dueCount: 0,
+    recentActivities: [],
   };
+}
+
+function getRatingLabel(rating: number, t: ReturnType<typeof useT>["t"]) {
+  if (rating <= 1) return t("study.ratings.again");
+  if (rating === 2) return t("study.ratings.good");
+  return t("study.ratings.easy");
+}
+
+function getRatingIconName(
+  rating: number,
+): ComponentProps<typeof MaterialCommunityIcons>["name"] {
+  if (rating <= 1) return "help-circle-outline";
+  if (rating === 2) return "check-circle-outline";
+  return "star-circle-outline";
 }
 
 const styles = StyleSheet.create({
@@ -206,7 +231,7 @@ const styles = StyleSheet.create({
   headerIconButton: {
     alignItems: "center",
     borderRadius: tokens.radius.pill,
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
     height: 42,
     justifyContent: "center",
     width: 42,

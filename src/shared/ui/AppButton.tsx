@@ -54,10 +54,10 @@ const styles = StyleSheet.create({
     borderRadius: tokens.radius.m,
     alignItems: "center",
     justifyContent: "center",
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
   },
   disabled: {
-    opacity: 0.45,
+    opacity: tokens.opacity.disabled,
   },
   label: {
     ...tokens.typography.bodyBold,

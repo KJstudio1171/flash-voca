@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 14,
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
     borderRadius: tokens.radius.l,
     padding: tokens.spacing.m,
   },

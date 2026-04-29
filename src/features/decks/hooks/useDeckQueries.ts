@@ -6,6 +6,7 @@ import {
 
 import { useAppServices } from "@/src/app/AppProviders";
 import { SaveDeckPayload } from "@/src/core/domain/models";
+import { homeQueryKeys } from "@/src/features/home/hooks/useHomeSummaryQuery";
 
 export const deckQueryKeys = {
   all: ["decks"] as const,
@@ -41,6 +42,8 @@ export function useSaveDeckMutation() {
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: deckQueryKeys.all }),
         queryClient.invalidateQueries({ queryKey: deckQueryKeys.detail(deck.id) }),
+        queryClient.invalidateQueries({ queryKey: homeQueryKeys.deckSummaries }),
+        queryClient.invalidateQueries({ queryKey: homeQueryKeys.summary }),
       ]);
     },
   });

@@ -105,7 +105,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     aspectRatio: 0.9,
     borderRadius: tokens.radius.m,
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
     gap: tokens.spacing.s,
     justifyContent: "center",
     padding: tokens.spacing.s,

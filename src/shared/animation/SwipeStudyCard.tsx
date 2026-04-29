@@ -154,17 +154,17 @@ export function SwipeStudyCard({
         {leftActionLabel ? (
           <Animated.View
             pointerEvents="none"
-            style={[styles.actionChip, styles.leftChip, { backgroundColor: colors.chipAgainBg, borderColor: colors.chipAgainBorder }, leftLabelStyle]}
+            style={[styles.actionChip, styles.leftChip, { backgroundColor: colors.dangerSoft, borderColor: colors.danger }, leftLabelStyle]}
           >
-            <Text style={[styles.actionLabel, { color: colors.accent }]}>{leftActionLabel}</Text>
+            <Text style={[styles.actionLabel, { color: colors.danger }]}>{leftActionLabel}</Text>
           </Animated.View>
         ) : null}
         {rightActionLabel ? (
           <Animated.View
             pointerEvents="none"
-            style={[styles.actionChip, styles.rightChip, { backgroundColor: colors.chipEasyBg, borderColor: colors.chipEasyBorder }, rightLabelStyle]}
+            style={[styles.actionChip, styles.rightChip, { backgroundColor: colors.successSoft, borderColor: colors.success }, rightLabelStyle]}
           >
-            <Text style={[styles.actionLabel, { color: colors.primary }]}>{rightActionLabel}</Text>
+            <Text style={[styles.actionLabel, { color: colors.success }]}>{rightActionLabel}</Text>
           </Animated.View>
         ) : null}
         {upActionLabel ? (
@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: tokens.spacing.m,
     paddingVertical: tokens.spacing.s,
     borderRadius: tokens.radius.pill,
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
   },
   leftChip: {
     left: tokens.spacing.m,

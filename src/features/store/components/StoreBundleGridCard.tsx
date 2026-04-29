@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
   },
   root: {
     borderRadius: tokens.radius.m,
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
     overflow: "hidden",
   },
   cover: {
@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   illustration: {
     bottom: tokens.spacing.m,
     left: tokens.spacing.m,
-    opacity: 0.9,
+    opacity: tokens.opacity.prominent,
     position: "absolute",
   },
   lockBadge: {
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     bottom: tokens.spacing.l,
     height: 42,
     justifyContent: "center",
-    opacity: 0.9,
+    opacity: tokens.opacity.prominent,
     position: "absolute",
     right: tokens.spacing.l,
     width: 42,

@@ -44,7 +44,7 @@ const paddingBySize = {
 const styles = StyleSheet.create({
   base: {
     borderRadius: tokens.radius.l,
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
     gap: tokens.spacing.s,
   },
 });

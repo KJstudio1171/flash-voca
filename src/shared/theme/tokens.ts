@@ -1,11 +1,14 @@
 export const tokens = {
   spacing: {
+    none: 0,
+    xxs: 4,
     xs: 6,
     s: 12,
     m: 16,
     l: 20,
     xl: 28,
     xxl: 36,
+    xxxl: 48,
   },
 
   layout: {
@@ -18,19 +21,53 @@ export const tokens = {
   },
 
   radius: {
+    none: 0,
+    xs: 6,
     s: 12,
     m: 18,
     l: 24,
     pill: 999,
   },
 
+  borderWidth: {
+    none: 0,
+    hairline: 1,
+    thick: 2,
+  },
+
+  opacity: {
+    prominent: 0.9,
+    pressed: 0.7,
+    overlay: 0.5,
+    disabled: 0.45,
+    glow: 0.18,
+    subtle: 0.08,
+  },
+
+  iconSize: {
+    s: 16,
+    m: 20,
+    l: 24,
+    xl: 32,
+  },
+
+  zIndex: {
+    base: 0,
+    raised: 10,
+    sticky: 20,
+    fab: 30,
+    overlay: 40,
+    modal: 50,
+    toast: 60,
+  },
+
   elevation: {
-    card: {
-      shadowColor: "#0F172A",
-      shadowOffset: { width: 0, height: 10 },
-      shadowOpacity: 0.08,
-      shadowRadius: 22,
-      elevation: 4,
+    none: {
+      shadowColor: "transparent",
+      shadowOffset: { width: 0, height: 0 },
+      shadowOpacity: 0,
+      shadowRadius: 0,
+      elevation: 0,
     },
     soft: {
       shadowColor: "#0F172A",
@@ -38,6 +75,20 @@ export const tokens = {
       shadowOpacity: 0.06,
       shadowRadius: 16,
       elevation: 2,
+    },
+    card: {
+      shadowColor: "#0F172A",
+      shadowOffset: { width: 0, height: 10 },
+      shadowOpacity: 0.08,
+      shadowRadius: 22,
+      elevation: 4,
+    },
+    modal: {
+      shadowColor: "#0F172A",
+      shadowOffset: { width: 0, height: 16 },
+      shadowOpacity: 0.18,
+      shadowRadius: 32,
+      elevation: 12,
     },
   },
 

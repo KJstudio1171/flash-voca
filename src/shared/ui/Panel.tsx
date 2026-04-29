@@ -30,7 +30,7 @@ export function Panel({ children, style }: PanelProps) {
 const styles = StyleSheet.create({
   base: {
     borderRadius: tokens.radius.l,
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
     padding: tokens.spacing.l,
     gap: tokens.spacing.s,
   },

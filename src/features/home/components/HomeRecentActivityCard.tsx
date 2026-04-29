@@ -40,14 +40,14 @@ export function HomeRecentActivityCard({ emptyLabel, items }: HomeRecentActivity
         const toneStyles =
           item.resultTone === "good"
             ? {
-                backgroundColor: colors.chipEasyBg,
-                borderColor: colors.chipEasyBorder,
-                color: colors.primary,
+                backgroundColor: colors.successSoft,
+                borderColor: colors.success,
+                color: colors.success,
               }
             : {
-                backgroundColor: colors.chipAgainBg,
-                borderColor: colors.chipAgainBorder,
-                color: colors.accent,
+                backgroundColor: colors.dangerSoft,
+                borderColor: colors.danger,
+                color: colors.danger,
               };
 
         return (
@@ -95,7 +95,7 @@ export function HomeRecentActivityCard({ emptyLabel, items }: HomeRecentActivity
 const styles = StyleSheet.create({
   root: {
     borderRadius: tokens.radius.m,
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
     overflow: "hidden",
     paddingHorizontal: tokens.spacing.m,
   },
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   },
   result: {
     borderRadius: tokens.radius.pill,
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
     minWidth: 72,
     paddingHorizontal: tokens.spacing.s,
     paddingVertical: 7,

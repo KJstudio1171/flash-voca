@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   visibilityRow: {
     alignItems: "center",
     borderRadius: tokens.radius.m,
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
     flexDirection: "row",
     gap: tokens.spacing.m,
     justifyContent: "space-between",

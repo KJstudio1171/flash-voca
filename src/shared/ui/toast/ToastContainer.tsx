@@ -74,7 +74,7 @@ const styles = StyleSheet.create({
     paddingVertical: tokens.spacing.m,
     paddingHorizontal: tokens.layout.cardPadding,
     borderRadius: tokens.radius.s,
-    borderWidth: 1,
+    borderWidth: tokens.borderWidth.hairline,
   },
   message: {
     ...tokens.typography.body,
