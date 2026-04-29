@@ -39,7 +39,12 @@ export class PurchaseVerificationService {
     if (response.error || !response.data) {
       throw new BillingVerificationError({ cause: response.error, context: { body } });
     }
-    const entitlement = response.data.entitlement;
+    const raw = response.data.entitlement as Entitlement & { kind?: string; autoRenewing?: boolean };
+    const entitlement: Entitlement = {
+      ...raw,
+      kind: raw.kind === "subscription" ? "subscription" : "one_time",
+      autoRenewing: Boolean(raw.autoRenewing),
+    };
     await this.deps.upsertCachedEntitlementAsync(entitlement);
     return entitlement;
   }
