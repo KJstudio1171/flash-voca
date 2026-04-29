@@ -88,6 +88,10 @@
         "title": "Standard (SM-2)",
         "description": "Anki와 같은 표준. 카드별 난이도를 자동 조정."
       },
+      "fsrs": {
+        "title": "Advanced (FSRS)",
+        "description": "망각곡선 기반의 차세대 알고리즘. Anki 23.10에 도입됨."
+      },
       "changed": "{{name}}로 변경했어요."
     },
     "rating": {

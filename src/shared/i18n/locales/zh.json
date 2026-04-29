@@ -88,6 +88,10 @@
         "title": "Standard (SM-2)",
         "description": "类似 Anki 的标准。按卡片自动调整难度。"
       },
+      "fsrs": {
+        "title": "Advanced (FSRS)",
+        "description": "基于遗忘曲线的下一代算法。Anki 23.10 采纳。"
+      },
       "changed": "已切换为 {{name}}。"
     },
     "rating": {

@@ -88,6 +88,10 @@
         "title": "Standard (SM-2)",
         "description": "Anki風の標準。カードごとに難易度を自動調整。"
       },
+      "fsrs": {
+        "title": "Advanced (FSRS)",
+        "description": "忘却曲線に基づく次世代アルゴリズム。Anki 23.10で採用。"
+      },
       "changed": "{{name}}に変更しました。"
     },
     "rating": {
