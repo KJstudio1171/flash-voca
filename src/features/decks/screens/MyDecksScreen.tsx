@@ -48,7 +48,7 @@ export default function MyDecksScreen() {
         </View>
       </AnimatedScreen>
 
-      <AnimatedScreen delay={80} style={styles.list}>
+      <AnimatedScreen style={styles.list} variant="none">
         {decks.length === 0 && !deckQuery.isLoading ? (
           <CardSurface elevation="soft" style={styles.emptyState}>
             <Text style={[styles.emptyTitle, { color: colors.ink }]}>

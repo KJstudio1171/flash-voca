@@ -1,10 +1,9 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.0";
-import { verifyPurchase, VerifyError, VerifyDeps } from "./verifier.ts";
-import {
-  getProductPurchaseAsync,
-  getSubscriptionPurchaseAsync,
-} from "./googlePlayClient.ts";
+import { requireLinkedUserId } from "./auth.ts";
+import { createVerifyDeps } from "./repositories.ts";
+import { jsonError, jsonSuccess } from "./response.ts";
+import { verifyPurchase, VerifyError } from "./verifier.ts";
 import type { VerifyPurchaseRequest } from "./types.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -21,105 +20,36 @@ const adminClient = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
   auth: { autoRefreshToken: false, persistSession: false },
 });
 
-function jsonError(status: number, code: string) {
-  return new Response(JSON.stringify({ code }), {
-    status,
-    headers: { "Content-Type": "application/json" },
-  });
+async function parseRequestBody(req: Request): Promise<VerifyPurchaseRequest | null> {
+  try {
+    return (await req.json()) as VerifyPurchaseRequest;
+  } catch {
+    return null;
+  }
 }
 
 serve(async (req) => {
   if (req.method !== "POST") return jsonError(405, "method_not_allowed");
 
-  const authHeader = req.headers.get("Authorization") ?? "";
-  if (!authHeader.startsWith("Bearer ")) {
-    return jsonError(401, "unauthenticated");
-  }
-  const jwt = authHeader.slice("Bearer ".length);
-
-  const userClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-    global: { headers: { Authorization: `Bearer ${jwt}` } },
-    auth: { autoRefreshToken: false, persistSession: false },
+  const userId = await requireLinkedUserId({
+    req,
+    supabaseUrl: SUPABASE_URL,
+    supabaseAnonKey: SUPABASE_ANON_KEY,
   });
-  const { data: userData, error: userErr } = await userClient.auth.getUser(jwt);
-  if (userErr || !userData.user) return jsonError(401, "unauthenticated");
+  if (userId instanceof Response) return userId;
 
-  const isAnonymous = (userData.user as unknown as { is_anonymous?: boolean }).is_anonymous;
-  const provider = userData.user.app_metadata?.provider;
-  const linked = !isAnonymous && provider && provider !== "anonymous";
-  if (!linked) return jsonError(401, "not_linked");
-
-  const userId = userData.user.id;
-  let body: VerifyPurchaseRequest;
-  try {
-    body = (await req.json()) as VerifyPurchaseRequest;
-  } catch {
-    return jsonError(400, "invalid_request");
-  }
-
-  const deps: VerifyDeps = {
-    findBundleById: async (id) => {
-      const { data } = await adminClient
-        .from("bundles")
-        .select("play_product_id")
-        .eq("id", id)
-        .maybeSingle();
-      return data;
-    },
-    findBundleByProductId: async (pid) => {
-      const { data } = await adminClient
-        .from("bundles")
-        .select("id")
-        .eq("play_product_id", pid)
-        .maybeSingle();
-      return data;
-    },
-    findReceiptByToken: async (token) => {
-      const { data } = await adminClient
-        .from("purchase_receipts")
-        .select("user_id, status")
-        .eq("purchase_token", token)
-        .maybeSingle();
-      return data;
-    },
-    upsertReceipt: async (row) => {
-      const { error } = await adminClient
-        .from("purchase_receipts")
-        .upsert(row, { onConflict: "purchase_token" });
-      if (error) throw error;
-    },
-    upsertEntitlement: async (row) => {
-      const { data, error } = await adminClient
-        .from("entitlements")
-        .upsert(
-          {
-            user_id: row.user_id,
-            bundle_id: row.bundle_id,
-            provider: row.provider,
-            provider_ref: row.provider_ref,
-            kind: row.kind,
-            expires_at: row.expires_at,
-            auto_renewing: row.auto_renewing,
-            status: "active",
-            granted_at: new Date().toISOString(),
-          },
-          { onConflict: "user_id,bundle_id,provider" },
-        )
-        .select()
-        .single();
-      if (error) throw error;
-      return data;
-    },
-    getPlayPurchaseStatus: getProductPurchaseAsync,
-    getSubscriptionStatus: getSubscriptionPurchaseAsync,
-  };
+  const body = await parseRequestBody(req);
+  if (!body) return jsonError(400, "invalid_request");
 
   try {
-    const result = await verifyPurchase(body, userId, deps, PACKAGE_NAME, PRO_PRODUCT_IDS);
-    return new Response(JSON.stringify(result), {
-      status: 200,
-      headers: { "Content-Type": "application/json" },
-    });
+    const result = await verifyPurchase(
+      body,
+      userId,
+      createVerifyDeps(adminClient),
+      PACKAGE_NAME,
+      PRO_PRODUCT_IDS,
+    );
+    return jsonSuccess(result);
   } catch (err) {
     if (err instanceof VerifyError) return jsonError(err.status, err.code);
     console.error("verify-purchase error", err);

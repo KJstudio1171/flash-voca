@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
-import { useAppServices } from "@/src/app/AppProviders";
+import { useAppServices } from "@/src/app/AppServicesContext";
+import { SyncError } from "@/src/core/errors";
 
 export function useDeckSync() {
   const { deckSyncService } = useAppServices();
@@ -8,7 +9,9 @@ export function useDeckSync() {
 
   const sync = useMutation({
     mutationFn: async () => {
-      if (!deckSyncService) throw new Error("deckSyncService unavailable");
+      if (!deckSyncService) {
+        throw new SyncError({ context: { reason: "service_unavailable" } });
+      }
       return deckSyncService.syncAsync({ trigger: "manual" });
     },
     onSuccess: () => {
@@ -20,11 +23,11 @@ export function useDeckSync() {
 }
 
 export function useFailedDeckOpsCount() {
-  const { deckRepository } = useAppServices();
+  const { pendingSyncRepository } = useAppServices();
   return useQuery({
     queryKey: ["deckSync", "failedCount"],
-    queryFn: () => deckRepository.countFailedDeckOpsAsync(),
-    enabled: !!deckRepository,
+    queryFn: () => pendingSyncRepository.countFailedAsync(["deck"]),
+    enabled: !!pendingSyncRepository,
     staleTime: 30_000,
   });
 }

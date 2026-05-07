@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { StyleSheet, Text, View } from "react-native";
 
-import { useAppServices } from "@/src/app/AppProviders";
+import { useAppServices } from "@/src/app/AppServicesContext";
 import { useAuthState } from "@/src/features/profile/hooks/useAuthState";
 import { useT } from "@/src/shared/i18n";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";

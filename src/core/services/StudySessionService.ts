@@ -9,6 +9,13 @@ import { StudyRepository } from "@/src/core/repositories/contracts/StudyReposito
 import type { AuthService } from "@/src/core/services/auth/AuthService";
 import type { SrsPreferenceService } from "@/src/core/services/srs/SrsPreferenceService";
 import { getSrsAlgorithm } from "@/src/core/services/srs/srsAlgorithmRegistry";
+import {
+  calculateHomeProgress,
+  countDeckSummaryDueCards,
+  countDeckSummaryMasteredCards,
+  countStudyCardsDue,
+  countStudyCardsMastered,
+} from "@/src/core/services/study/StudyProgressCalculator";
 
 export class StudySessionService {
   constructor(
@@ -21,19 +28,22 @@ export class StudySessionService {
   async listDeckSummariesAsync(userId?: string): Promise<DeckSummary[]> {
     const id = userId ?? this.auth.getCurrentUserId();
     const decks = await this.deckRepository.listDecksAsync();
-    const summaries = await Promise.all(
-      decks.map(async (deck) => {
-        const states = await this.studyRepository.listCardStatesAsync(deck.id, id);
-        const now = Date.now();
-        const notDueCount = states.filter(
-          (s) => s.nextReviewAt && new Date(s.nextReviewAt).getTime() > now,
-        ).length;
-        const dueCount = deck.cardCount - notDueCount;
-        const masteredCount = states.filter((s) => s.masteryLevel >= 3).length;
-        return { ...deck, dueCount, masteredCount };
-      }),
+    const allStates = await this.studyRepository.listCardStatesByDeckIdsAsync(
+      decks.map((d) => d.id),
+      id,
     );
-    return summaries;
+    const statesByDeck = new Map<string, typeof allStates>();
+    for (const state of allStates) {
+      const list = statesByDeck.get(state.deckId) ?? [];
+      list.push(state);
+      statesByDeck.set(state.deckId, list);
+    }
+    return decks.map((deck) => {
+      const states = statesByDeck.get(deck.id) ?? [];
+      const dueCount = countDeckSummaryDueCards(deck.cardCount, states);
+      const masteredCount = countDeckSummaryMasteredCards(states);
+      return { ...deck, dueCount, masteredCount };
+    });
   }
 
   async getHomeSummaryAsync(userId?: string): Promise<HomeSummary> {
@@ -42,17 +52,13 @@ export class StudySessionService {
       this.listDeckSummariesAsync(id),
       this.studyRepository.getHomeReviewStatsAsync(id),
     ]);
-    const totalCards = decks.reduce((sum, deck) => sum + deck.cardCount, 0);
-    const masteredCards = decks.reduce((sum, deck) => sum + deck.masteredCount, 0);
-    const dueCount = decks.reduce((sum, deck) => sum + deck.dueCount, 0);
+    const progress = calculateHomeProgress(decks);
 
     return {
       decks,
       stats: {
         ...reviewStats,
-        totalCards,
-        dueCount,
-        progress: totalCards > 0 ? masteredCards / totalCards : 0,
+        ...progress,
       },
       recentActivities: reviewStats.recentActivities,
     };
@@ -74,15 +80,8 @@ export class StudySessionService {
       card,
       state: stateByCardId.get(card.id) ?? null,
     }));
-    const dueCount = cards.filter((item) => {
-      if (!item.state?.nextReviewAt) {
-        return true;
-      }
-
-      return new Date(item.state.nextReviewAt).getTime() <= Date.now();
-    }).length;
-    const masteredCount = cards.filter((item) => (item.state?.masteryLevel ?? 0) >= 3)
-      .length;
+    const dueCount = countStudyCardsDue(cards);
+    const masteredCount = countStudyCardsMastered(cards);
 
     return {
       deck,

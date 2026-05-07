@@ -6,6 +6,13 @@
     "confirm": "Confirm",
     "close": "Close"
   },
+  "bootstrap": {
+    "brand": "Flash Voca",
+    "title": "Preparing local-first workspace",
+    "message": "SQLite schema, sample data, and service boundaries are loading.",
+    "errorTitle": "Startup issue",
+    "retry": "Try again"
+  },
   "tabs": {
     "home": "Home",
     "decks": "Decks",

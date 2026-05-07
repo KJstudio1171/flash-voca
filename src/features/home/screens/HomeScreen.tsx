@@ -100,7 +100,7 @@ export default function HomeScreen() {
         </View>
       </AnimatedScreen>
 
-      <AnimatedScreen delay={60} style={styles.content}>
+      <AnimatedScreen style={styles.content} variant="none">
         <HomeStudySummaryCard
           labels={{
             progressLabel: t("home.summary.progressLabel"),

@@ -49,6 +49,23 @@ describe("DeckSyncMerger.mergePulledAsync", () => {
     expect(result).toEqual({ applied: 1, skipped: 0 });
   });
 
+  it("skips remote when local deck has pending changes", async () => {
+    const deckRepo = createMockDeckRepository({
+      hasPendingLocalChangesAsync: jest.fn().mockResolvedValue(true),
+      getDeckByIdAsync: jest.fn().mockResolvedValue(
+        localDeckDetail("2026-04-27T00:00:00Z"),
+      ),
+    });
+    const merger = new DeckSyncMerger(deckRepo);
+
+    const payload = createMockRemoteDeckPayload({ updatedAt: "2026-04-28T12:00:00Z" });
+    const result = await merger.mergePulledAsync([payload]);
+
+    expect(deckRepo.applyRemoteDeckAsync).not.toHaveBeenCalled();
+    expect(deckRepo.getDeckByIdAsync).not.toHaveBeenCalled();
+    expect(result).toEqual({ applied: 0, skipped: 1 });
+  });
+
   it("skips remote when local updated_at is newer or equal", async () => {
     const deckRepo = createMockDeckRepository({
       getDeckByIdAsync: jest.fn().mockResolvedValue(

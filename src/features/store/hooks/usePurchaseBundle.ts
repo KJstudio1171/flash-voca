@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 
-import { useAppServices } from "@/src/app/AppProviders";
+import { useAppServices } from "@/src/app/AppServicesContext";
 import { BillingProductMissingError } from "@/src/core/errors";
 import type { Bundle, Entitlement } from "@/src/core/domain/models";
 import type { BillingGateway } from "@/src/core/services/billing/BillingGateway";

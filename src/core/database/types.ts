@@ -3,7 +3,6 @@ import {
   DeckActivityType,
   DeckSourceType,
   DeckVisibility,
-  EntitlementStatus,
 } from "@/src/core/domain/models";
 
 export type LocalSyncState = "failed" | "pending" | "synced";
@@ -83,6 +82,8 @@ export interface LocalReviewLogRecord {
   rating: number;
   elapsedMs: number;
   reviewedAt: string;
+  previousSrsState: string;
+  nextSrsState: string;
   syncState: LocalSyncState;
   syncedAt: string | null;
 }
@@ -100,22 +101,6 @@ export interface PendingSyncOperationRecord {
   lastError: string | null;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface CachedEntitlementRecord {
-  id: string;
-  userId: string;
-  bundleId: string;
-  provider: string;
-  providerRef: string | null;
-  status: EntitlementStatus;
-  grantedAt: string;
-  expiresAt: string | null;
-  syncedAt: string | null;
-  kind: string;
-  auto_renewing: number;
-  cacheUpdatedAt: string;
-  rawPayload: string | null;
 }
 
 export interface LocalBundleRecord {

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-import { useAppServices } from "@/src/app/AppProviders";
+import { useAppServices } from "@/src/app/AppServicesContext";
 import type { EntitlementStatus } from "@/src/core/domain/models";
 
 export interface ProAccess {

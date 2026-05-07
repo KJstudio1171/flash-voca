@@ -6,7 +6,7 @@ import Animated from "react-native-reanimated";
 import { ReviewRating, StudyCard } from "@/src/core/domain/models";
 import { ReviewRatingButtons } from "@/src/features/study/components/ReviewRatingButtons";
 import { AnimatedFlipCard } from "@/src/shared/animation/AnimatedFlipCard";
-import { cardStackEnter } from "@/src/shared/animation/motionPresets";
+import { studyCardEnter } from "@/src/shared/animation/motionPresets";
 import { SwipeStudyCard } from "@/src/shared/animation/SwipeStudyCard";
 import type { CardSrsState } from "@/src/core/services/srs/SrsAlgorithm";
 import { useTheme } from "@/src/shared/theme/ThemeProvider";
@@ -62,7 +62,7 @@ function StudyFlashcardComponent({
   }, [cardDetail.id, cardDetail.imageUri]);
 
   return (
-    <Animated.View key={cardDetail.id} entering={cardStackEnter()} style={styles.root}>
+    <Animated.View key={cardDetail.id} entering={studyCardEnter()} style={styles.root}>
       <SwipeStudyCard
         disabled={!canSwipe}
         leftActionLabel={labels.again}

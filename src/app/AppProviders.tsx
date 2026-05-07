@@ -1,21 +1,21 @@
 // src/app/AppProviders.tsx
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { PropsWithChildren, createContext, useContext, useState } from "react";
+import { PropsWithChildren, useState } from "react";
 import { I18nextProvider } from "react-i18next";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
+import { AppServicesProvider } from "@/src/app/AppServicesContext";
+import { DatabaseBootstrapGate } from "@/src/app/bootstrap/DatabaseBootstrapGate";
 import { createErrorHandler } from "@/src/core/errors/handleError";
 import { getErrorReporter } from "@/src/core/observability";
-import { AppServices, createAppServices } from "@/src/core/services/createAppServices";
+import { createAppServices } from "@/src/core/services/createAppServices";
 import { AccountRequiredModal } from "@/src/features/store/components/AccountRequiredModal";
 import { AuthGatedActionProvider } from "@/src/features/store/hooks/useAuthGatedAction";
 import { StudyPreferencesProvider } from "@/src/features/study/preferences/StudyPreferencesProvider";
 import { i18next } from "@/src/shared/i18n";
 import { ThemeProvider } from "@/src/shared/theme/ThemeProvider";
 import { ToastProvider, useToast } from "@/src/shared/ui/toast";
-
-const AppServicesContext = createContext<AppServices | null>(null);
 
 export function QueryLayer({ children }: PropsWithChildren) {
   const toast = useToast();
@@ -39,24 +39,20 @@ export function AppProviders({ children }: PropsWithChildren) {
         <I18nextProvider i18n={i18next}>
           <ThemeProvider>
             <ToastProvider>
-              <StudyPreferencesProvider>
-                <AppServicesContext.Provider value={services}>
-                  <AuthGatedActionProvider>
-                    {children}
-                    <AccountRequiredModal />
-                  </AuthGatedActionProvider>
-                </AppServicesContext.Provider>
-              </StudyPreferencesProvider>
+              <DatabaseBootstrapGate>
+                <StudyPreferencesProvider>
+                  <AppServicesProvider services={services}>
+                    <AuthGatedActionProvider>
+                      {children}
+                      <AccountRequiredModal />
+                    </AuthGatedActionProvider>
+                  </AppServicesProvider>
+                </StudyPreferencesProvider>
+              </DatabaseBootstrapGate>
             </ToastProvider>
           </ThemeProvider>
         </I18nextProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
-}
-
-export function useAppServices() {
-  const services = useContext(AppServicesContext);
-  if (!services) throw new Error("AppServicesContext is not available.");
-  return services;
 }

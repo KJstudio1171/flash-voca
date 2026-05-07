@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import { useAppServices } from "@/src/app/AppProviders";
+import { useAppServices } from "@/src/app/AppServicesContext";
 import { AuthState } from "@/src/core/services/auth/AuthService";
 
 export function useAuthState(): AuthState {

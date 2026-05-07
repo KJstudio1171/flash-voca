@@ -122,7 +122,7 @@ export default function StudyScreen() {
       }
     >
       {hasSnapshot ? (
-        <AnimatedScreen>
+        <AnimatedScreen variant="none">
           <StudyHeader currentIndex={displayIndex} totalCards={session.totalCards} />
         </AnimatedScreen>
       ) : null}

@@ -1,7 +1,13 @@
 import { DeckSyncService } from "@/src/core/services/DeckSyncService";
-import { PendingSyncWorker } from "@/src/core/services/PendingSyncWorker";
+import {
+  DeckSyncOperationHandler,
+  PendingSyncWorker,
+} from "@/src/core/services/PendingSyncWorker";
 import { DeckSyncMerger } from "@/src/core/services/DeckSyncMerger";
-import { createMockDeckRepository } from "@/__tests__/helpers/mockRepositories";
+import {
+  createMockDeckRepository,
+  createMockPendingSyncRepository,
+} from "@/__tests__/helpers/mockRepositories";
 import { createMockRemoteDeckGateway } from "@/__tests__/helpers/MockRemoteDeckGateway";
 import { createMockAuthService, TEST_USER_ID } from "@/__tests__/helpers/MockAuthService";
 import { createMockAppMetaStore } from "@/__tests__/helpers/MockAppMetaStore";
@@ -12,12 +18,20 @@ describe("DeckSyncService.syncAsync", () => {
     const deckRepo = createMockDeckRepository();
     const remote = createMockRemoteDeckGateway({
       pullDecksUpdatedAfterAsync: jest.fn().mockResolvedValue([
-        createMockRemoteDeckPayload({ updatedAt: "2026-04-28T10:00:00Z" }),
+        createMockRemoteDeckPayload({
+          id: "deck-cursor",
+          updatedAt: "2026-04-28T10:00:00Z",
+        }),
       ]),
     });
     const auth = createMockAuthService();
     const meta = createMockAppMetaStore();
-    const worker = new PendingSyncWorker(deckRepo, remote, auth);
+    const queue = createMockPendingSyncRepository();
+    const worker = new PendingSyncWorker(
+      queue,
+      [new DeckSyncOperationHandler(deckRepo, remote)],
+      auth,
+    );
     const merger = new DeckSyncMerger(deckRepo);
 
     const svc = new DeckSyncService({ worker, merger, remote, auth, appMeta: meta });
@@ -28,7 +42,7 @@ describe("DeckSyncService.syncAsync", () => {
     );
     expect(meta.setValueAsync).toHaveBeenCalledWith(
       "deck_sync.last_pulled_at",
-      "2026-04-28T10:00:00Z",
+      JSON.stringify({ updatedAt: "2026-04-28T10:00:00Z", id: "deck-cursor" }),
     );
     expect(result.pulled).toBe(1);
   });
@@ -38,17 +52,73 @@ describe("DeckSyncService.syncAsync", () => {
     const remote = createMockRemoteDeckGateway();
     const auth = createMockAuthService();
     const meta = createMockAppMetaStore({
-      "deck_sync.last_pulled_at": "2026-04-27T00:00:00Z",
+      "deck_sync.last_pulled_at": JSON.stringify({
+        updatedAt: "2026-04-27T00:00:00Z",
+        id: "deck-prev",
+      }),
     });
-    const worker = new PendingSyncWorker(deckRepo, remote, auth);
+    const queue = createMockPendingSyncRepository();
+    const worker = new PendingSyncWorker(
+      queue,
+      [new DeckSyncOperationHandler(deckRepo, remote)],
+      auth,
+    );
     const merger = new DeckSyncMerger(deckRepo);
 
     const svc = new DeckSyncService({ worker, merger, remote, auth, appMeta: meta });
     await svc.syncAsync({ trigger: "manual" });
 
     expect(remote.pullDecksUpdatedAfterAsync).toHaveBeenCalledWith(
-      TEST_USER_ID, "2026-04-27T00:00:00Z", 200,
+      TEST_USER_ID,
+      { updatedAt: "2026-04-27T00:00:00Z", id: "deck-prev" },
+      200,
     );
+  });
+
+  it("does not pull remote decks when pending local flush has failures", async () => {
+    const deckRepo = createMockDeckRepository();
+    const remote = createMockRemoteDeckGateway();
+    const auth = createMockAuthService();
+    const meta = createMockAppMetaStore();
+    const queue = createMockPendingSyncRepository({
+      listPendingOperationsAsync: jest.fn().mockResolvedValue([
+        {
+          id: "op-fail",
+          entityType: "deck",
+          entityId: "deck-1",
+          operationType: "upsert",
+          payload: {
+            deck: createMockRemoteDeckPayload({ id: "deck-1" }).deck,
+            cards: [],
+          },
+          attemptCount: 0,
+          availableAt: "2026-04-28T00:00:00Z",
+        },
+      ]),
+    });
+    const failingRemote = createMockRemoteDeckGateway({
+      upsertDeckAsync: jest.fn().mockRejectedValue(new Error("network")),
+      pullDecksUpdatedAfterAsync: remote.pullDecksUpdatedAfterAsync,
+    });
+    const worker = new PendingSyncWorker(
+      queue,
+      [new DeckSyncOperationHandler(deckRepo, failingRemote)],
+      auth,
+    );
+    const merger = new DeckSyncMerger(deckRepo);
+
+    const svc = new DeckSyncService({
+      worker,
+      merger,
+      remote: failingRemote,
+      auth,
+      appMeta: meta,
+    });
+    const result = await svc.syncAsync({ trigger: "manual" });
+
+    expect(failingRemote.pullDecksUpdatedAfterAsync).not.toHaveBeenCalled();
+    expect(meta.setValueAsync).not.toHaveBeenCalled();
+    expect(result.failed).toBe(1);
   });
 
   it("paginates while batches return full page", async () => {
@@ -68,7 +138,12 @@ describe("DeckSyncService.syncAsync", () => {
     });
     const auth = createMockAuthService();
     const meta = createMockAppMetaStore();
-    const worker = new PendingSyncWorker(deckRepo, remote, auth);
+    const queue = createMockPendingSyncRepository();
+    const worker = new PendingSyncWorker(
+      queue,
+      [new DeckSyncOperationHandler(deckRepo, remote)],
+      auth,
+    );
     const merger = new DeckSyncMerger(deckRepo);
 
     const svc = new DeckSyncService({ worker, merger, remote, auth, appMeta: meta });

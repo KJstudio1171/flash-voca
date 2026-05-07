@@ -14,6 +14,11 @@ export class DeckSyncMerger {
     let skipped = 0;
 
     for (const payload of payloads) {
+      if (await this.deckRepo.hasPendingLocalChangesAsync(payload.deck.id)) {
+        skipped++;
+        continue;
+      }
+
       const local = await this.deckRepo.getDeckByIdAsync(payload.deck.id);
       if (local && local.updatedAt >= payload.deck.updatedAt) {
         skipped++;

@@ -1,1 +1,3 @@
-export { default } from "@/src/features/decks/screens/DeckOverviewScreen";
+import DeckOverviewScreen from "@/src/features/decks/screens/DeckOverviewScreen";
+
+export default DeckOverviewScreen;

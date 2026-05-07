@@ -38,7 +38,7 @@ describe("StudySessionService", () => {
         listDecksAsync: jest.fn().mockResolvedValue([deck]),
       });
       const studyRepo = createMockStudyRepository({
-        listCardStatesAsync: jest.fn().mockResolvedValue([]),
+        listCardStatesByDeckIdsAsync: jest.fn().mockResolvedValue([]),
       });
       const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService(), createMockSrsPreferenceService());
 
@@ -69,7 +69,7 @@ describe("StudySessionService", () => {
         listDecksAsync: jest.fn().mockResolvedValue([deck]),
       });
       const studyRepo = createMockStudyRepository({
-        listCardStatesAsync: jest.fn().mockResolvedValue(states),
+        listCardStatesByDeckIdsAsync: jest.fn().mockResolvedValue(states),
       });
       const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService(), createMockSrsPreferenceService());
 
@@ -90,7 +90,7 @@ describe("StudySessionService", () => {
         listDecksAsync: jest.fn().mockResolvedValue([deck]),
       });
       const studyRepo = createMockStudyRepository({
-        listCardStatesAsync: jest.fn().mockResolvedValue(states),
+        listCardStatesByDeckIdsAsync: jest.fn().mockResolvedValue(states),
       });
       const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService(), createMockSrsPreferenceService());
 
@@ -138,8 +138,8 @@ describe("StudySessionService", () => {
         listDecksAsync: jest.fn().mockResolvedValue([deck1, deck2]),
       });
       const studyRepo = createMockStudyRepository({
-        listCardStatesAsync: jest.fn().mockImplementation((deckId: string) =>
-          Promise.resolve(statesByDeck[deckId] ?? []),
+        listCardStatesByDeckIdsAsync: jest.fn().mockImplementation((deckIds: string[]) =>
+          Promise.resolve(deckIds.flatMap((id) => statesByDeck[id] ?? [])),
         ),
       });
       const service = new StudySessionService(deckRepo, studyRepo, createMockAuthService(), createMockSrsPreferenceService());
@@ -191,7 +191,7 @@ describe("StudySessionService", () => {
         listDecksAsync: jest.fn().mockResolvedValue([deck]),
       });
       const studyRepo = createMockStudyRepository({
-        listCardStatesAsync: jest.fn().mockResolvedValue(states),
+        listCardStatesByDeckIdsAsync: jest.fn().mockResolvedValue(states),
         getHomeReviewStatsAsync: jest.fn().mockResolvedValue({
           studiedCards: 2,
           studyMinutes: 7,

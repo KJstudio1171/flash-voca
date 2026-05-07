@@ -6,24 +6,24 @@ import {
 import { motion } from "@/src/shared/animation/motionTokens";
 
 describe("navigation presets", () => {
-  it("stackPushOptions uses slide_from_right with normal duration", () => {
+  it("stackPushOptions uses slide_from_right with navigation duration", () => {
     expect(stackPushOptions()).toEqual({
       animation: "slide_from_right",
-      animationDuration: motion.duration.normal,
+      animationDuration: motion.duration.navigation,
     });
   });
 
-  it("modalPushOptions uses slide_from_bottom with normal duration", () => {
+  it("modalPushOptions uses slide_from_bottom with navigation duration", () => {
     expect(modalPushOptions()).toEqual({
       animation: "slide_from_bottom",
-      animationDuration: motion.duration.normal,
+      animationDuration: motion.duration.navigation,
     });
   });
 
-  it("tabShiftOptions uses shift with fast duration", () => {
+  it("tabShiftOptions uses a short fade transition", () => {
     expect(tabShiftOptions()).toEqual({
-      animation: "shift",
-      animationDuration: motion.duration.fast,
+      animation: "fade",
+      animationDuration: motion.duration.tab,
     });
   });
 });

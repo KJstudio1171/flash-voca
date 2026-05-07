@@ -38,26 +38,32 @@ export function ThemeProvider({ children }: PropsWithChildren) {
   );
 
   useEffect(() => {
-    void loadThemePrefsAsync().then(({ paletteId: pid, colorMode: cm, flashcardFontId: fid }) => {
-      setPaletteId(pid);
-      setColorModeState(cm);
-      setFlashcardFontId(fid);
-    });
+    void loadThemePrefsAsync()
+      .then(({ paletteId: pid, colorMode: cm, flashcardFontId: fid }) => {
+        setPaletteId(pid);
+        setColorModeState(cm);
+        setFlashcardFontId(fid);
+      })
+      .catch(() => {
+        setPaletteId(DEFAULT_PALETTE_ID);
+        setColorModeState(DEFAULT_COLOR_MODE);
+        setFlashcardFontId(DEFAULT_FLASHCARD_FONT_ID);
+      });
   }, []);
 
   const setPalette = useCallback((id: PaletteId) => {
     setPaletteId(id);
-    void saveThemePref("palette_id", id);
+    void saveThemePref("palette_id", id).catch(() => {});
   }, []);
 
   const setColorMode = useCallback((mode: ColorMode) => {
     setColorModeState(mode);
-    void saveThemePref("color_mode", mode);
+    void saveThemePref("color_mode", mode).catch(() => {});
   }, []);
 
   const setFlashcardFont = useCallback((id: FlashcardFontId) => {
     setFlashcardFontId(id);
-    void saveThemePref("flashcard_font_id", id);
+    void saveThemePref("flashcard_font_id", id).catch(() => {});
   }, []);
 
   const value: ThemeContextValue = {

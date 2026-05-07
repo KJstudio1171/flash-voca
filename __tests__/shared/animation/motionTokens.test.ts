@@ -1,9 +1,13 @@
 import { motion } from "@/src/shared/animation/motionTokens";
 
 describe("motionTokens", () => {
-  it("exposes four duration tokens in ascending order", () => {
+  it("exposes duration tokens in ascending order by speed group", () => {
     expect(motion.duration.instant).toBe(100);
+    expect(motion.duration.tab).toBe(140);
+    expect(motion.duration.content).toBe(180);
     expect(motion.duration.fast).toBe(200);
+    expect(motion.duration.navigation).toBe(300);
+    expect(motion.duration.cardFlip).toBe(320);
     expect(motion.duration.normal).toBe(350);
     expect(motion.duration.slow).toBe(500);
   });
@@ -23,6 +27,7 @@ describe("motionTokens", () => {
 
   it("exposes delay tokens", () => {
     expect(motion.delay.stagger).toBe(50);
+    expect(motion.delay.maxStagger).toBe(250);
     expect(motion.delay.short).toBe(100);
     expect(motion.delay.medium).toBe(200);
   });

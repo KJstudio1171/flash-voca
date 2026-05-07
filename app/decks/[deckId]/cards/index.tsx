@@ -1,1 +1,3 @@
-export { default } from "@/src/features/decks/screens/CardManagementScreen";
+import CardManagementScreen from "@/src/features/decks/screens/CardManagementScreen";
+
+export default CardManagementScreen;

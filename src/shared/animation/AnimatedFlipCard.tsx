@@ -25,7 +25,7 @@ function AnimatedFlipCardComponent({
 
   useEffect(() => {
     rotation.value = withTiming(flipped ? 1 : 0, {
-      duration: motion.duration.normal,
+      duration: motion.duration.cardFlip,
       easing: motion.easing.standard,
     });
   }, [flipped, rotation]);

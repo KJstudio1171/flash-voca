@@ -4,7 +4,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 
-import { useAppServices } from "@/src/app/AppProviders";
+import { useAppServices } from "@/src/app/AppServicesContext";
 import { SaveDeckPayload } from "@/src/core/domain/models";
 import { homeQueryKeys } from "@/src/features/home/hooks/useHomeSummaryQuery";
 

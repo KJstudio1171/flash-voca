@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useQuery } from "@tanstack/react-query";
 
-import { useAppServices } from "@/src/app/AppProviders";
+import { useAppServices } from "@/src/app/AppServicesContext";
 import type { ReviewRating } from "@/src/core/domain/models";
 import { getSrsAlgorithm } from "@/src/core/services/srs/srsAlgorithmRegistry";
 import type { CardSrsState } from "@/src/core/services/srs/SrsAlgorithm";

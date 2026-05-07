@@ -40,7 +40,7 @@ export function Screen({
         </View>
         {rightSlot ? <View>{rightSlot}</View> : null}
       </AnimatedScreen>
-      <AnimatedScreen delay={80} style={styles.body}>
+      <AnimatedScreen style={styles.body} variant="none">
         {children}
       </AnimatedScreen>
     </View>

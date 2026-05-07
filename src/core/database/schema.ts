@@ -92,6 +92,8 @@ CREATE TABLE IF NOT EXISTS local_review_logs (
   rating INTEGER NOT NULL,
   elapsed_ms INTEGER NOT NULL DEFAULT 0,
   reviewed_at TEXT NOT NULL,
+  previous_srs_state TEXT NOT NULL DEFAULT '{}',
+  next_srs_state TEXT NOT NULL DEFAULT '{}',
   sync_state TEXT NOT NULL DEFAULT 'pending' CHECK (sync_state IN ('failed', 'pending', 'synced')),
   synced_at TEXT,
   FOREIGN KEY(deck_id) REFERENCES local_decks(id) ON DELETE CASCADE,

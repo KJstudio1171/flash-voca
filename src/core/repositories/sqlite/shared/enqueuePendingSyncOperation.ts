@@ -1,4 +1,7 @@
-import type { SQLiteDatabase } from "expo-sqlite";
+import type {
+  SQLiteBindParams,
+  SQLiteRunResult,
+} from "expo-sqlite";
 
 import {
   SyncEntityType,
@@ -6,7 +9,9 @@ import {
 } from "@/src/core/database/types";
 import { createId } from "@/src/shared/utils/createId";
 
-type SqliteMutationRunner = Pick<SQLiteDatabase, "runAsync">;
+interface SqliteMutationRunner {
+  runAsync(sql: string, params: SQLiteBindParams): Promise<SQLiteRunResult>;
+}
 
 interface QueuePendingSyncOperationInput {
   entityType: SyncEntityType;

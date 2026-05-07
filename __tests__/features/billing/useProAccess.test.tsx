@@ -7,7 +7,7 @@ import type { Entitlement, EntitlementStatus } from "@/src/core/domain/models";
 // Must be prefixed with "mock" to be allowed in jest.mock factory scope
 let mockServices: unknown = null;
 
-jest.mock("@/src/app/AppProviders", () => ({
+jest.mock("@/src/app/AppServicesContext", () => ({
   useAppServices: () => mockServices,
 }));
 

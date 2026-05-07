@@ -1,7 +1,7 @@
 import { getDatabaseAsync } from "@/src/core/database/client";
 import { LOCAL_DATABASE_SCHEMA_SQL } from "@/src/core/database/schema";
 
-export const LOCAL_DATABASE_SCHEMA_VERSION = 8;
+export const LOCAL_DATABASE_SCHEMA_VERSION = 9;
 
 const SQLITE_PRAGMA_SQL = `
 PRAGMA foreign_keys = ON;
@@ -116,7 +116,7 @@ async function migrateToVersion7Async(db: MigrationDatabase): Promise<void> {
     db,
     "local_user_card_states",
     "algorithm_data",
-    "TEXT NOT NULL DEFAULT '{}'",
+    "algorithm_data TEXT NOT NULL DEFAULT '{}'",
   );
 }
 
@@ -125,13 +125,28 @@ async function migrateToVersion8Async(db: MigrationDatabase): Promise<void> {
     db,
     "cached_entitlements",
     "kind",
-    "TEXT NOT NULL DEFAULT 'one_time'",
+    "kind TEXT NOT NULL DEFAULT 'one_time'",
   );
   await addColumnIfMissingAsync(
     db,
     "cached_entitlements",
     "auto_renewing",
-    "INTEGER NOT NULL DEFAULT 0",
+    "auto_renewing INTEGER NOT NULL DEFAULT 0",
+  );
+}
+
+async function migrateToVersion9Async(db: MigrationDatabase): Promise<void> {
+  await addColumnIfMissingAsync(
+    db,
+    "local_review_logs",
+    "previous_srs_state",
+    "previous_srs_state TEXT NOT NULL DEFAULT '{}'",
+  );
+  await addColumnIfMissingAsync(
+    db,
+    "local_review_logs",
+    "next_srs_state",
+    "next_srs_state TEXT NOT NULL DEFAULT '{}'",
   );
 }
 
@@ -150,36 +165,32 @@ export async function initializeDatabaseAsync() {
     return;
   }
 
-  if (currentVersion < 3) {
-    await migrateToVersion3Async(db);
+  // Bump schema_version after each step so a crash mid-chain doesn't leave us
+  // re-running already-applied migrations on next launch.
+  const steps: [number, () => Promise<void>][] = [
+    [3, () => migrateToVersion3Async(db)],
+    [4, () => migrateToVersion4Async(db)],
+    [5, () => migrateToVersion5Async(db)],
+    [6, () => migrateToVersion6Async(db)],
+    [7, () => migrateToVersion7Async(db)],
+    [8, () => migrateToVersion8Async(db)],
+    [9, () => migrateToVersion9Async(db)],
+  ];
+  for (const [version, run] of steps) {
+    if (currentVersion < version) {
+      await run();
+      await setSchemaVersionAsync(db, version);
+    }
   }
+}
 
-  if (currentVersion < 4) {
-    await migrateToVersion4Async(db);
-  }
-
-  if (currentVersion < 5) {
-    await migrateToVersion5Async(db);
-  }
-
-  if (currentVersion < 6) {
-    await migrateToVersion6Async(db);
-  }
-
-  if (currentVersion < 7) {
-    await migrateToVersion7Async(db);
-  }
-
-  if (currentVersion < 8) {
-    await migrateToVersion8Async(db);
-  }
-
+async function setSchemaVersionAsync(db: MigrationDatabase, version: number) {
   await db.runAsync(
     `
       INSERT INTO app_meta (key, value)
       VALUES ('schema_version', ?)
       ON CONFLICT(key) DO UPDATE SET value = excluded.value;
     `,
-    [String(LOCAL_DATABASE_SCHEMA_VERSION)],
+    [String(version)],
   );
 }

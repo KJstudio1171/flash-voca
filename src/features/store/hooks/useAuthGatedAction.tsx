@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 
-import { useAppServices } from "@/src/app/AppProviders";
+import { useAppServices } from "@/src/app/AppServicesContext";
 import { AuthGateCancelledError } from "@/src/core/errors";
 
 type Resolver = (linked: boolean) => void;

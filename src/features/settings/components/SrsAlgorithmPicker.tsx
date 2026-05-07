@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 
-import { useAppServices } from "@/src/app/AppProviders";
+import { useAppServices } from "@/src/app/AppServicesContext";
 import type { SrsAlgorithmId } from "@/src/core/services/srs/SrsAlgorithm";
 import { useT } from "@/src/shared/i18n";
 import type { TranslationKey } from "@/src/shared/i18n";

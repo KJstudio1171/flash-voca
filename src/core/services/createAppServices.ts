@@ -1,158 +1,57 @@
-import { SqliteAppMetaRepository } from "@/src/core/repositories/sqlite/SqliteAppMetaRepository";
-import { SqliteBundleRepository } from "@/src/core/repositories/sqlite/SqliteBundleRepository";
-import { SqliteCatalogCacheRepository } from "@/src/core/repositories/sqlite/SqliteCatalogCacheRepository";
-import { SqliteDeckRepository } from "@/src/core/repositories/sqlite/SqliteDeckRepository";
-import { SqliteEntitlementRepository } from "@/src/core/repositories/sqlite/SqliteEntitlementRepository";
-import { SqliteStudyRepository } from "@/src/core/repositories/sqlite/SqliteStudyRepository";
-import { SupabaseCatalogGateway } from "@/src/core/repositories/supabase/SupabaseCatalogGateway";
-import { SupabaseDeckGateway } from "@/src/core/repositories/supabase/SupabaseDeckGateway";
-import { SupabaseEntitlementGateway } from "@/src/core/repositories/supabase/SupabaseEntitlementGateway";
-import { DeckSyncMerger } from "@/src/core/services/DeckSyncMerger";
-import { DeckSyncService } from "@/src/core/services/DeckSyncService";
-import { PendingSyncWorker } from "@/src/core/services/PendingSyncWorker";
-import { BootstrapService } from "@/src/core/services/BootstrapService";
-import { CatalogSyncService } from "@/src/core/services/CatalogSyncService";
-import { DeckService } from "@/src/core/services/DeckService";
-import { EntitlementService } from "@/src/core/services/EntitlementService";
-import { StoreService } from "@/src/core/services/StoreService";
-import { StudySessionService } from "@/src/core/services/StudySessionService";
-import { ExpoIapBillingGateway } from "@/src/core/services/billing/ExpoIapBillingGateway";
-import { NoopBillingGateway } from "@/src/core/services/billing/NoopBillingGateway";
-import { PurchaseVerificationService } from "@/src/core/services/billing/PurchaseVerificationService";
-import { NoopPurchaseVerificationService } from "@/src/core/services/billing/NoopPurchaseVerificationService";
-import { getDatabaseAsync } from "@/src/core/database/client";
-import { SrsPreferenceService } from "@/src/core/services/srs/SrsPreferenceService";
 import { getSupabaseClient } from "@/src/core/supabase/client";
-import type { AuthService } from "@/src/core/services/auth/AuthService";
-import { NoopAuthService } from "@/src/core/services/auth/NoopAuthService";
-import { SupabaseAuthAdapter } from "@/src/core/services/auth/SupabaseAuthAdapter";
-import { SupabaseAuthService } from "@/src/core/services/auth/SupabaseAuthService";
-import { RealGoogleSignInClient } from "@/src/core/services/auth/google/GoogleSignInClient";
-import { AsyncStorageUserIdStorage } from "@/src/core/services/auth/userIdStorage";
-import { rebindUserIdAsync } from "@/src/core/services/auth/authMigration";
-import { randomUUID } from "expo-crypto";
-import {
-  AsyncStorageLocaleStorage,
-  ExpoLocaleDetector,
-  LocaleService,
-} from "@/src/shared/i18n";
-import type { Entitlement } from "@/src/core/domain/models";
-
-function createAuthService(): AuthService {
-  const storage = new AsyncStorageUserIdStorage();
-  const supabaseClient = getSupabaseClient();
-  const googleWebClientId = process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? "";
-
-  if (!supabaseClient || !googleWebClientId) {
-    return new NoopAuthService(storage);
-  }
-
-  return new SupabaseAuthService({
-    storage,
-    supabase: new SupabaseAuthAdapter(supabaseClient),
-    google: new RealGoogleSignInClient(),
-    googleWebClientId,
-    randomId: () => randomUUID(),
-    runMigrationInTxAsync: async (fromUserId, toUserId) => {
-      const db = await getDatabaseAsync();
-      await db.withExclusiveTransactionAsync(async (tx) => {
-        await rebindUserIdAsync(
-          {
-            runAsync: (sql, params) =>
-              tx.runAsync(sql, params as import("expo-sqlite").SQLiteBindParams) as Promise<unknown>,
-          },
-          { fromUserId, toUserId },
-        );
-      });
-    },
-  });
-}
+import { createAuthService } from "@/src/core/services/factories/createAuthService";
+import { createBillingServices } from "@/src/core/services/factories/createBillingServices";
+import { createBootstrapServices } from "@/src/core/services/factories/createBootstrapServices";
+import { createCatalogServices } from "@/src/core/services/factories/createCatalogServices";
+import { createDeckStudyServices } from "@/src/core/services/factories/createDeckStudyServices";
+import { createLocalRepositories } from "@/src/core/services/factories/createLocalRepositories";
+import { createSyncServices } from "@/src/core/services/factories/createSyncServices";
 
 export function createAppServices() {
-  const authService = createAuthService();
-  const deckRepository = new SqliteDeckRepository(authService);
-  const bundleRepository = new SqliteBundleRepository();
-  const catalogCacheRepository = new SqliteCatalogCacheRepository();
-  const entitlementRepository = new SqliteEntitlementRepository();
-  const studyRepository = new SqliteStudyRepository();
-  const catalogSyncService = new CatalogSyncService(
-    new SupabaseCatalogGateway(),
-    catalogCacheRepository,
-  );
-  const entitlementService = new EntitlementService(
-    entitlementRepository,
-    new SupabaseEntitlementGateway(),
-    authService,
-  );
-  const localeService = new LocaleService(
-    new AsyncStorageLocaleStorage(),
-    new ExpoLocaleDetector(),
-  );
-
   const supabaseClient = getSupabaseClient();
-
-  const appMeta = new SqliteAppMetaRepository();
-  const srsPreferenceService = new SrsPreferenceService(appMeta);
-
-  const deckSyncService: DeckSyncService | null = supabaseClient
-    ? (() => {
-        const remoteDeckGateway = new SupabaseDeckGateway(supabaseClient);
-        const worker = new PendingSyncWorker(
-          deckRepository,
-          remoteDeckGateway,
-          authService,
-        );
-        const merger = new DeckSyncMerger(deckRepository);
-        return new DeckSyncService({
-          worker,
-          merger,
-          remote: remoteDeckGateway,
-          auth: authService,
-          appMeta,
-        });
-      })()
-    : null;
-
-  const billingGateway = supabaseClient
-    ? new ExpoIapBillingGateway()
-    : new NoopBillingGateway();
-
-  const purchaseVerification = supabaseClient
-    ? new PurchaseVerificationService({
-        invokeFunctionAsync: async (name, opts) => {
-          const result = await supabaseClient.functions.invoke(name, {
-            body: opts.body as Record<string, unknown>,
-          });
-          return result as { data?: { entitlement: Entitlement }; error?: unknown };
-        },
-        upsertCachedEntitlementAsync: (entitlement) =>
-          entitlementRepository.upsertCachedEntitlementAsync(entitlement),
-      })
-    : new NoopPurchaseVerificationService();
+  const authService = createAuthService();
+  const repositories = createLocalRepositories(authService);
+  const bootstrap = createBootstrapServices();
+  const catalog = createCatalogServices({
+    authService,
+    bundleRepository: repositories.bundleRepository,
+    catalogCacheRepository: repositories.catalogCacheRepository,
+    entitlementRepository: repositories.entitlementRepository,
+  });
+  const deckStudy = createDeckStudyServices({
+    appMeta: repositories.appMeta,
+    authService,
+    deckRepository: repositories.deckRepository,
+    studyRepository: repositories.studyRepository,
+  });
+  const sync = createSyncServices({
+    appMeta: repositories.appMeta,
+    authService,
+    deckRepository: repositories.deckRepository,
+    pendingSyncRepository: repositories.pendingSyncRepository,
+    studyRepository: repositories.studyRepository,
+    supabaseClient,
+  });
+  const billing = createBillingServices({
+    entitlementRepository: repositories.entitlementRepository,
+    supabaseClient,
+  });
 
   return {
     authService,
-    bootstrapService: new BootstrapService(localeService),
-    catalogSyncService,
-    localeService,
-    deckRepository,
-    deckService: new DeckService(deckRepository),
-    deckSyncService,
-    storeService: new StoreService(
-      bundleRepository,
-      entitlementService,
-      catalogSyncService,
-    ),
-    entitlementService,
-    studySessionService: new StudySessionService(
-      deckRepository,
-      studyRepository,
-      authService,
-      srsPreferenceService,
-    ),
-    billingGateway,
-    purchaseVerification,
-    srsPreferenceService,
+    bootstrapService: bootstrap.bootstrapService,
+    catalogSyncService: catalog.catalogSyncService,
+    localeService: bootstrap.localeService,
+    deckRepository: repositories.deckRepository,
+    pendingSyncRepository: repositories.pendingSyncRepository,
+    deckService: deckStudy.deckService,
+    deckSyncService: sync.deckSyncService,
+    storeService: catalog.storeService,
+    entitlementService: catalog.entitlementService,
+    studySessionService: deckStudy.studySessionService,
+    billingGateway: billing.billingGateway,
+    purchaseVerification: billing.purchaseVerification,
+    srsPreferenceService: deckStudy.srsPreferenceService,
   };
 }
 

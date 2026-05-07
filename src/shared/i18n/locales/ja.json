@@ -6,6 +6,13 @@
     "confirm": "確認",
     "close": "閉じる"
   },
+  "bootstrap": {
+    "brand": "Flash Voca",
+    "title": "ローカルワークスペースを準備中",
+    "message": "SQLiteスキーマ、サンプルデータ、サービス境界を読み込んでいます。",
+    "errorTitle": "起動に失敗しました",
+    "retry": "もう一度試す"
+  },
   "tabs": {
     "home": "ホーム",
     "decks": "単語帳",

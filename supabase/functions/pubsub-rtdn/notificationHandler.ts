@@ -4,6 +4,7 @@ import {
   RtdnPayload,
   mapSubscriptionState,
 } from "./types.ts";
+import { resolveEntitlementBundleId } from "./entitlementTarget.ts";
 
 export async function handleSubscriptionNotification(
   payload: RtdnPayload,
@@ -24,7 +25,7 @@ export async function handleSubscriptionNotification(
 
   await deps.updateEntitlement({
     user_id: receipt.user_id,
-    bundle_id: "pro",
+    bundle_id: resolveEntitlementBundleId(payload, receipt),
     provider: "google_play",
     status,
     expires_at: expiresAt,

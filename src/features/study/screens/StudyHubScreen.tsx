@@ -83,7 +83,7 @@ export default function StudyHubScreen() {
         </Text>
       </AnimatedScreen>
 
-      <AnimatedScreen delay={80} style={styles.content}>
+      <AnimatedScreen style={styles.content} variant="none">
         <CardSurface elevation="card" style={styles.summaryPanel}>
           <View style={styles.summaryCopy}>
             <Text style={[styles.sectionTitle, { color: colors.ink }]}>

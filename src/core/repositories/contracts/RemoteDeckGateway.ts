@@ -38,12 +38,17 @@ export interface RemoteDeckPayload {
   cards: RemoteCardRecord[];
 }
 
+export interface RemoteDeckPullCursor {
+  updatedAt: string;
+  id: string;
+}
+
 export interface RemoteDeckGateway {
   upsertDeckAsync(userId: string, payload: RemoteDeckPayload): Promise<void>;
   softDeleteDeckAsync(userId: string, deckId: string, deletedAt: string): Promise<void>;
   pullDecksUpdatedAfterAsync(
     userId: string,
-    since: string | null,
+    since: RemoteDeckPullCursor | null,
     limit: number,
   ): Promise<RemoteDeckPayload[]>;
 }

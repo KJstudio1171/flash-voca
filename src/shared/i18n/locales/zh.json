@@ -6,6 +6,13 @@
     "confirm": "确认",
     "close": "关闭"
   },
+  "bootstrap": {
+    "brand": "Flash Voca",
+    "title": "正在准备本地工作区",
+    "message": "正在加载 SQLite 架构、示例数据和服务边界。",
+    "errorTitle": "启动失败",
+    "retry": "重试"
+  },
   "tabs": {
     "home": "首页",
     "decks": "卡组",

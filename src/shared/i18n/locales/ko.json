@@ -6,6 +6,13 @@
     "confirm": "확인",
     "close": "닫기"
   },
+  "bootstrap": {
+    "brand": "Flash Voca",
+    "title": "로컬 작업 공간을 준비하고 있어요",
+    "message": "SQLite 스키마와 샘플 데이터, 서비스 경계를 불러오는 중입니다.",
+    "errorTitle": "앱을 시작할 수 없어요",
+    "retry": "다시 시도"
+  },
   "tabs": {
     "home": "홈",
     "decks": "단어장",
